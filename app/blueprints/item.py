@@ -10,5 +10,5 @@ def list_items():
 
 # test by arima2
 # test by fujita
-#test by sato
+#test by
 #test by yamamoto
