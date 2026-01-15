@@ -7,7 +7,7 @@ def list_items():
     return jsonify(items=[])
 
 
-# test by hidaka
+
 # test by arima2
 # test by fujita
 
