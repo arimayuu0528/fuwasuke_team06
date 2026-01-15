@@ -8,6 +8,6 @@ def list_items():
 
 
 # test by hidaka
-# test by arima
+# test by arima2
 # test by fujita
 
