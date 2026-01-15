@@ -10,8 +10,7 @@ def list_items():
 
 # test by arima2
 # test by fujita
-#t
+# test by tajiri
 #test by yamamoto
 # test by mukoyama
 
-あだだだだだだ
