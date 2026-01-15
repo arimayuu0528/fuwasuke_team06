@@ -5,3 +5,6 @@ item_bp = Blueprint("item", __name__, url_prefix="/items")
 @item_bp.get("/")
 def list_items():
     return jsonify(items=[])
+
+
+# test by hidaka
