@@ -1,17 +1,32 @@
-from flask import Flask
+# ==========================================================
+# Filename      : app/__init__.py
+# Descriptions  : Application Factory
+# ==========================================================
+from flask import Flask, render_template,session
 
 def create_app():
+    # Flaskアプリケーションのインスタンスを作成
+    # __name__をappパッケージのパスに設定
     app = Flask(__name__)
+    
+    # config.pyから設定を読み込む
+    app.config.from_object('config.Config')
 
-    # ここでBlueprintを登録する（追加するたびここに1行増やす）-------------------------------------
-    from .blueprints.product import product_bp
-    from .blueprints.item import item_bp
+    # --- Blueprintの登録 ---
+    # viewsパッケージからproductsとauthのBlueprintをインポート
+    # （）
+    from .views import item,product
+    app.register_blueprint(item.item_bp)
+    app.register_blueprint(product.product_bp)
 
-    app.register_blueprint(product_bp)
-    app.register_blueprint(item_bp)
-    # -----------------------------------------------------------------------------------------
-    @app.get("/")
-    def health():
-        return {"ok": True}
 
+
+
+
+
+
+    # --- トップページのルートをここで定義 ---
+    @app.route('/')
+    def index():
+        return render_template('index.html')
     return app
