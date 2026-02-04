@@ -3,8 +3,33 @@
 {% block title %}
 
 {% endblock %}
-
-
 {% block content %}
+
+<header class="fuwasuke_log">
+    <p><img src="../static/image/ふわすけロゴ３.png" alt=""></p>
+</header>
+
+<main class="login">
+    <div class="mail">
+        <h4>メールアドレス</h4>
+        <input type="text">
+    </div>
+
+    <div class="password">
+        <h4>パスワード</h4>
+        <input type="text">
+    </div>
+
+    <input type="submit" value="ログイン">
+
+    <div class="new_register">
+        <p>アカウントをお持ちでないですか？</p>
+        <input type="submit" value="新規登録" id="new_register">
+    </div>
+
+    <p class="register_info">登録することで、ふわすけの<a href="">利用規約</a>および<a href="">プライバシーポリシー</a>に同意したものとみなされます。</p>
+    
+
+</main>
 
 {% endblock %}

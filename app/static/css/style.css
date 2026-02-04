@@ -1,3 +1,67 @@
 body {
   font-family: "Roboto", sans-serif;
+  min-height: 100dvh;
+  min-width: 100dvw;
+  display: flex;
+  flex-direction: column;
+}
+
+.fuwasuke_log p {
+  text-align: center;
+}
+.fuwasuke_log p img {
+  max-width: 200px;
+}
+
+.login {
+  font-size: 15px;
+  font-weight: 300;
+  text-align: center;
+  margin: 0rem 0.5rem;
+}
+.login input[type=text] {
+  background-color: #f6f6f6;
+  padding: 1rem;
+  width: 95%;
+  height: 30%;
+  margin-top: 0.5rem;
+  border-radius: 55px;
+}
+.login .mail {
+  margin-bottom: 1rem;
+}
+.login .mail h4 {
+  text-align: justify;
+}
+.login .password {
+  margin-bottom: 2rem;
+}
+.login .password h4 {
+  text-align: left;
+}
+.login input[type=submit] {
+  background-color: #FFAF5A;
+  padding: 1.3rem 6rem;
+  color: #f6f6f6;
+  border-radius: 30px;
+  font-size: 18px;
+}
+.login .new_register #new_register {
+  color: #FFAF5A;
+  background-color: #fff;
+}
+.login .new_register p {
+  color: #999;
+  font-size: 16px;
+  margin-top: 3rem;
+}
+.login .register_info {
+  font-size: 10px;
+  color: #999;
+  padding: 0rem 1.5rem;
+  line-height: 1rem;
+}
+.login .register_info a {
+  color: #FFAF5A;
+  border-bottom: #FFAF5A solid 1px;
 }/*# sourceMappingURL=style.css.map */

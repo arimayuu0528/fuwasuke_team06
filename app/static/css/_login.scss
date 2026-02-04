@@ -1,0 +1,63 @@
+
+
+.login {
+  font-size: 15px;
+  font-weight: 300;
+  text-align: center;
+  margin: 0rem 0.5rem;
+  input[type="text"]{
+    background-color: #f6f6f6;
+    padding: 1rem;
+    width: 95%;
+    height: 30%;
+    margin-top: 0.5rem;
+    border-radius: 55px;
+  }
+
+  .mail{
+    margin-bottom: 1rem;
+    h4{
+      text-align: justify;
+    }
+  }
+
+  .password{
+    margin-bottom: 2rem;
+    h4{
+      text-align: left;
+    }
+  }
+
+  input[type="submit"]{
+    background-color: #FFAF5A;
+    padding: 1.3rem 6rem;
+    color: #f6f6f6;
+    border-radius: 30px;
+    font-size: 18px;
+  }
+
+  .new_register{
+    #new_register{
+      color: #FFAF5A;
+      background-color: #fff;
+    }
+    p{
+      color: #999;
+      font-size: 16px;
+      margin-top: 3rem;
+    }
+  }
+
+  .register_info{
+    font-size: 10px;
+    color: #999;
+    padding: 0rem 1.5rem;
+    line-height: 1rem;
+
+    a{
+      color: #FFAF5A;
+      border-bottom: #FFAF5A solid 1px;
+    }
+  }
+
+}

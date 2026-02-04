@@ -1,3 +1,17 @@
 body{
-    font-family: "Roboto", sans-serif;;
+    font-family: "Roboto", sans-serif;
+    min-height: 100dvh;
+    min-width: 100dvw;
+    display: flex;
+    flex-direction: column;
+}
+
+.fuwasuke_log{
+  p{
+    text-align: center;
+    img{
+      max-width: 200px;
+    }
+  }
+  
 }

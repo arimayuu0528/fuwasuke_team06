@@ -32,5 +32,5 @@ def create_app():
     # --- トップページのルートをここで定義 ---
     @app.route('/')
     def index():
-        return render_template('index.html')
+        return render_template('auth/login.html')
     return app
