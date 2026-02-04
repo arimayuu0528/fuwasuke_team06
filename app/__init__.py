@@ -15,12 +15,15 @@ def create_app():
     # --- Blueprintの登録 ---
     # viewsパッケージからproductsとauthのBlueprintをインポート
     # （）
-    from .views import item,product,auth,schedule,task
-    app.register_blueprint(item.item_bp)
-    app.register_blueprint(product.product_bp)
+    from .views import auth,schedule,task,mood,main
+
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(schedule.schedule_bp)
     app.register_blueprint(task.task_bp)
+    app.register_blueprint(mood.mood_bp)
+    app.register_blueprint(main.main_bp)
+
+
     
 
 
