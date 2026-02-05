@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template
+from flask import Blueprint,render_template,request
 from app.db import DatabaseManager
 
 # Blueprintオブジェクト作成
@@ -15,6 +15,8 @@ task_bp = Blueprint('task',__name__,url_prefix='/task')
 
 @task_bp.route("/task")
 def task_form():
+    rec=request.form
+    
     # エンドポイント名、関数名は各自変更してください。
     pass
 
@@ -40,4 +42,4 @@ def task_create():
 
 @task_bp.route("/task_proposal")
 def task_proposal():
-    pass
+    return render_template('suggestion_task.html')
