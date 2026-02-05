@@ -1,10 +1,52 @@
-{% extends "base3.html" %}
+{% extends "base3.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
+block content %}
+<div class="header">
+  <h1>固定タスク一覧</h1>
+  <div class="tab-container">
+    <button class="tab">タスク</button>
+    <button class="tab active">固定タスク</button>
+  </div>
+</div>
 
-{% block title %}
+<div class="task-list">
+  {% for task in tasks %}
+  <div class="task-card">
+    <div class="task-header">
+      <div class="task-title">{{ task.title }}</div>
+      <button class="delete-btn" onclick="deleteTask({{ task.id }})">🗑</button>
+    </div>
+    <div class="task-meta">
+      <span class="task-category">{{ task.category }}</span>
+      <span class="task-time">{{ task.start_time }}~{{ task.end_time }}</span>
+    </div>
 
-{% endblock %}
+    {% if task.comment %}
+    <div class="comment-section">
+      <button class="comment-toggle" onclick="toggleComment(this)">
+        <span class="arrow">▼</span>
+        <span>コメント</span>
+      </button>
+      <div class="comment-content">{{ task.comment }}</div>
+    </div>
+    {% endif %}
 
-
-{% block content %}
+    <div class="weekday-pills">
+      {% for day in ['月', '火', '水', '木', '金', '土', '日'] %}
+      <div
+        class="weekday {% if day in task.active_days %}active{% else %}inactive{% endif %}"
+      >
+        {{ day }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<button
+  class="add-task-btn"
+  onclick="location.href='{{ url_for(\&quot;register_schedule\&quot;) }}'"
+>
+  新しい固定タスクを作成
+</button>
 
 {% endblock %}

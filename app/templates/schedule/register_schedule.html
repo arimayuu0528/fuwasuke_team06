@@ -1,10 +1,113 @@
-{% extends "base3.html" %}
+{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %} {%
+block content %}
+<div class="header">
+  <h1>固定タスク登録</h1>
+  <div class="tab-container">
+    <button class="tab">タスク登録</button>
+    <button class="tab active">固定タスク登録</button>
+  </div>
+</div>
 
-{% block title %}
+<div class="form-container">
+  <form id="taskForm" method="POST" action="{{ url_for('schedule') }}">
+    <div class="form-section">
+      <div class="form-label">
+        <span>タスク名</span>
+        <a href="#" class="template-link">固定タスク一覧 ☰</a>
+      </div>
+      <input
+        type="text"
+        name="title"
+        class="form-input"
+        placeholder="何をする？"
+        value="{{ task.title if task else '' }}"
+        required
+      />
+    </div>
 
-{% endblock %}
+    <div class="form-section">
+      <div class="time-inputs">
+        <div class="time-input-wrapper">
+          <span class="time-label">開始時間</span>
+          <input
+            type="time"
+            name="start_time"
+            class="time-input"
+            value="{{ task.start_time if task else '09:10' }}"
+            required
+          />
+          <span class="time-icon">🕐</span>
+        </div>
+        <div class="time-input-wrapper">
+          <span class="time-label">終了時間</span>
+          <input
+            type="time"
+            name="end_time"
+            class="time-input"
+            value="{{ task.end_time if task else '09:50' }}"
+            required
+          />
+          <span class="time-icon">🕐</span>
+        </div>
+      </div>
+    </div>
 
+    <div class="form-section">
+      <div class="form-label">繰り返す曜日</div>
+      <div class="weekday-selector">
+        {% set weekdays = ['月', '火', '水', '木', '金', '土', '日'] %} {% set
+        default_active = ['月', '火', '水', '木', '金'] %} {% for day in
+        weekdays %}
+        <button
+          type="button"
+          class="weekday-btn {% if (task and day in task.active_days) or (not task and day in default_active) %}active{% endif %}"
+          data-day="{{ day }}"
+          onclick="toggleWeekday(this)"
+        >
+          {{ day }}
+        </button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="active_days" id="activeDays" value="" />
+    </div>
 
-{% block content %}
+    <div class="form-section">
+      <div class="form-label">カテゴリー</div>
+      <div class="category-selector">
+        {% set categories = ['セルフケア', 'セルフケア', 'セルフケア'] %} {% for
+        category in categories %}
+        <button
+          type="button"
+          class="category-btn {% if loop.first %}active{% endif %}"
+          onclick="selectCategory(this)"
+        >
+          {{ category }}
+        </button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="category" id="category" value="セルフケア" />
+    </div>
+
+    <div class="form-section">
+      <div class="form-label">モチベーション</div>
+      <textarea
+        name="memo"
+        class="memo-textarea"
+        placeholder="タスクのメモや手順を入力してください"
+      >
+{{ task.memo if task else '' }}</textarea
+      >
+    </div>
+
+    <div class="info-box">
+      <span class="info-icon">ふわすけ</span>
+      <p class="info-text">
+        固定タスクは毎週決まった時間にカレンダーに追加されるよ
+      </p>
+    </div>
+  </form>
+</div>
+
+<button type="submit" form="taskForm" class="submit-btn">登録</button>
 
 {% endblock %}
