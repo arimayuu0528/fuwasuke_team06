@@ -14,7 +14,6 @@ def create_app():
 
     # --- Blueprintの登録 ---
     # viewsパッケージからproductsとauthのBlueprintをインポート
-    # （）
     from .views import auth,schedule,task,mood,main
 
     app.register_blueprint(auth.auth_bp)
@@ -25,11 +24,6 @@ def create_app():
 
 
     
-
-
-
-
-
 
 
     # --- トップページのルートをここで定義 ---
