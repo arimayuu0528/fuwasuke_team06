@@ -1,3 +1,4 @@
+@charset "UTF-8";
 body {
   font-family: "Roboto", sans-serif;
   min-height: 100dvh;
@@ -6,11 +7,50 @@ body {
   flex-direction: column;
 }
 
-.fuwasuke_log p {
+.fuwasuke_log2 p {
   text-align: center;
 }
-.fuwasuke_log p img {
+.fuwasuke_log2 p img {
   max-width: 200px;
+}
+
+.fuwasuke_log1 p {
+  text-align: center;
+  margin: 1.5rem 0rem;
+}
+.fuwasuke_log1 p img {
+  max-width: 200px;
+}
+
+.menu {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  /* 下に固定するための設定 */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 65px; /* メニューの高さを固定すると安定します */
+  z-index: 999;
+}
+.menu .icon {
+  display: flex;
+  flex-direction: column; /* 縦に並べる */
+  align-items: center; /* 左右の中央に寄せる */
+  justify-content: center; /* 上下の中央に寄せる */
+  flex: 1;
+}
+.menu .icon i {
+  font-size: 30px;
+  color: #C2C2C2;
+  margin-bottom: 5px;
+  display: block;
+}
+.menu p {
+  font-family: "Roboto", sans-serif;
+  color: #C2C2C2;
+  font-size: 11px;
 }
 
 .login {

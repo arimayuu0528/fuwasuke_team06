@@ -9,11 +9,30 @@
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&family=Hina+Mincho&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@100..900&family=Permanent+Marker&family=Roboto:ital,wght@0,100..900;1,100..900&family=Saira+Condensed:wght@100;200;300;400;500;600;700;800;900&family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="fuwasuke">
-        <p><img src="../static/image/ふわすけ.png" alt=""></p>
+    <header class="fuwasuke_log1">
+        <p><img src="../static/image/ふわすけ1.png" alt=""></p>
     </header>
     {% block content %}
 
     {% endblock %}
+
+    <div class="menu">
+        <div class="icon">
+            <p><i class="fa-solid fa-house house_icon"></i></p>
+            <p>ホーム</p>
+        </div>
+        <div class="icon">
+            <p><i class="fa-solid fa-calendar calender_icon"></i></p>
+            <p>カレンダー</p>
+        </div>
+        <div class="icon">
+            <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
+            <p>レポート</p>
+        </div>
+        <div class="icon">
+            <p><i class="fa-solid fa-user user_icon"></i></p>
+            <p>マイページ</p>
+        </div>
+    </div>
 </body>
 </html>
