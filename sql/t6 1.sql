@@ -167,10 +167,10 @@ INSERT INTO t_tasks (user_id, task_name, priority_id, fatigue_id, deadline, dura
 (3,'会議準備',3,1,'2026-02-02',90,'2026-01-26','仕事');
 
 -- タスク評価
-INSERT INTO t_task_reviews (task_id, evaluation, comment, evaluation_day) VALUES
-(1,5,'完璧にできた','2026-01-26'),
-(2,3,'まあまあ','2026-01-25'),
-(3,4,'少し改善が必要','2026-01-26');
+INSERT INTO t_task_reviews (task_id, evaluation, evaluation_day) VALUES
+(1,1,'2026-01-26'),
+(2,3,'2026-01-25'),
+(3,2,'2026-01-26');
 
 -- 固定予定マスター
 INSERT INTO t_fixed_schedule_masters (user_id, title, duration_min, start_time, end_time, repeat_type, day_of_week, location, tag, memo) VALUES
