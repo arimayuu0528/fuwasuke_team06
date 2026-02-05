@@ -40,6 +40,6 @@ def task_create():
 # タスク提案
 # -----------------------------------------------------
 
-@task_bp.route("/task_proposal")
+@task_bp.route("/task_suggestion")
 def task_proposal():
     return render_template('suggestion_task.html')
