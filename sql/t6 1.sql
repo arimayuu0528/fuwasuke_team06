@@ -76,7 +76,6 @@ CREATE TABLE t_fixed_schedule_instances (
 -- 今日の気分
 -- 変更点：
 --  - mood_point(1〜3) を追加（ロジック用）
---  - mood_date は DATE でも良いが、元SQLの形を尊重して DATETIME のまま残す
 CREATE TABLE t_today_moods (
     today_moods_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -134,10 +133,10 @@ CREATE TABLE t_task_suggestion_detail (
     plan_min INT NOT NULL,                         -- 提案した分数（例：20/25など）
     remaining_min_at_suggest INT NULL,             -- 提案時点の残り分（分母として使った値）
     days_left INT NULL,                            -- 提案時点の残り日数
-    deadline_multiplier FLOAT NULL,         -- 締め切り補正倍率
+    deadline_multiplier FLOAT NULL,                -- 締め切り補正倍率
 
-    exec_task_level FLOAT NULL,             -- 実施タスクレベル
-    priority_score FLOAT NULL,              -- 優先点
+    exec_task_level FLOAT NULL,                    -- 実施タスクレベル
+    priority_score FLOAT NULL,                     -- 優先点
 
     actual_work_min INT NULL,                      -- 実際にやった分数（その日の入力をここに持つ）
 
