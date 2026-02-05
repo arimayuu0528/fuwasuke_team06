@@ -22,8 +22,6 @@ CREATE TABLE t_tasks (
     fatigue_id INT NOT NULL,
     deadline DATE NOT NULL,
     duration_min INT NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
     created_date DATE NOT NULL DEFAULT CURRENT_DATE,
     category_name VARCHAR(50) NOT NULL,
     PRIMARY KEY (task_id),
@@ -93,12 +91,12 @@ CREATE TABLE t_fixed_schedule_instances (
 
 -- 今日の気分
 CREATE TABLE t_today_moods (
-    id INT NOT NULL AUTO_INCREMENT,
+    today_moods_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     mood_date DATETIME NOT NULL,
     mood VARCHAR(4) NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES t_users(id),
+    PRIMARY KEY (today_moods_id),
+    FOREIGN KEY (user_id) REFERENCES t_users(user_id),
     CHECK (mood IN ('普通', 'しんどい', '元気'))
 );
 -- タスク作業ログテーブル
@@ -111,12 +109,44 @@ CREATE TABLE t_task_work_logs (
     end_time TIME NOT NULL,
     create_at DATETIME NOT NULL,
     PRIMARY KEY(work_id),
-    FOREIGN KEY(task_id) REFERENCES t_tasks(id)
+    FOREIGN KEY(task_id) REFERENCES t_tasks(task_id)
+);
+--タスク提案
+CREATE TABLE t_task_suggestions (
+    task_suggestion_id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    created_at DATE NOT NULL,
+    mood VARCHAR(4) NOT NULL,
+    PRIMARY KEY (task_suggestion_id),
+    FOREIGN KEY (user_id) REFERENCES t_users(user_id)
+);
+--タスク提案詳細
+CREATE TABLE t_task_suggestion_detail (
+    task_suggestion_detail_id INT NOT NULL AUTO_INCREMENT,
+    task_suggestion_id INT NOT NULL,
+    task_id INT NOT NULL,
+    plan_min INT NOT NULL,
+    PRIMARY KEY (task_suggestion_detail_id),
+    FOREIGN KEY (task_suggestion_id) REFERENCES t_task_suggestions(task_suggestion_id),
+    FOREIGN KEY (task_id) REFERENCES t_tasks(task_id)
+);
+--タスク提案評価
+CREATE TABLE t_task_suggestion_reviews (
+    task_suggestion_reviews_id INT NOT NULL AUTO_INCREMENT,
+    task_suggestion_id INT NOT NULL,
+    task_id INT NOT NULL,
+    plan_min INT NOT NULL,
+    PRIMARY KEY (task_suggestion_reviews_id),
+    FOREIGN KEY (task_suggestion_id) REFERENCES t_task_suggestions(task_suggestion_id),
+    FOREIGN KEY (task_id) REFERENCES t_tasks(task_id)
 );
 
 
 USE huwasuke_db;
 
+-- =========================
+-- t_priorities
+-- =========================
 -- =========================
 -- t_priorities
 -- =========================
@@ -136,26 +166,26 @@ INSERT INTO t_fatigue_levels (fatigue_name) VALUES
 -- =========================
 -- t_users
 -- =========================
-INSERT INTO t_users (email,user_name, password, wakeup_time, sleep_time) VALUES
-('user1@example.com',"ふわじぃ",'pass000001','07:00:00','23:30:00'),
-('user2@example.com',"ふわちゃん",'pass000002','06:30:00','23:00:00'),
-('user3@example.com',"ふわばぁ",'pass000003','08:00:00','22:30:00');
+INSERT INTO t_users (email, user_name, password, wakeup_time, sleep_time) VALUES
+('user1@example.com','ふわじぃ','pass000001','07:00:00','23:30:00'),
+('user2@example.com','ふわちゃん','pass000002','06:30:00','23:00:00'),
+('user3@example.com','ふわばぁ','pass000003','08:00:00','22:30:00');
 
 -- =========================
 -- t_tasks
 -- =========================
-INSERT INTO t_tasks (user_id, task_name, priority_id, fatigue_id, deadline, duration_min, start_time, end_time) VALUES
-(1,'レポート作成',1,2,'2026-01-31',120,'09:00:00','11:00:00'),
-(2,'コードレビュー',2,3,'2026-01-28',60,'14:00:00','15:00:00'),
-(3,'会議準備',3,1,'2026-02-02',90,'10:00:00','11:30:00');
+INSERT INTO t_tasks (user_id, task_name, priority_id, fatigue_id, deadline, duration_min, created_date, category_name) VALUES
+(1,'レポート作成',1,2,'2026-01-31',120,'2026-01-26','仕事'),
+(2,'コードレビュー',2,3,'2026-01-28',60,'2026-01-25','仕事'),
+(3,'会議準備',3,1,'2026-02-02',90,'2026-01-26','仕事');
 
 -- =========================
 -- t_task_reviews
 -- =========================
-INSERT INTO t_task_reviews (evaluation, comment, evaluation_day) VALUES
-(5,'完璧にできた','2026-01-26'),
-(3,'まあまあ','2026-01-25'),
-(4,'少し改善が必要','2026-01-26');
+INSERT INTO t_task_reviews (task_id, evaluation, comment, evaluation_day) VALUES
+(1,5,'完璧にできた','2026-01-26'),
+(2,3,'まあまあ','2026-01-25'),
+(3,4,'少し改善が必要','2026-01-26');
 
 -- =========================
 -- t_fixed_schedule_masters
@@ -180,20 +210,68 @@ INSERT INTO t_today_moods (user_id, mood_date, mood) VALUES
 (1,'2026-01-27 08:00:00','普通'),
 (2,'2026-01-27 08:30:00','元気'),
 (3,'2026-01-27 09:00:00','しんどい');
+
 -- =========================
 -- t_task_work_logs
 -- =========================
-INSERT INTO t_task_work_logs
-(task_id, work_date, work_min, start_time, end_time, create_at)
-VALUES
--- タスクID 1：レポート作成
+INSERT INTO t_task_work_logs (task_id, work_date, work_min, start_time, end_time, create_at) VALUES
+-- レポート作成
 (1, '2026-01-26', 60, '09:00:00', '10:00:00', '2026-01-26 10:05:00'),
 (1, '2026-01-27', 60, '10:00:00', '11:00:00', '2026-01-27 11:02:00'),
-
--- タスクID 2：コードレビュー
+-- コードレビュー
 (2, '2026-01-25', 30, '14:00:00', '14:30:00', '2026-01-25 14:35:00'),
-(2, NULL,          30, '14:30:00', '15:00:00', '2026-01-25 15:05:00'),
-
--- タスクID 3：会議準備
+(2, NULL, 30, '14:30:00', '15:00:00', '2026-01-25 15:05:00'),
+-- 会議準備
 (3, '2026-01-26', 45, '10:00:00', '10:45:00', '2026-01-26 10:50:00'),
 (3, '2026-01-27', 45, '10:45:00', '11:30:00', '2026-01-27 11:35:00');
+
+-- =========================
+-- t_task_suggestions
+-- =========================
+INSERT INTO t_task_suggestions (user_id, created_at, mood) VALUES
+(1,'2026-01-26','普通'),
+(2,'2026-01-26','元気'),
+(3,'2026-01-26','しんどい');
+
+-- =========================
+-- t_task_suggestion_detail
+-- =========================
+INSERT INTO t_task_suggestion_detail (task_suggestion_id, task_id, plan_min) VALUES
+(1,1,60),
+(1,2,30),
+(2,2,45),
+(3,3,90);
+
+-- =========================
+-- t_task_suggestion_reviews
+-- =========================
+INSERT INTO t_task_suggestion_reviews (task_suggestion_id, task_id, plan_min) VALUES
+(1,1,60),
+(1,2,30),
+(2,2,45),
+(3,3,90);
+-- =========================
+-- t_fixed_schedule_instances（1週間分）
+-- =========================
+
+-- 朝会（毎日 月〜金）
+INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, end_time, is_cancelled) VALUES
+(1,'2026-01-27','09:00:00','09:30:00',0),
+(1,'2026-01-28','09:00:00','09:30:00',0),
+(1,'2026-01-29','09:00:00','09:30:00',0),
+(1,'2026-01-30','09:00:00','09:30:00',0),
+(1,'2026-01-31','09:00:00','09:30:00',0);
+
+-- 昼休み（毎日 月〜金）
+INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, end_time, is_cancelled) VALUES
+(2,'2026-01-27','12:00:00','13:00:00',0),
+(2,'2026-01-28','12:00:00','13:00:00',0),
+(2,'2026-01-29','12:00:00','13:00:00',0),
+(2,'2026-01-30','12:00:00','13:00:00',0),
+(2,'2026-01-31','12:00:00','13:00:00',0);
+
+-- 運動（毎週 火・木）
+INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, end_time, is_cancelled) VALUES
+(3,'2026-01-28','18:00:00','18:45:00',0),
+(3,'2026-01-30','18:00:00','18:45:00',0),
+(3,'2026-02-04','18:00:00','18:45:00',0);  -- 翌週の火曜日も追加例
