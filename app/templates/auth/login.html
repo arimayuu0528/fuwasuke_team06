@@ -6,18 +6,21 @@
 {% block content %}
 
 <main class="login">
-    <div class="mail">
-        <h4>メールアドレス</h4>
-        <input type="text">
-    </div>
+    <form method="post" action="{{ url_for('auth.login') }}">
+        <div class="mail">
+            <h4>メールアドレス</h4>
+            <input type="text" name="email" required>
+        </div>
 
-    <div class="password">
-        <h4>パスワード</h4>
-        <input type="text">
-    </div>
-
-    <input type="submit" value="ログイン">
-
+        <div class="password">
+            <h4>パスワード</h4>
+            <input type="text" name="password" placeholder="8文字以上の英数字">
+        </div>
+        {% if error %}
+            <p class="login-error">{{ error }}</p>
+        {% endif %}
+        <input type="submit" value="ログイン">
+    </form>
     <div class="new_register">
         <p>アカウントをお持ちでないですか？</p>
         <input type="submit" value="新規登録" id="new_register">
