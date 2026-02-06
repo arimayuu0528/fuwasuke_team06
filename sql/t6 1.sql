@@ -1,4 +1,3 @@
-DROP DATABASE IF EXISTS huwasuke_db;
 CREATE DATABASE huwasuke_db DEFAULT CHARACTER SET utf8mb4;
 USE huwasuke_db;
 
