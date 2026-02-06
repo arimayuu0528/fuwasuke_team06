@@ -1,5 +1,5 @@
-{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %} {%
-block content %}
+{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %} {%block
+content %}
 <div class="header">
   <h1>固定タスク登録</h1>
   <div class="tab-container">
@@ -9,7 +9,11 @@ block content %}
 </div>
 
 <div class="form-container">
-  <form id="taskForm" method="POST" action="{{ url_for('schedule') }}">
+  <form
+    id="taskForm"
+    method="POST"
+    action="{{ url_for('schedule.schedule_form') }}"
+  >
     <div class="form-section">
       <div class="form-label">
         <span>タスク名</span>

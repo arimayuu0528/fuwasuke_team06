@@ -10,6 +10,6 @@ class Config:
 
     # DB接続情報を追加
     DB_HOST = 'localhost'
-    DB_USER = 'root'
-    DB_PASSWORD = ''
+    DB_USER = 'team06'
+    DB_PASSWORD = 'team06fuwasuke'
     DB_DATABASE = 'huwasuke_db'

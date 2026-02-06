@@ -1,14 +1,107 @@
-from flask import Blueprint,render_template
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from app.db import DatabaseManager
+from datetime import datetime
 
-# Blueprintオブジェクト作成
-schedule_bp = Blueprint('schedule',__name__,url_prefix='/schedule')
+schedule_bp = Blueprint('schedule', __name__, url_prefix='/schedule')
 
 
 # -----------------------------------------------------
-# ○○画面処理　（エンドポイント：' ')  担当者名：山本聖
+# 固定タスク登録画面・登録処理
+# URL：/schedule/schedule
 # -----------------------------------------------------
-@schedule_bp.route("/schedule")
+@schedule_bp.route("/schedule", methods=["GET", "POST"])
 def schedule_form():
-    # エンドポイント名、関数名は各自変更してください。
-    pass
+    db = DatabaseManager()
+    db.connect()  # 
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time")
+        active_days = request.form.get("active_days")
+        category = request.form.get("category")
+        memo = request.form.get("memo")
+
+        user_id = session.get("user_id", 1)
+
+        fmt = "%H:%M"
+        duration_min = (
+            datetime.strptime(end_time, fmt)
+            - datetime.strptime(start_time, fmt)
+        ).seconds // 60
+
+        sql = """
+        INSERT INTO t_fixed_schedule_masters
+        (user_id, title, duration_min, start_time, end_time,
+         repeat_type, day_of_week, location, tag, memo)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """
+
+        params = (
+            user_id,
+            title,
+            duration_min,
+            start_time,
+            end_time,
+            "weekly",
+            active_days,
+            "",
+            category,
+            memo
+        )
+
+        db.execute_query(sql, params)  # 
+        db.disconnect()
+
+        return redirect(url_for("schedule.schedule_list"))
+
+    db.disconnect()
+    return render_template("schedule/register_schedule.html")
+
+
+
+# -----------------------------------------------------
+# 固定タスク一覧
+# URL：/schedule/list
+# -----------------------------------------------------
+@schedule_bp.route("/list")
+def schedule_list():
+    db = DatabaseManager()
+    db.connect()
+
+    sql = """
+    SELECT
+        master_id,
+        title,
+        start_time,
+        end_time,
+        day_of_week,
+        tag,
+        memo
+    FROM t_fixed_schedule_masters
+    ORDER BY start_time
+    """
+
+    rows = db.fetch_all(sql)
+
+    if not rows:
+        rows = []
+
+    tasks = []
+    for row in rows:
+        tasks.append({
+            "id": row["master_id"],
+            "title": row["title"],
+            "start_time": row["start_time"],
+            "end_time": row["end_time"],
+            "category": row["tag"],
+            "comment": row["memo"],
+            "active_days": list(row["day_of_week"]) if row["day_of_week"] else []
+        })
+        rows = db.fetch_all("SELECT * FROM t_fixed_schedule_masters")
+
+    print("DEBUG rows:", rows)
+
+
+    db.disconnect()
+    return render_template("schedule/schedule_list.html", tasks=tasks)
