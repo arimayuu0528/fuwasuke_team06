@@ -3,8 +3,87 @@
 {% block title %}
 
 {% endblock %}
-
-
 {% block content %}
+
+<main class="register">
+
+    <!-- タイトル -->
+    <div class="register-header">
+        <h2>ふわすけへようこそ</h2>
+        <p class="subtitle">あなたに合わせた生活リズムを整えましょう</p>
+    </div>
+
+    <form method="post" action="{{ url_for('auth.register') }}">
+
+        <!-- メールアドレス -->
+        <div class="form-group">
+            <h4>メールアドレス</h4>
+            <input
+                type="email"
+                name="email"
+                placeholder="入力してください"
+                required
+                maxlength="255"
+            >
+        </div>
+
+        <!-- パスワード -->
+        <div class="form-group">
+            <h4>パスワード</h4>
+            <input
+                type="password"
+                name="password"
+                placeholder="8文字以上の英数字"
+                pattern="[A-Za-z0-9]{8,}"
+                required
+            >
+        </div>
+
+        <!-- ユーザー名 -->
+        <div class="form-group">
+            <h4>ユーザー名</h4>
+            <input
+                type="text"
+                name="user_name"
+                placeholder="入力してください"
+                maxlength="8"
+                required
+            >
+        </div>
+
+        <!-- 生活リズム -->
+        <div class="life-rhythm">
+            <p class="section-title">生活リズムの設定</p>
+
+            <div class="time-group">
+                <div>
+                    <label>起床時間</label>
+                    <input type="time" name="wakeup_time" value="07:00">
+                </div>
+
+                <div>
+                    <label>就寝時間</label>
+                    <input type="time" name="sleep_time" value="23:30">
+                </div>
+            </div>
+        </div>
+
+        <!-- エラーメッセージ -->
+        {% if error %}
+            <p class="register-error">{{ error }}</p>
+        {% endif %}
+
+        <!-- 登録ボタン -->
+        <input type="submit" value="登録する" class="register-btn">
+
+    </form>
+
+    <!-- ログインリンク -->
+    <p class="login-link">
+        すでにアカウントをお持ちですか？
+        <a href="{{ url_for('auth.login_form') }}">ログイン</a>
+    </p>
+
+</main>
 
 {% endblock %}

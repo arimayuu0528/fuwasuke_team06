@@ -7,12 +7,17 @@ from datetime import date
 from app.db import DatabaseManager
 
 def create_app():
-    # Flaskアプリケーションのインスタンスを作成
-    # __name__をappパッケージのパスに設定
-    app = Flask(__name__)
-    
-    # config.pyから設定を読み込む
-    app.config.from_object('config.Config')
+    app = Flask(__name__, instance_relative_config=True)
+ 
+    # 1) 共有デフォルト（Git管理）
+    app.config.from_object("app.config.Config")
+ 
+    # 2) ローカル秘密（Git管理しない）※あれば上書き
+    app.config.from_pyfile("config.py", silent=True)
+ 
+  
+   
+
 
     # --- Blueprintの登録 ---
     # viewsパッケージからproductsとauthのBlueprintをインポート

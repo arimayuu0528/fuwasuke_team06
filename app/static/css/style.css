@@ -110,4 +110,87 @@ body {
 .login .register_info a {
   color: #FFAF5A;
   border-bottom: #FFAF5A solid 1px;
+}
+
+.register {
+  font-size: 15px;
+  font-weight: 300;
+  text-align: center;
+  margin: 0rem 0.5rem;
+  /* ---------- 共通入力 ---------- */
+  /* ---------- フォームグループ ---------- */
+  /* ---------- 生活リズム ---------- */
+  /* ---------- エラー ---------- */
+  /* ---------- 登録ボタン ---------- */
+  /* ---------- ログインリンク ---------- */
+}
+.register input[type=text],
+.register input[type=email],
+.register input[type=password],
+.register input[type=time] {
+  background-color: #f6f6f6;
+  padding: 1rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  border-radius: 55px;
+  text-align: left;
+  font-size: 14px;
+  border: none;
+}
+.register .form-group {
+  margin-bottom: 1.2rem;
+}
+.register .form-group h4 {
+  text-align: left;
+  font-size: 14px;
+  margin-left: 1rem;
+}
+.register .life-rhythm {
+  margin: 2rem 0;
+}
+.register .life-rhythm .section-title {
+  text-align: left;
+  font-size: 14px;
+  margin-left: 1rem;
+  margin-bottom: 0.8rem;
+}
+.register .life-rhythm .time-group {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0 0.5rem;
+}
+.register .life-rhythm .time-group div {
+  flex: 1;
+  text-align: left;
+}
+.register .life-rhythm .time-group div label {
+  font-size: 12px;
+  color: #666;
+  margin-left: 1rem;
+}
+.register .life-rhythm .time-group div input[type=time] {
+  text-align: left;
+}
+.register .register-error {
+  color: #ff4d4d;
+  font-size: 14px;
+  margin: 1rem 0;
+}
+.register .register-btn {
+  background-color: #FFAF5A;
+  padding: 1.3rem 6rem;
+  color: #fff;
+  border-radius: 30px;
+  font-size: 18px;
+  margin-top: 1.5rem;
+  border: none;
+}
+.register .login-link {
+  color: #999;
+  font-size: 14px;
+  margin-top: 2.5rem;
+}
+.register .login-link a {
+  color: #FFAF5A;
+  text-decoration: none;
 }/*# sourceMappingURL=style.css.map */

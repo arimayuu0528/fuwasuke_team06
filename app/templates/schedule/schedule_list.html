@@ -1,5 +1,6 @@
 {% extends "base3.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
 block content %}
+
 <div class="header">
   <h1>固定タスク一覧</h1>
   <div class="tab-container">
@@ -44,9 +45,25 @@ block content %}
 </div>
 <button
   class="add-task-btn"
-  onclick="location.href='{{ url_for(\&quot;register_schedule\&quot;) }}'"
+  onclick="location.href='{{ url_for('schedule.schedule_form') }}'"
 >
   新しい固定タスクを作成
 </button>
+{% if tasks|length == 0 %}
+<p style="color: red">タスクがありません</p>
+{% endif %}
+<p>件数：{{ tasks|length }}</p>
+
+<script>
+  function deleteTask(taskId) {
+    if (!confirm("この固定タスクを削除しますか？")) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `/schedule/delete/${taskId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
 
 {% endblock %}

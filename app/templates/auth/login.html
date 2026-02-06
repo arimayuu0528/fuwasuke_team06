@@ -6,7 +6,7 @@
 {% block content %}
 
 <main class="login">
-    <form method="post" action="{{ url_for('auth.login') }}">
+    <form method="post" action="{{ url_for('auth.login_process') }}">
         <div class="mail">
             <h4>メールアドレス</h4>
             <input type="text" name="email" required>
@@ -23,7 +23,9 @@
     </form>
     <div class="new_register">
         <p>アカウントをお持ちでないですか？</p>
-        <input type="submit" value="新規登録" id="new_register">
+        <form method="get" action="{{ url_for('auth.register') }}">
+            <input type="submit" value="新規登録" id="new_register">
+        </form>
     </div>
 
     <p class="register_info">登録することで、ふわすけの<a href="">利用規約</a>および<a href="">プライバシーポリシー</a>に同意したものとみなされます。</p>
