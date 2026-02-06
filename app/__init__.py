@@ -25,7 +25,7 @@ def create_app():
 
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(schedule.schedule_bp)
-    app.register_blueprint(task.task_bp)
+    # app.register_blueprint(task.task_bp)
     app.register_blueprint(mood.mood_bp)
     app.register_blueprint(main.main_bp)
     
