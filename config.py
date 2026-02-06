@@ -3,6 +3,9 @@
 # Descriptions  : 設定ファイル
 # ==========================================================
 import os
+from dotenv import load_dotenv
+
+
 
 class Config:
     # Flaskのセッション機能や特定の拡張機能で暗号化キーとして使用される
@@ -10,6 +13,6 @@ class Config:
 
     # DB接続情報を追加
     DB_HOST = 'localhost'
-    DB_USER = 'team06'
-    DB_PASSWORD = 'team06fuwasuke'
+    DB_USER = 'suke'
+    DB_PASSWORD = 'suke06'
     DB_DATABASE = 'huwasuke_db'
