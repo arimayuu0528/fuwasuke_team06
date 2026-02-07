@@ -39,4 +39,4 @@ def task_create():
 @task_bp.route("/task_suggestion")
 def task_suggestion():
     
-    return render_template('suggestion_task.html')
+    return render_template('task_suggestion.html')
