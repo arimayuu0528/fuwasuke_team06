@@ -6,5 +6,11 @@
 
 
 {% block content %}
+<main>
+    <form method="get" action="{{ url_for('mood.home') }}">
+        <button type="submit">ホームへ進む</button>
+    </form>
+</main>
+
 
 {% endblock %}

@@ -39,20 +39,31 @@ def create_app():
 
     @app.before_request
     def check_user():
-        # ログインページと静的ファイルはチェックしない
-        if request.endpoint in ('auth.login', 'index', 'static'):
+        # ログインページと静的ファイルはチェックしない　無限ループ回避用
+        if request.endpoint in (
+            'auth.login_form',
+            'auth.login_process',
+            'index',
+            'static',
+            'mood.register_mood',
+            'mood.home'
+        ):
             return
+
 
         # ログインしていなければログイン画面へ
         if not session.get('user_id'):
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.login_form'))
 
         # 今日の気分が未登録なら登録画面へ
         db = DatabaseManager()
         today = date.today()
 
         sql = "SELECT * FROM t_today_moods WHERE user_id = %s AND mood_date = %s"
-        mood = db.query(sql, (session['user_id'], today), fetch_one=True)
+        mood = db.fetch_one(sql, (session['user_id'], today))
+
+        db.disconnect()
+
 
         if not mood and request.endpoint != 'mood.register_mood':
             return redirect(url_for('mood.register_mood'))
