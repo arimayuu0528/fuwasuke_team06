@@ -57,16 +57,29 @@ def create_app():
 
         # 今日の気分が未登録なら登録画面へ
         db = DatabaseManager()
+        #今日の日付を取得
         today = date.today()
 
-        sql = "SELECT * FROM t_today_moods WHERE user_id = %s AND mood_date = %s"
-        mood = db.fetch_one(sql, (session['user_id'], today))
+        # 今日の気分が登録されているかチェックするSQL
+        sql = """
+        SELECT *
+        FROM t_today_moods
+        WHERE user_id = %s
+        AND DATE(mood_date) = %s
+        """
 
+        # ログイン中のユーザーが今日の気分を登録しているか取得
+        mood = db.fetch_one(sql, (session['user_id'], today))
         db.disconnect()
 
-
+        #今日の気分が未登録の場合
         if not mood and request.endpoint != 'mood.register_mood':
             return redirect(url_for('mood.register_mood'))
         
+
+        # 登録済み → home へ
+        if request.endpoint != 'mood.home':
+            return render_template('main/home.html')
+
 
     return app   
