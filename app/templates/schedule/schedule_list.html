@@ -1,5 +1,340 @@
-{% extends "base3.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
-block content %}
+{% extends "base3.html" %} {% block title %} 固定タスク一覧{% endblock %}
+<style>
+  /* Fixed Tasks List - Complete CSS Replication */
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
+    background-color: #f5f5f5;
+    padding-bottom: 80px;
+  }
+
+  /* Header Styles */
+  .header {
+    background-color: #fff;
+    padding: 20px 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+
+  /* Tab Container */
+  .tab-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 0 8px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .tab.active {
+    color: #ff9f5a;
+    border-bottom-color: #ff9f5a;
+  }
+
+  /* Task List */
+  .task-list {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Task Card */
+  .task-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f0f0f0;
+  }
+
+  /* Task Header */
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .task-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    flex: 1;
+  }
+
+  .delete-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    transition: color 0.2s;
+  }
+
+  .delete-btn:hover {
+    color: #ff6b6b;
+  }
+
+  /* Task Meta */
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .task-category {
+    background: #ffe5d6;
+    color: #ff9f5a;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .task-time {
+    color: #999;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .task-time::before {
+    content: "🕐";
+    font-size: 16px;
+  }
+
+  /* Comment Section */
+  .comment-section {
+    margin: 12px 0;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+  }
+
+  .comment-toggle {
+    background: transparent;
+    border: none;
+    color: #999;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    font-family: inherit;
+  }
+
+  .comment-toggle .arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+
+  .comment-toggle.collapsed .arrow {
+    transform: rotate(-90deg);
+  }
+
+  .comment-content {
+    margin-top: 8px;
+    padding: 8px 0;
+    color: #ccc;
+    font-size: 13px;
+    line-height: 1.5;
+    border-top: 1px dashed #e0e0e0;
+  }
+
+  .comment-content.hidden {
+    display: none;
+  }
+
+  /* Weekday Pills */
+  .weekday-pills {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .weekday {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .weekday.active {
+    background: #ff9f5a;
+    color: #fff;
+  }
+
+  .weekday.inactive {
+    background: #e8e8e8;
+    color: #999;
+  }
+
+  /* Add Task Button */
+  .add-task-btn {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 400px;
+    padding: 16px;
+    background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .add-task-btn::before {
+    content: "+";
+    font-size: 24px;
+    font-weight: 400;
+  }
+
+  .add-task-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 159, 90, 0.4);
+  }
+
+  .add-task-btn:active {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Bottom Navigation (from screenshot) */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #999;
+    font-size: 11px;
+    flex: 1;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+
+  .nav-item.active {
+    color: #ff9f5a;
+  }
+
+  .nav-icon {
+    font-size: 24px;
+  }
+
+  /* Empty State */
+  p[style*="color: red"] {
+    text-align: center;
+    padding: 40px 16px;
+    color: #ff6b6b !important;
+    font-size: 14px;
+  }
+
+  /* Task Count */
+  p:last-of-type {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .task-card {
+      border-radius: 12px;
+    }
+
+    .weekday {
+      width: 36px;
+      height: 36px;
+      font-size: 13px;
+    }
+
+    .weekday-pills {
+      gap: 6px;
+    }
+  }
+
+  /* Animation for task deletion */
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+  }
+
+  .task-card.deleting {
+    animation: fadeOut 0.3s forwards;
+  }</style
+>{% block content %}
 
 <div class="header">
   <h1>固定タスク一覧</h1>
@@ -56,13 +391,271 @@ block content %}
 
 <script>
   function deleteTask(taskId) {
-    if (!confirm("この固定タスクを削除しますか？")) return;
+    if (!confirm("この固定タスクを削除しますか？")) {
+      return;
+    }
 
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = `/schedule/delete/${taskId}`;
-    document.body.appendChild(form);
-    form.submit();
+    // Add animation before deletion
+    const taskCard = event.target.closest(".task-card");
+    if (taskCard) {
+      taskCard.classList.add("deleting");
+
+      // Wait for animation to complete
+      setTimeout(() => {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = `/schedule/delete/${taskId}`;
+        document.body.appendChild(form);
+        form.submit();
+      }, 300);
+    } else {
+      // Fallback if animation fails
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = `/schedule/delete/${taskId}`;
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+
+  // Toggle comment visibility
+  function toggleComment(button) {
+    const commentContent = button.nextElementSibling;
+
+    if (commentContent.classList.contains("hidden")) {
+      // Show comment
+      commentContent.classList.remove("hidden");
+      button.classList.remove("collapsed");
+    } else {
+      // Hide comment
+      commentContent.classList.add("hidden");
+      button.classList.add("collapsed");
+    }
+  }
+
+  // Initialize comments as collapsed on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    // Collapse all comments initially
+    const commentContents = document.querySelectorAll(".comment-content");
+    const commentToggles = document.querySelectorAll(".comment-toggle");
+
+    commentContents.forEach((content) => {
+      content.classList.add("hidden");
+    });
+
+    commentToggles.forEach((toggle) => {
+      toggle.classList.add("collapsed");
+    });
+
+    // Add ripple effect to buttons
+    addRippleEffect();
+
+    // Add smooth scroll behavior
+    document.documentElement.style.scrollBehavior = "smooth";
+  });
+
+  // Add ripple effect to interactive elements
+  function addRippleEffect() {
+    const buttons = document.querySelectorAll(
+      ".add-task-btn, .tab, .weekday.active",
+    );
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", function (e) {
+        const ripple = document.createElement("span");
+        ripple.classList.add("ripple");
+
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        ripple.style.width = ripple.style.height = size + "px";
+        ripple.style.left = x + "px";
+        ripple.style.top = y + "px";
+
+        this.appendChild(ripple);
+
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+  }
+
+  // Tab switching functionality
+  function switchTab(tabElement) {
+    // Remove active class from all tabs
+    const tabs = document.querySelectorAll(".tab");
+    tabs.forEach((tab) => tab.classList.remove("active"));
+
+    // Add active class to clicked tab
+    tabElement.classList.add("active");
+
+    // Handle navigation based on tab
+    if (tabElement.textContent.trim() === "タスク") {
+      window.location.href = "/tasks"; // Adjust URL as needed
+    }
+  }
+
+  // Add event listeners to tabs
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll(".tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        switchTab(this);
+      });
+    });
+  });
+
+  // Weekday toggle functionality (for future editing)
+  function toggleWeekday(weekdayElement) {
+    weekdayElement.classList.toggle("active");
+    weekdayElement.classList.toggle("inactive");
+  }
+
+  // Touch feedback for mobile
+  document.addEventListener("DOMContentLoaded", function () {
+    const touchElements = document.querySelectorAll(
+      ".task-card, .weekday, .delete-btn",
+    );
+
+    touchElements.forEach((element) => {
+      element.addEventListener("touchstart", function () {
+        this.style.opacity = "0.7";
+      });
+
+      element.addEventListener("touchend", function () {
+        this.style.opacity = "1";
+      });
+
+      element.addEventListener("touchcancel", function () {
+        this.style.opacity = "1";
+      });
+    });
+  });
+
+  // Scroll reveal animation
+  function revealOnScroll() {
+    const taskCards = document.querySelectorAll(".task-card");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+      },
+    );
+
+    taskCards.forEach((card) => {
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+      card.style.transition = "opacity 0.4s, transform 0.4s";
+      observer.observe(card);
+    });
+  }
+
+  // Initialize scroll reveal
+  document.addEventListener("DOMContentLoaded", revealOnScroll);
+
+  // Prevent double-click on delete button
+  let isDeleting = false;
+
+  function safeDeleteTask(taskId) {
+    if (isDeleting) return;
+
+    isDeleting = true;
+    deleteTask(taskId);
+
+    setTimeout(() => {
+      isDeleting = false;
+    }, 1000);
+  }
+
+  // Long press for delete (alternative mobile interaction)
+  let pressTimer;
+
+  function setupLongPress() {
+    const deleteButtons = document.querySelectorAll(".delete-btn");
+
+    deleteButtons.forEach((btn) => {
+      btn.addEventListener("touchstart", function (e) {
+        pressTimer = setTimeout(() => {
+          // Vibrate if available
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+
+          const taskCard = this.closest(".task-card");
+          taskCard.style.transform = "scale(0.98)";
+        }, 500);
+      });
+
+      btn.addEventListener("touchend", function () {
+        clearTimeout(pressTimer);
+        const taskCard = this.closest(".task-card");
+        taskCard.style.transform = "scale(1)";
+      });
+
+      btn.addEventListener("touchcancel", function () {
+        clearTimeout(pressTimer);
+        const taskCard = this.closest(".task-card");
+        taskCard.style.transform = "scale(1)";
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", setupLongPress);
+
+  // Swipe to delete functionality (optional enhancement)
+  function setupSwipeToDelete() {
+    const taskCards = document.querySelectorAll(".task-card");
+
+    taskCards.forEach((card) => {
+      let startX = 0;
+      let currentX = 0;
+      let isSwiping = false;
+
+      card.addEventListener("touchstart", (e) => {
+        startX = e.touches[0].clientX;
+        isSwiping = true;
+      });
+
+      card.addEventListener("touchmove", (e) => {
+        if (!isSwiping) return;
+
+        currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+
+        // Only allow left swipe
+        if (diffX < 0) {
+          card.style.transform = `translateX(${Math.max(diffX, -80)}px)`;
+        }
+      });
+
+      card.addEventListener("touchend", () => {
+        const diffX = currentX - startX;
+
+        if (diffX < -60) {
+          // Show delete confirmation
+          card.style.transform = "translateX(-80px)";
+          card.style.transition = "transform 0.2s";
+        } else {
+          // Reset position
+          card.style.transform = "translateX(0)";
+          card.style.transition = "transform 0.2s";
+        }
+
+        isSwiping = false;
+        setTimeout(() => {
+          card.style.transition = "";
+        }, 200);
+      });
+    });
   }
 </script>
 
