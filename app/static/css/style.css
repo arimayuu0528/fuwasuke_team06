@@ -118,8 +118,14 @@ body {
   text-align: center;
   margin: 0rem 0.5rem;
   /* ---------- 共通入力 ---------- */
+  /* ---------- タイトル ---------- */
   /* ---------- フォームグループ ---------- */
   /* ---------- 生活リズム ---------- */
+  /* セクションタイトル */
+  /* 横並び＆中央寄せ */
+  /* 起床時間・就寝時間それぞれ */
+  /* ラベル */
+  /* 時間入力 */
   /* ---------- エラー ---------- */
   /* ---------- 登録ボタン ---------- */
   /* ---------- ログインリンク ---------- */
@@ -136,6 +142,18 @@ body {
   text-align: left;
   font-size: 14px;
   border: none;
+}
+.register .register-header {
+  margin-bottom: 1rem;
+}
+.register .register-header h2 {
+  font-size: 30px;
+  margin-bottom: 0.5rem;
+  margin-top: -2rem;
+}
+.register .register-header .subtitle {
+  font-size: 12px;
+  line-height: 1.4;
 }
 .register .form-group {
   margin-bottom: 1.2rem;
@@ -156,19 +174,20 @@ body {
 }
 .register .life-rhythm .time-group {
   display: flex;
-  gap: 0.8rem;
-  padding: 0 0.5rem;
+  justify-content: center;
+  gap: 1.2rem;
 }
-.register .life-rhythm .time-group div {
-  flex: 1;
-  text-align: left;
+.register .life-rhythm .time-group > div {
+  flex: 0 1 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ← 中央寄せ */
 }
-.register .life-rhythm .time-group div label {
+.register .life-rhythm .time-group label {
   font-size: 12px;
-  color: #666;
-  margin-left: 1rem;
 }
-.register .life-rhythm .time-group div input[type=time] {
+.register .life-rhythm .time-group input[type=time] {
+  width: 100%;
   text-align: left;
 }
 .register .register-error {
@@ -182,15 +201,22 @@ body {
   color: #fff;
   border-radius: 30px;
   font-size: 18px;
-  margin-top: 1.5rem;
   border: none;
 }
-.register .login-link {
+.register .new_register {
   color: #999;
   font-size: 14px;
-  margin-top: 2.5rem;
+  margin-top: 1rem;
+  text-align: center;
 }
-.register .login-link a {
+.register .new_register p {
+  margin-bottom: 0.5rem;
+}
+.register .new_register input[type=submit] {
+  background: none;
+  border: none;
   color: #FFAF5A;
-  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
 }/*# sourceMappingURL=style.css.map */

@@ -44,6 +44,7 @@ def create_app():
             'auth.login_form',
             'auth.login_process',
             'auth.register',
+            'auth.register_process', 
             'index',
             'static'
         ):
@@ -73,13 +74,13 @@ def create_app():
         db.disconnect()
 
         #今日の気分が未登録の場合
-        if not mood and request.endpoint != 'mood.register_mood':
-            return redirect(url_for('mood.register_mood'))
-        
+        if not mood and request.endpoint != 'mood.register':
+            return redirect(url_for('mood.register'))
+
 
         # 登録済み → home へ
-        # if request.endpoint != 'mood.home':
-        #     return render_template('main/home.html')
+        if request.endpoint != 'mood.home':
+            return render_template('main/home.html')
 
 
     return app   

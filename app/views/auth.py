@@ -35,8 +35,6 @@ def login_process():
         WHERE email = %s AND password = %s
     """
     user = db.fetch_one(sql, (email, password))
-    print(sql)
-    print(user)
     db.disconnect()
 
     #認証失敗
@@ -55,6 +53,43 @@ def login_process():
 # -----------------------------------------------------
 # 新規登録画面表示　（エンドポイント：' ')  担当者名：
 # -----------------------------------------------------
-@auth_bp.route('/register')
+@auth_bp.route("/register", methods=["GET"])
 def register():
-    return render_template('auth/register_user.html')
+    return render_template("auth/register_user.html")
+# -----------------------------------------------------
+# 新規登録処理　（エンドポイント：' ')  担当者名：
+# -----------------------------------------------------
+@auth_bp.route("/register", methods=["POST"])
+def register_process():
+    email = request.form.get("email")
+    password = request.form.get("password")
+    user_name = request.form.get("user_name")
+    wakeup_time = request.form.get("wakeup_time")
+    sleep_time = request.form.get("sleep_time")
+
+    db = DatabaseManager()
+    db.connect()
+
+    # メールアドレス重複チェック
+    sql = "SELECT user_id FROM t_users WHERE email = %s"
+    existing = db.fetch_one(sql, (email,))
+
+    if existing:
+        db.disconnect()
+        return render_template(
+            "auth/register_user.html",
+            error="このメールアドレスはすでに登録されています"
+        )
+
+    # ユーザー登録
+    sql = """
+        INSERT INTO t_users (email, password, user_name, wakeup_time, sleep_time)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    db.execute_query(sql, (email, password, user_name, wakeup_time, sleep_time))
+    db.disconnect()
+
+    # session保存
+    session["user_name"] = user_name
+
+    return redirect(url_for("auth.login_form"))
