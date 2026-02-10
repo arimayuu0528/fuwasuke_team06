@@ -1,0 +1,89 @@
+/* 全体レイアウト */
+.mood-container {
+  text-align: center;
+  max-width: 350px;
+  margin: 0 auto;
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+  color: #333;
+}
+
+.mood-title {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.mood-subtitle {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+/* ラジオボタンを隠す */
+input[type="radio"] {
+  display: none;
+}
+
+/* カード（選択肢）の基本スタイル */
+.mood-card {
+  display: flex;
+  align-items: center;
+  background-color: #fffaf0; /* 薄いベージュ */
+  border-radius: 25px;
+  padding: 15px 30px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: transform 0.1s, border 0.2s;
+  border: 2px solid transparent;
+}
+
+/* アイコンの白い円 */
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  background-color: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 20px;
+  overflow: hidden;
+}
+
+.icon-circle img {
+  width: 80%;
+  height: auto;
+}
+
+.mood-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #555;
+  flex-grow: 1;
+  text-align: left;
+}
+
+/* 選択された時のスタイル（オレンジの枠線を付ける場合など） */
+input[type="radio"]:checked + .mood-card {
+  background-color: #fff5e6;
+  border: 2px solid #ffb366; /* 選択中を強調 */
+}
+
+/* 決定ボタン */
+.decide-button {
+  width: 100%;
+  background-color: #ffb366; /* オレンジ */
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-top: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #e6954d; /* 軽い立体感 */
+}
+
+.decide-button:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
