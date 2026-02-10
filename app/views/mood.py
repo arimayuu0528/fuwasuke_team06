@@ -21,7 +21,10 @@ mood_bp = Blueprint('mood',__name__,url_prefix='/mood')
 
 @mood_bp.route("/")
 def register():
-    url = url_for("register")
-    return render_template("register_mood.html", url)
+    url = url_for("mood.register")
+
+    return render_template("mood/register_mood.html")
+
+
     
 
