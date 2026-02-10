@@ -9,6 +9,6 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key_py24')
 
     DB_HOST='localhost'
-    DB_USER='suke'
-    DB_PASSWORD='suke06'
+    DB_USER='root'
+    DB_PASSWORD=''
     DB_DATABASE='huwasuke_db'

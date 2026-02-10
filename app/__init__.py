@@ -43,10 +43,9 @@ def create_app():
         if request.endpoint in (
             'auth.login_form',
             'auth.login_process',
+            'auth.register',
             'index',
-            'static',
-            'mood.register_mood',
-            'mood.home'
+            'static'
         ):
             return
 
@@ -57,6 +56,7 @@ def create_app():
 
         # 今日の気分が未登録なら登録画面へ
         db = DatabaseManager()
+        db.connect()
         #今日の日付を取得
         today = date.today()
 
@@ -78,8 +78,8 @@ def create_app():
         
 
         # 登録済み → home へ
-        if request.endpoint != 'mood.home':
-            return render_template('main/home.html')
+        # if request.endpoint != 'mood.home':
+        #     return render_template('main/home.html')
 
 
     return app   
