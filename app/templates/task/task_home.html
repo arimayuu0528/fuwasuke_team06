@@ -1,21 +1,45 @@
 {% extends "base3.html" %}
 
 {% block title %}
-
 {% endblock %}
 
-
 {% block content %}
-<img src="../../static/image/ふわすけ.png">
-<img src="../../static/image/bouhuwasuke.png">
-<h4>今日はたくさんの予定があります。 しっかりとがんばりましょう。</h4>
-<div id="mission">
-    <p>今日の達成度</p>
+
+<div class="container">
+
+    <div class="header">
+        <img src="../../static/image/bouhuwasuke.png" class="chara">
+        <p class="message">
+            今日はたくさんの予定があります。<br>
+            しっかりとがんばりましょう。
+        </p>
+    </div>
+
+    <div class="date">
+        <button class="arrow prev">◀</button>
+        <button class="arrow next">▶</button>
+    </div>
+
+    <div class="progress-box">
+        <div class="progress-title">
+            <span>今日の達成度</span>
+            <span class="percent"></span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        <p class="progress-text">✨ あとつのタスクで目標達成です</p>
+    </div>
+
+    <button class="main-btn">タスク案を評価する</button>
+
+    <div class="task-header">
+        <h3>本日のタスク</h3>
+        <a href="#">すべて見る ></a>
+    </div>
+
+    <div id="task-list"></div>
+
 </div>
-<h3>タスク案を評価する</h3>
-<h2>本日のタスク</h2>
-<p>すべて見る</p>
-<div id="task">
-    
-</div>
+<link rel="stylesheet" href="../../static/css/tsk.css">
 {% endblock %}
