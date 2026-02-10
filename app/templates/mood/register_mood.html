@@ -1,54 +1,36 @@
-<!-- {% extends "base1.html" %}
+{% extends "base1.html" %} {% block title %} 気分{% endblock %} {% block content
+%}
 
-{% block title %}
+<div class="mood-container">
+  <h2 class="mood-title">今日の気分はどうですか？</h2>
+  <p class="mood-subtitle">ふわすけに今の気持ちを教えてね</p>
 
+  <form class="mood-form">
+    <input type="radio" id="genki" name="mood" value="genki" checked />
+    <label for="genki" class="mood-card">
+      <div class="icon-circle">
+        <img src="../../static/image/gennki.png" alt="元気" />
+      </div>
+      <span class="mood-text">元気</span>
+    </label>
+
+    <input type="radio" id="futu" name="mood" value="futu" />
+    <label for="futu" class="mood-card">
+      <div class="icon-circle">
+        <img src="../../static/image/futu.png" alt="普通" />
+      </div>
+      <span class="mood-text">普通</span>
+    </label>
+
+    <input type="radio" id="warui" name="mood" value="warui" />
+    <label for="warui" class="mood-card">
+      <div class="icon-circle">
+        <img src="../../static/image/warui.png" alt="悪い" />
+      </div>
+      <span class="mood-text">悪い</span>
+    </label>
+
+    <button type="submit" class="decide-button">決定</button>
+  </form>
+</div>
 {% endblock %}
-
-
-{% block content %}
-
-{% endblock %} -->
-
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../../static/css/destyle.css">
-    <link rel="stylesheet" href="../../static/css/register_mood.css">
-</head>
-<body>
-    <div class="mood-container">
-    <h2 class="mood-title">今日の気分はどうですか？</h2>
-    <p class="mood-subtitle">ふわすけに今の気持ちを教えてね</p>
-
-    <form class="mood-form">
-        <input type="radio" id="genki" name="mood" value="genki" checked>
-        <label for="genki" class="mood-card">
-        <div class="icon-circle">
-            <img src="../../static/image/gennki.png" alt="元気"> </div>
-        <span class="mood-text">元気</span>
-        </label>
-
-        <input type="radio" id="futu" name="mood" value="futu">
-        <label for="futu" class="mood-card">
-        <div class="icon-circle">
-            <img src="../../static/image/futu.png" alt="普通">
-        </div>
-        <span class="mood-text">普通</span>
-        </label>
-
-        <input type="radio" id="warui" name="mood" value="warui">
-        <label for="warui" class="mood-card">
-        <div class="icon-circle">
-            <img src="../../static/image/warui.png" alt="悪い">
-        </div>
-        <span class="mood-text">悪い</span>
-        </label>
-
-        <button type="submit" class="decide-button">決定</button>
-    </form>
-    </div>
-</body>
-</html>
