@@ -113,5 +113,16 @@ content %}
 </div>
 
 <button type="submit" form="taskForm" class="submit-btn">登録</button>
+<script>
+  function toggleWeekday(btn) {
+    btn.classList.toggle("active");
+
+    const actives = document.querySelectorAll(".weekday-btn.active");
+    const days = Array.from(actives)
+      .map((b) => b.dataset.day)
+      .join("");
+    document.getElementById("activeDays").value = days;
+  }
+</script>
 
 {% endblock %}
