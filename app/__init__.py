@@ -48,8 +48,12 @@ def create_app():
             'auth.login_form',
             'auth.login_process',
             'auth.register',
+
             'mood.register',   # ← 修正
             'schedule_list',
+
+            'auth.register_process', 
+
             'index',
             'static'
         ):
@@ -71,7 +75,9 @@ def create_app():
         mood = db.fetch_one(sql, (session['user_id'], today))
         db.disconnect()
 
-        # if not mood:
-        #     return redirect(url_for('mood.register'))  # ← 修正
+
+        if not mood:
+            return redirect(url_for('mood.register'))  # ← 修正
+
 
     return app   
