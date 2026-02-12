@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 8f9e137f2720cab2596fcb9e1c9d4032ce8d7143
 from flask import Blueprint,render_template,request,session,redirect,url_for
 from app.db import DatabaseManager
 
