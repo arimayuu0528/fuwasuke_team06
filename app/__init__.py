@@ -76,8 +76,8 @@ def create_app():
 
 
         # 登録済み → home へ
-        if request.endpoint != 'mood.home':
-            return render_template('main/home.html')
+        # if request.endpoint != 'mood.home':
+        #     return render_template('main/home.html')
 
 
     return app   
