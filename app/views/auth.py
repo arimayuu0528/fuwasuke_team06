@@ -49,7 +49,7 @@ def login_process():
     session["user_name"] = user["user_name"]
 
     # ログイン成功
-    return redirect(url_for("main.main_form"))
+    return redirect(url_for("mood.register"))
 # -----------------------------------------------------
 # 新規登録画面表示　（エンドポイント：' ')  担当者名：
 # -----------------------------------------------------
