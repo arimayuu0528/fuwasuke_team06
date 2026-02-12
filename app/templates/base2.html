@@ -6,33 +6,44 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="../static/css/destyle.css">
     <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&family=Hina+Mincho&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@100..900&family=Permanent+Marker&family=Roboto:ital,wght@0,100..900;1,100..900&family=Saira+Condensed:wght@100;200;300;400;500;600;700;800;900&family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@hotwired/turbo@7.1.0/dist/turbo.es2017-umd.js"></script>
 </head>
 <body>
     <header class="fuwasuke_log1">
-        <p><img src="../static/image/ふわすけ1.png" alt=""></p>
+        {% block header_content %}
+        <div class="logo">ふわすけ</div>
+        {% endblock %}
     </header>
-    {% block content %}
 
-    {% endblock %}
+    <turbo-frame id="main-content">
+        {% block content %}
+        {% endblock %}
+    </turbo-frame>
+
+    <a href="{{url_for('main.add_event')}}" class="add-event-btn {% if request.endpoint in ['main.home','main.main_form'] %}is-visible{% endif %}">
+        <i class="fa-solid fa-plus"></i>
+    </a>
+
 
     <div class="menu">
-        <div class="icon">
+        <a href="{{ url_for('main.home') }}" class="icon {% if request.endpoint == 'main.home' %}active{% endif %}">
             <p><i class="fa-solid fa-house house_icon"></i></p>
             <p>ホーム</p>
-        </div>
-        <div class="icon">
+        </a>
+        <a href="{{ url_for('main.main_form') }}" class="icon {% if request.endpoint == 'main.main_form' %}active{% endif %}">
             <p><i class="fa-solid fa-calendar calender_icon"></i></p>
             <p>カレンダー</p>
-        </div>
-        <div class="icon">
+        </a>
+        <a href="{{ url_for('main.report') }}" class="icon {% if request.endpoint == 'main.report' %}active{% endif %}">
             <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
             <p>レポート</p>
-        </div>
-        <div class="icon">
+        </a>
+        <a href="{{ url_for('main.mypage') }}" class="icon {% if request.endpoint == 'main.mypage' %}active{% endif %}">
             <p><i class="fa-solid fa-user user_icon"></i></p>
             <p>マイページ</p>
-        </div>
+        </a>
     </div>
 </body>
 </html>

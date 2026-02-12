@@ -48,7 +48,12 @@ def create_app():
             'auth.login_form',
             'auth.login_process',
             'auth.register',
+
+            'mood.register',   # ← 修正
+            'schedule_list',
+
             'auth.register_process', 
+
             'index',
             'static'
         ):
@@ -70,14 +75,9 @@ def create_app():
         mood = db.fetch_one(sql, (session['user_id'], today))
         db.disconnect()
 
-        #今日の気分が未登録の場合
-        if not mood and request.endpoint != 'mood.register':
-            return redirect(url_for('mood.register'))
 
-
-        # 登録済み → home へ
-        # if request.endpoint != 'mood.home':
-        #     return render_template('main/home.html')
+        if not mood:
+            return redirect(url_for('mood.register'))  # ← 修正
 
 
     return app   

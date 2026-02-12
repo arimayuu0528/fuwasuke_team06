@@ -1,10 +1,54 @@
-{% extends "base1.html" %}
+{% extends "base2.html" %}
 
-{% block title %}
-
+{% block header_content %}
+{# マイページ専用のロゴエリア #}
+<div class="fuwasuke_log2">
+    <p>
+        <img src="{{ url_for('static', filename='image/ふわすけロゴ２.png') }}" alt="ふわすけロゴ">
+    </p>
+</div>
 {% endblock %}
 
-
 {% block content %}
+<main class="calendar-content">
+    <div class="profile-header">
+        <h3 class="username">{{ user.user_name if user else "ユーザー名" }}さん</h3>
+        <p class="today_mood">今日の気分：元気</p>
+    </div>
 
+    <div class="today_task">
+        <div class="now_task">
+            <p>進行中のタスク</p>
+            <p>5件</p>
+        </div>
+        <div class="completed_task">
+            <p>完了したタスク</p>
+            <p>10件</p>
+        </div>
+    </div>
+
+    <div>
+        <p>通知設定</p>
+        <button>ON</button>
+        <button>OFF</button>
+    </div>
+
+    <div>
+        <p>生活リズムの設定</p>
+        <div>
+            <div>
+                <p>起床時間</p>
+                <p>07:00AM</p>
+            </div>
+            <div>
+                <p>就寝時間</p>
+                <p>11:00PM</p>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <button>ログアウト</button>
+    </div>
+</main>
 {% endblock %}
