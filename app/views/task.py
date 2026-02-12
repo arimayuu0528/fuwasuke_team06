@@ -833,7 +833,9 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 db.connection.commit()
 
                 # 選んだ1案だけ表示する画面へ戻す
-                return redirect(url_for("task.task_form"))
+                return redirect(url_for("main.home"))
+                # # ◇ task/taskを表示させたい場合:
+                # return redirect(url_for("task.task_form"))
 
             # -- 評価更新
             # form から評価値(1~3)をintで受け取る(無ければNone)
