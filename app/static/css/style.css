@@ -16,7 +16,6 @@ body {
 
 .fuwasuke_log1 p {
   text-align: center;
-  margin: 1.5rem 0rem;
 }
 .fuwasuke_log1 p img {
   max-width: 200px;
@@ -41,6 +40,10 @@ body {
   justify-content: center; /* 上下の中央に寄せる */
   flex: 1;
 }
+.menu .icon.active i, .menu .icon.active p {
+  color: #FFC547;
+  font-weight: bold;
+}
 .menu .icon i {
   font-size: 30px;
   color: #C2C2C2;
@@ -51,6 +54,31 @@ body {
   font-family: "Roboto", sans-serif;
   color: #C2C2C2;
   font-size: 11px;
+}
+
+.add-event-btn {
+  display: none;
+}
+.add-event-btn.is-visible {
+  display: flex;
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 60px;
+  height: 60px;
+  background-color: #FFC547;
+  color: white;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+  z-index: 1000;
+  transition: transform 0.2s;
+}
+.add-event-btn.is-visible:active {
+  transform: scale(0.9);
 }
 
 .login {
@@ -193,4 +221,303 @@ body {
 .register .login-link a {
   color: #FFAF5A;
   text-decoration: none;
+}
+
+/* mood.css */
+body {
+  background-color: #fcfcfc;
+  margin: 0;
+  padding: 0;
+}
+
+.mood-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ヘッダーのキャラクター部分（base1.htmlにある想定） */
+.header-character {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.character-name {
+  color: #f4b752;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+}
+
+.character-image {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* タイトルとサブタイトル */
+.mood-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.mood-subtitle {
+  font-size: 13px;
+  color: #cccccc;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+/* フォーム */
+.mood-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ラジオボタンを非表示 */
+input[type=radio] {
+  display: none;
+}
+
+/* 気分カード */
+.mood-card {
+  display: flex;
+  align-items: center;
+  background-color: #fff4e6;
+  border-radius: 20px;
+  padding: 18px 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 3px solid transparent;
+  gap: 20px;
+}
+
+.mood-card:hover {
+  background-color: #ffecd1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 選択状態 */
+input[type=radio]:checked + .mood-card {
+  background-color: #ffe4bf;
+  border-color: #f4b752;
+  box-shadow: 0 4px 12px rgba(244, 183, 82, 0.2);
+}
+
+/* アイコン */
+.icon-circle {
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-circle img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+/* 気分テキスト */
+.mood-text {
+  font-size: 22px;
+  color: #5a5a5a;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+/* 決定ボタン */
+.decide-button {
+  width: 100%;
+  background: linear-gradient(135deg, #ffb966 0%, #f4a04c 100%);
+  color: white;
+  border: none;
+  border-radius: 28px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(244, 160, 76, 0.3);
+}
+
+.decide-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(244, 160, 76, 0.4);
+}
+
+.decide-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 160, 76, 0.3);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .mood-container {
+    padding: 30px 15px;
+  }
+  .mood-title {
+    font-size: 18px;
+  }
+  .mood-subtitle {
+    font-size: 12px;
+  }
+  .mood-card {
+    padding: 15px 20px;
+  }
+  .icon-circle {
+    width: 50px;
+    height: 50px;
+  }
+  .mood-text {
+    font-size: 20px;
+  }
+  .decide-button {
+    font-size: 16px;
+    padding: 16px;
+  }
+}
+.calendar-fixed-header {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 100;
+}
+.calendar-fixed-header .calendar-title {
+  color: #FFC547;
+  text-align: left;
+  padding-left: 0.5rem;
+  font-size: 16px;
+  margin-bottom: 0.8rem;
+}
+.calendar-fixed-header .calendar-table.sticky-thead {
+  width: 100%;
+  table-layout: fixed;
+  display: table;
+}
+.calendar-fixed-header .calendar-table.sticky-thead th {
+  height: 40px;
+  vertical-align: middle;
+  border: 1px solid #eee;
+  width: 14.2857142857%;
+}
+
+.calendar-content {
+  height: calc(100dvh - 210px);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.calendar-content::-webkit-scrollbar {
+  display: none;
+}
+
+.month-section {
+  flex-shrink: 0;
+  height: 100%;
+  scroll-snap-align: start;
+  display: block;
+  flex-direction: column;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  display: table;
+  height: 100%;
+}
+.calendar-table th, .calendar-table td {
+  border: 1px solid #eee;
+  text-align: center;
+  vertical-align: top;
+  padding: 5px 2px;
+}
+.calendar-table th:nth-child(1), .calendar-table td:nth-child(1) {
+  color: #EF0404;
+}
+.calendar-table th.is-holiday, .calendar-table td.is-holiday {
+  color: #EF0404;
+}
+.calendar-table th:nth-child(7), .calendar-table td:nth-child(7) {
+  color: #1E8FDB;
+}
+.calendar-table th {
+  background-color: #FFF5EA;
+  font-weight: normal;
+}
+.calendar-table tbody {
+  display: table-row-group;
+  flex-direction: column;
+  flex: 1;
+}
+.calendar-table tbody tr {
+  display: table-row;
+  flex: 1;
+}
+.calendar-table tbody tr td {
+  flex: 1;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
+  vertical-align: top;
+}
+
+.day-number {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.day-cell.is-holiday {
+  background-color: #fffafa;
+}
+.day-cell.is-holiday .day-number {
+  color: #ff4d4d !important;
+  font-weight: bold;
+}
+.day-cell.is-saturday .day-number {
+  color: #4d94ff !important;
+  font-weight: bold;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 55px;
+  margin-top: 4px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.event-item {
+  background-color: #fce4ec;
+  color: #880e4f;
+  font-size: 8px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  text-align: left;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 95%;
+  margin: 0 auto;
 }/*# sourceMappingURL=style.css.map */

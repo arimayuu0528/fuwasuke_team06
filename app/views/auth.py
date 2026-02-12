@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 from flask import Blueprint,render_template,request,redirect,url_for
+=======
+from flask import Blueprint,render_template,request,session,redirect,url_for
+>>>>>>> 726d935700debc45a66152b910da7684a6a04a79
 from app.db import DatabaseManager
 
 # Blueprintオブジェクト作成
@@ -35,7 +39,8 @@ def login_process():
         WHERE email = %s AND password = %s
     """
     user = db.fetch_one(sql, (email, password))
-
+    print(sql)
+    print(user)
     db.disconnect()
 
     #認証失敗
@@ -44,9 +49,13 @@ def login_process():
             'auth/login.html',
             error='メールアドレスまたはパスワードが違います'
         )
+    
+    #sessionに保存
+    session["user_id"] = user["user_id"]
+    session["user_name"] = user["user_name"]
 
     # ログイン成功
-    return render_template("mood/register_mood.html")
+    return redirect(url_for("main.main_form"))
 # -----------------------------------------------------
 # 新規登録画面表示　（エンドポイント：' ')  担当者名：
 # -----------------------------------------------------

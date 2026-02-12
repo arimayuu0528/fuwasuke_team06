@@ -13,7 +13,7 @@ task_bp = Blueprint('task',__name__,url_prefix='/task')
 @task_bp.route("/task")
 def task_form():
     rec=request.form
-    
+    return render_template('task_home.html')
     # エンドポイント名、関数名は各自変更してください。
     pass
 

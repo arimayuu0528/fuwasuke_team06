@@ -1,0 +1,162 @@
+.calendar-fixed-header{
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 100;
+
+    .calendar-title{
+        color: #FFC547;
+        text-align: left;
+        padding-left: 0.5rem;
+        font-size: 16px;
+        margin-bottom: 0.8rem;
+    }
+
+    .calendar-table.sticky-thead{
+        width: 100%;
+        table-layout: fixed;
+        display: table;
+
+        th{
+        height: 40px;
+        vertical-align: middle;
+        border: 1px solid #eee;
+        width: calc(100% / 7);
+        }
+    }
+    }
+
+
+    .calendar-content{
+    height: calc(100dvh - 210px);
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-snap-type: y proximity;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar{
+        display: none;
+    }
+    }
+
+    .month-section{
+    flex-shrink: 0;
+    height: 100%;
+    scroll-snap-align: start;
+    display: block;
+    flex-direction: column;
+    }
+
+
+
+
+    .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    display: table;
+    height: 100%;
+
+    // 曜日(th)と日付(td)共通のスタイル
+    th, td {
+        border: 1px solid #eee;
+        text-align: center;
+        vertical-align: top;
+        padding: 5px 2px;
+
+        // 日曜日の色
+        &:nth-child(1) {
+        color: #EF0404;
+        }
+
+        &.is-holiday{
+        color: #EF0404;
+        }
+
+        // 土曜日の色
+        &:nth-child(7) {
+        color: #1E8FDB;
+        }
+    }
+
+    // 曜日ヘッダーのみのスタイル
+    th {
+        background-color: #FFF5EA;
+        font-weight: normal;
+    }
+    
+    tbody{
+        display: table-row-group;
+        flex-direction: column;
+        flex: 1;
+        tr{
+        display: table-row;
+        flex: 1;
+        td{
+            flex: 1;
+            height: 80px;
+            min-height: 80px;
+            max-height: 80px;
+            vertical-align: top;
+        }
+        }
+    }
+    }
+
+    .day-number {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    }
+
+    .day-cell{
+    &.is-holiday{
+        .day-number{
+        color: #ff4d4d  !important;
+        font-weight: bold;
+        }
+        background-color: #fffafa;
+    }
+
+    &.is-saturday{
+        .day-number{
+        color: #4d94ff !important;
+        font-weight: bold;
+        }
+    }
+    }
+
+    // 予定（イベント）のリストコンテナ
+    .event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px; // 予定同士の隙間
+    max-height: 55px;
+    margin-top: 4px;
+    width: 100%;
+    overflow: hidden; // セルからはみ出さないように
+    }
+
+    // 予定（イベント）の1件ごとのスタイル
+    .event-item {
+    // 1. 背景色の変更（お好みの色に変えてください）
+    background-color: #fce4ec; // 薄いピンク（例：#e3f2fdなら薄い青、#fff9c4なら薄い黄）
+    color: #880e4f;           // 文字色（背景に合わせた濃い色）
+    
+    // 2. 文字をさらに小さく
+    font-size: 8px;           // 10pxから8pxに落とすとかなりスッキリします
+    padding: 1px 3px;
+    border-radius: 2px;
+    text-align: left;
+    line-height: 1.2;
+
+    // 3. 何文字目から見えなくする（省略）の設定
+    white-space: nowrap;      // 改行させない
+    overflow: hidden;         // 枠からはみ出た文字を消す
+    text-overflow: ellipsis;  // 消えた部分に「...」を出す
+    
+    // セルの横幅いっぱいに広げる
+    display: block; 
+    width: 95%; 
+    margin: 0 auto;
+}

@@ -7,55 +7,91 @@ body{
 }
 
 .fuwasuke_log2{
-  p{
-    text-align: center;
-    img{
-      max-width: 200px;
+    p{
+        text-align: center;
+        img{
+        max-width: 200px;
+        }
     }
-  }
-  
+    
 }
 
 .fuwasuke_log1{
-  p{
-    text-align: center;
-    margin: 1.5rem 0rem;
-    img{
-      max-width: 200px;
+    p{
+        text-align: center;
+        img{
+        max-width: 200px;
+        }
     }
-  }
-  
+    
 }
 
 
 .menu{
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
-
-  /* 下に固定するための設定 */
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 65px; /* メニューの高さを固定すると安定します */
-  z-index: 999;
-  .icon{
     display: flex;
-    flex-direction: column; /* 縦に並べる */
-    align-items: center;    /* 左右の中央に寄せる */
-    justify-content: center; /* 上下の中央に寄せる */
-    flex: 1;
-    i{
-      font-size: 30px;
-      color: #C2C2C2;
-      margin-bottom: 5px;
-      display: block;
+    justify-content: space-around;
+    text-align: center;
+
+    /* 下に固定するための設定 */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px; /* メニューの高さを固定すると安定します */
+    z-index: 999;
+    .icon{
+        display: flex;
+        flex-direction: column; /* 縦に並べる */
+        align-items: center;    /* 左右の中央に寄せる */
+        justify-content: center; /* 上下の中央に寄せる */
+        flex: 1;
+        &.active{
+        i,p{
+            color: #FFC547;
+            font-weight: bold;
+        }
+        }
+        i{
+        font-size: 30px;
+        color: #C2C2C2;
+        margin-bottom: 5px;
+        display: block;
+        }
     }
-  }
-  p{
-    font-family: "Roboto", sans-serif;
-    color: #C2C2C2;
-    font-size: 11px;
-  }
+    p{
+        font-family: "Roboto", sans-serif;
+        color: #C2C2C2;
+        font-size: 11px;
+    }
+}
+
+
+
+// デフォルトは非表示にする
+.add-event-btn {
+    display: none; 
+
+    // 特定のクラスがついている時だけ表示
+    &.is-visible {
+        display: flex;
+        position: fixed;
+        right: 20px;
+        bottom: 100px;
+        width: 60px;
+        height: 60px;
+        background-color: #FFC547;
+        color: white;
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        z-index: 1000;
+        transition: transform 0.2s;
+
+        &:active {
+            transform: scale(0.9);
+        }
+    }
 }
