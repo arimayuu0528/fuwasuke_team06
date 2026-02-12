@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<main class="calendar-content">
+<main class="mypage-content">
     <div class="profile-header">
         <h3 class="username">{{ user.user_name if user else "ユーザー名" }}さん</h3>
         <p class="today_mood">今日の気分：元気</p>
@@ -19,36 +19,63 @@
     <div class="today_task">
         <div class="now_task">
             <p>進行中のタスク</p>
-            <p>5件</p>
+            <p class="task_num">5件</p>
         </div>
         <div class="completed_task">
             <p>完了したタスク</p>
-            <p>10件</p>
+            <p class="task_num">10件</p>
         </div>
     </div>
 
-    <div>
-        <p>通知設定</p>
-        <button>ON</button>
-        <button>OFF</button>
-    </div>
-
-    <div>
-        <p>生活リズムの設定</p>
-        <div>
-            <div>
-                <p>起床時間</p>
-                <p>07:00AM</p>
-            </div>
-            <div>
-                <p>就寝時間</p>
-                <p>11:00PM</p>
-            </div>
+    <div class="notice">
+        <h3>通知設定</h3>
+        <div class="notice_button">
+            <button type="button" class="is_active" id="btn_on">ON</button>
+            <button type="button" id="btn_off">OFF</button>
         </div>
     </div>
 
-    <div>
-        <button>ログアウト</button>
+    <div class="setting_life_rhythm">
+    <h3>生活リズムの設定</h3>
+    <form class="life_rhythm_form">
+        <div class="setting_items">
+            <div class="setting_time">
+                <div class="setting_item">
+                    <div class="item_label">
+                        <i class="fa-solid fa-sun"></i>
+                        <p>起床時間</p>
+                    </div>
+                    <input type="time" name="wakeup_time" value="07:00" class="time_input">
+                </div>
+                
+                <div class="setting_item">
+                    <div class="item_label">
+                        <i class="fa-solid fa-moon"></i>
+                        <p>就寝時間</p>
+                    </div>
+                    <input type="time" name="sleep_time" value="23:00" class="time_input">
+                </div>
+            </div>
+            
+
+            <div class="save_area">
+                <button type="submit" class="save_button" id="save-button" disabled>保存する</button>
+            </div>
+        </div>
+    </form>
+    </div>
+
+    <div class="logout_area">
+        <button class="logout">ログアウト</button>
     </div>
 </main>
+
+<div id="save-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <p>変更されました</p>
+        <button type="button" id="close-modal">閉じる</button>
+    </div>
+</div>
+
+<script src="{{url_for('static',filename='js/mypage.js')}}"></script>
 {% endblock %}

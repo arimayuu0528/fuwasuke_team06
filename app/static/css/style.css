@@ -1658,4 +1658,226 @@ input[type=radio]:checked + .mood-card {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding-right: 6px;
+}
+
+.log_mypage p {
+  margin-top: 0%;
+}
+.log_mypage p img {
+  max-width: 150px;
+  width: 100%;
+  height: auto;
+}
+
+.mypage-content .profile-header {
+  text-align: center;
+  margin-bottom: 5%;
+}
+.mypage-content .profile-header .username {
+  font-size: 32px;
+}
+.mypage-content .profile-header .today_mood {
+  font-size: 14px;
+  color: #999;
+}
+.mypage-content .today_task {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  margin-bottom: 5%;
+  gap: 30px;
+}
+.mypage-content .today_task .task_num {
+  font-size: 24px;
+  color: #000;
+}
+.mypage-content .today_task .now_task {
+  background-color: #FCF1E6;
+  padding: 1.5rem;
+  border-radius: 20px;
+  line-height: 1.5rem;
+}
+.mypage-content .today_task .completed_task {
+  background-color: #FCF1E6;
+  padding: 1.5rem;
+  border-radius: 20px;
+  line-height: 1.5rem;
+}
+.mypage-content .notice h3 {
+  padding-left: 12px;
+  border-left: 5px solid #FF9966;
+  line-height: 1.5;
+  margin-bottom: 15px;
+  color: #333;
+}
+.mypage-content .notice .notice_button {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5%;
+}
+.mypage-content .notice .notice_button button {
+  width: 40%;
+  padding: 20px;
+  text-align: center;
+  border-radius: 50px;
+  border: 1px solid #999;
+  background-color: #fff;
+  color: #000;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 100;
+}
+.mypage-content .notice .notice_button button.is_active {
+  background-color: #FFAF5A;
+  color: #fff;
+  border: 1px solid #FFAF5A;
+}
+.mypage-content .notice .notice_button button:focus {
+  outline: none;
+}
+.mypage-content .setting_life_rhythm {
+  margin-top: 2rem;
+}
+.mypage-content .setting_life_rhythm h3 {
+  padding-left: 12px;
+  border-left: 5px solid #FF9966;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+}
+.mypage-content .setting_life_rhythm .setting_items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_time {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_item {
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: 10px 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_item .item_label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #555;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_item .item_label i {
+  color: #FFAF5A;
+  font-size: 1.4rem;
+  width: 24px;
+  text-align: center;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_item .item_label p {
+  font-size: 16px;
+}
+.mypage-content .setting_life_rhythm .setting_items .setting_item .time_input {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  font-family: "Roboto", sans-serif;
+  color: #333;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  text-align: right;
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
+}
+.mypage-content .setting_life_rhythm .setting_items .save_area {
+  display: flex;
+  justify-content: center;
+}
+.mypage-content .setting_life_rhythm .setting_items .save_button {
+  padding: 15px;
+  background-color: #FFAF5A;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.mypage-content .setting_life_rhythm .setting_items .save_button:disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none !important;
+}
+.mypage-content .logout_area {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 7%;
+}
+.mypage-content .logout_area .logout {
+  width: 45%;
+  text-align: center;
+  padding: 15px;
+  background-color: #FFAF5A;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, opactiy 0.2s;
+}
+.mypage-content .logout_area .logout:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* _mypage.scss に追記 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* 背景を暗くする */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-overlay .modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 300px;
+}
+.modal-overlay .modal-content p {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
+.modal-overlay .modal-content button {
+  background-color: #FFAF5A;
+  color: #fff;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
 }/*# sourceMappingURL=style.css.map */
