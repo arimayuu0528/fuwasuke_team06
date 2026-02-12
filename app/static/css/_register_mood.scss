@@ -1,0 +1,174 @@
+/* mood.css */
+
+body {
+  background-color: #fcfcfc;
+  margin: 0;
+  padding: 0;
+}
+
+.mood-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ヘッダーのキャラクター部分（base1.htmlにある想定） */
+.header-character {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.character-name {
+  color: #f4b752;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+}
+
+.character-image {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* タイトルとサブタイトル */
+.mood-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.mood-subtitle {
+  font-size: 13px;
+  color: #cccccc;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+/* フォーム */
+.mood-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ラジオボタンを非表示 */
+input[type="radio"] {
+  display: none;
+}
+
+/* 気分カード */
+.mood-card {
+  display: flex;
+  align-items: center;
+  background-color: #fff4e6;
+  border-radius: 20px;
+  padding: 18px 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 3px solid transparent;
+  gap: 20px;
+}
+
+.mood-card:hover {
+  background-color: #ffecd1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 選択状態 */
+input[type="radio"]:checked + .mood-card {
+  background-color: #ffe4bf;
+  border-color: #f4b752;
+  box-shadow: 0 4px 12px rgba(244, 183, 82, 0.2);
+}
+
+/* アイコン */
+.icon-circle {
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 気分テキスト */
+.mood-text {
+  font-size: 22px;
+  color: #5a5a5a;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+/* 決定ボタン */
+.decide-button {
+  width: 100%;
+  background: linear-gradient(135deg, #ffb966 0%, #f4a04c 100%);
+  color: white;
+  border: none;
+  border-radius: 28px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(244, 160, 76, 0.3);
+}
+
+.decide-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(244, 160, 76, 0.4);
+}
+
+.decide-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 160, 76, 0.3);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .mood-container {
+    padding: 30px 15px;
+  }
+
+  .mood-title {
+    font-size: 18px;
+  }
+
+  .mood-subtitle {
+    font-size: 12px;
+  }
+
+  .mood-card {
+    padding: 15px 20px;
+  }
+
+  .icon-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mood-text {
+    font-size: 20px;
+  }
+
+  .decide-button {
+    font-size: 16px;
+    padding: 16px;
+  }
+}
