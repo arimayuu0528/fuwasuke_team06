@@ -16,7 +16,6 @@ body {
 
 .fuwasuke_log1 p {
   text-align: center;
-  margin: 1.5rem 0rem;
 }
 .fuwasuke_log1 p img {
   max-width: 200px;
@@ -41,6 +40,10 @@ body {
   justify-content: center; /* 上下の中央に寄せる */
   flex: 1;
 }
+.menu .icon.active i, .menu .icon.active p {
+  color: #FFC547;
+  font-weight: bold;
+}
 .menu .icon i {
   font-size: 30px;
   color: #C2C2C2;
@@ -51,6 +54,31 @@ body {
   font-family: "Roboto", sans-serif;
   color: #C2C2C2;
   font-size: 11px;
+}
+
+.add-event-btn {
+  display: none;
+}
+.add-event-btn.is-visible {
+  display: flex;
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 60px;
+  height: 60px;
+  background-color: #FFC547;
+  color: white;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+  z-index: 1000;
+  transition: transform 0.2s;
+}
+.add-event-btn.is-visible:active {
+  transform: scale(0.9);
 }
 
 .login {
