@@ -3,7 +3,7 @@
 {% block title %}
 {% endblock %}
 
-{% block content %}
+
 
 <div class="container">
 
@@ -22,7 +22,7 @@
 
     <div class="progress-box">
         <div class="progress-title">
-            <span>今日の達成度%</span>
+            <span>今日の達成度</span>
             <span class="percent"></span>
         </div>
         <div class="progress-bar">
@@ -37,12 +37,19 @@
         <h3>本日のタスク</h3>
         <a href="#">すべて見る ></a>
     </div>
+    <div class="add">
+      <button class="add-button">+</button>
+    </div>
 
     <div id="task-list"></div>
 
 </div>
 <link rel="stylesheet" href="../../static/css/tsk.css">
 <style>
+.date{
+  display: flex;
+  align-items: center;
+}
 .header {
   display: flex;        
   align-items: center;  
@@ -114,5 +121,52 @@ button.arrow.next:focus {
 .star {
   color: black;
 }
+.add-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f19710;
+  color: white;
+  font-size: 50px;
+  cursor: pointer;
+   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;          
+  line-height: 1;
+}
+.add-button:active {
+  filter: brightness(0.7);
+  transform: scale(0.95);
+}
+.task-header {
+  display: flex;
+  justify-content: space-between; /* 左右に配置 */
+  align-items: center;            /* 縦中央揃え */
+}
+
+.task-header a {
+  text-decoration: none;  /* 下線を消す */
+  color: #f5b31b;
+}
+.progress-title{
+  display: flex;
+  color: #f5b31b;
+}
+.main-btn {
+  background-color: #f19710;  /* オレンジ */
+  color: white;               /* 文字白 */
+  border: none;
+  padding: 12px 24px;         /* 余白 */
+  border-radius: 30px;        /* 丸み */
+  font-size: 16px;
+  cursor: pointer;
+}
+.add-button:active {
+  filter: brightness(0.7);
+  transform: scale(0.95);
+}
 </style>
+{% block content %}
 {% endblock %}

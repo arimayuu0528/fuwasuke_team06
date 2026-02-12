@@ -418,6 +418,859 @@ input[type=radio]:checked + .mood-card {
     padding: 16px;
   }
 }
+.fixed-task-page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
+  background-color: #f5f5f5;
+  padding-bottom: 80px;
+}
+
+/* Header */
+.fixed-task-page .header {
+  background-color: #fff;
+  padding: 20px 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fixed-task-page .header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+/* Tabs */
+.fixed-task-page .tab-container {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.fixed-task-page .tab {
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.fixed-task-page .tab.active {
+  color: #ff9f5a;
+  border-bottom-color: #ff9f5a;
+}
+
+/* Task List */
+.fixed-task-page .task-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card */
+.fixed-task-page .task-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+/* Header */
+.fixed-task-page .task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.fixed-task-page .task-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.fixed-task-page .delete-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  transition: color 0.2s;
+}
+
+.fixed-task-page .delete-btn:hover {
+  color: #ff6b6b;
+}
+
+/* Meta */
+.fixed-task-page .task-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.fixed-task-page .task-category {
+  background: #ffe5d6;
+  color: #ff9f5a;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fixed-task-page .task-time {
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fixed-task-page .task-time::before {
+  content: "🕐";
+  font-size: 16px;
+}
+
+/* Comment */
+.fixed-task-page .comment-section {
+  margin: 12px 0;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.fixed-task-page .comment-toggle {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fixed-task-page .comment-toggle .arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.fixed-task-page .comment-toggle.collapsed .arrow {
+  transform: rotate(-90deg);
+}
+
+.fixed-task-page .comment-content {
+  margin-top: 8px;
+  padding: 8px 0;
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1.5;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.fixed-task-page .comment-content.hidden {
+  display: none;
+}
+
+/* Weekdays */
+.fixed-task-page .weekday-pills {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fixed-task-page .weekday {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  background: #e8e8e8;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.fixed-task-page .weekday.active {
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 159, 90, 0.4);
+  transform: scale(1.05);
+}
+
+/* Add Button */
+.fixed-task-page .add-task-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 400px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+}
+
+.fixed-task-page .add-task-btn::before {
+  content: "+";
+  font-size: 24px;
+}
+
+/* Empty & Count */
+.fixed-task-page .empty-message {
+  text-align: center;
+  padding: 40px 16px;
+  color: #ff6b6b;
+  font-size: 14px;
+}
+
+.fixed-task-page .task-count {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  padding: 8px;
+}
+
+/* Animation */
+@keyframes fixedTaskFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+.fixed-task-page .task-card.deleting {
+  animation: fixedTaskFadeOut 0.3s forwards;
+}
+
+/* Delete Modal */
+.delete-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  -webkit-backdrop-filter: blur(4px);
+          backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.delete-modal.show {
+  display: flex;
+}
+
+.delete-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  max-width: 340px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+}
+
+.delete-modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.delete-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.delete-modal-text {
+  font-size: 14px;
+  color: #999;
+  margin: 0 0 24px 0;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-modal-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.delete-cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.delete-cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.delete-confirm-btn {
+  background: linear-gradient(135deg, #ff8a80 0%, #ff6b6b 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.delete-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.delete-confirm-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Scoped styles for schedule form - prefix: sched- */
+/* Header Styles */
+.sched-header {
+  background-color: #fff;
+  padding: 20px 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sched-header .sched-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+/* Tab Container */
+.sched-tab-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0;
+  padding: 0 8px;
+}
+
+.sched-tab {
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.sched-tab.sched-tab-active {
+  color: #ff9f5a;
+  border-bottom-color: #ff9f5a;
+}
+
+/* Form Container */
+.sched-form-container {
+  padding: 20px 16px;
+}
+
+/* Form Section */
+.sched-form-section {
+  margin-bottom: 24px;
+}
+
+/* Form Label */
+.sched-form-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #ffb380;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sched-template-link {
+  color: #ff9f5a;
+  text-decoration: none;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.sched-template-link:hover {
+  opacity: 0.7;
+}
+
+/* Form Input */
+.sched-form-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #fff;
+  color: #333;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.sched-form-input::-moz-placeholder {
+  color: #ccc;
+}
+
+.sched-form-input::placeholder {
+  color: #ccc;
+}
+
+.sched-form-input:focus {
+  outline: none;
+  border-color: #ff9f5a;
+  box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
+}
+
+/* Time Inputs */
+.sched-time-inputs {
+  display: flex;
+  gap: 12px;
+}
+
+.sched-time-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.sched-time-label {
+  display: block;
+  color: #999;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.sched-time-input {
+  width: 100%;
+  padding: 14px 40px 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  background: #fff;
+  color: #999;
+  font-family: inherit;
+  transition: all 0.2s;
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
+}
+
+.sched-time-input:focus {
+  outline: none;
+  border-color: #ff9f5a;
+  box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
+  color: #333;
+}
+
+.sched-time-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none;
+  margin-top: 12px; /* Adjust for label */
+}
+
+/* Weekday Selector */
+/* Weekday Selector */
+.sched-weekday-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center; /* 追加：中央揃え */
+}
+
+.sched-weekday-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #e8e8e8;
+  color: #999;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+  display: flex; /* 追加 */
+  align-items: center; /* 追加：垂直方向中央 */
+  justify-content: center; /* 追加：水平方向中央 */
+}
+
+.sched-weekday-btn.sched-weekday-active {
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 159, 90, 0.4);
+}
+
+.sched-weekday-btn:hover {
+  transform: scale(1.08);
+}
+
+.sched-weekday-btn:active {
+  transform: scale(0.95);
+}
+
+/* Category Selector */
+/* Category Selector */
+.sched-category-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center; /* 追加：中央揃え */
+}
+
+.sched-category-btn {
+  padding: 12px 24px;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: flex; /* 追加 */
+  align-items: center; /* 追加：垂直方向中央 */
+  justify-content: center; /* 追加：水平方向中央 */
+}
+
+.sched-category-btn.sched-category-active {
+  background: #ff9f5a;
+  color: #fff;
+  border-color: #ff9f5a;
+}
+
+.sched-category-btn:hover {
+  border-color: #ff9f5a;
+  color: #ff9f5a;
+}
+
+.sched-category-btn.sched-category-active:hover {
+  color: #fff;
+}
+
+/* Memo Textarea */
+.sched-memo-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #f8f9fa;
+  color: #333;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s;
+  line-height: 1.6;
+}
+
+.sched-memo-textarea::-moz-placeholder {
+  color: #ccc;
+}
+
+.sched-memo-textarea::placeholder {
+  color: #ccc;
+}
+
+.sched-memo-textarea:focus {
+  outline: none;
+  border-color: #ff9f5a;
+  box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
+  background: #fff;
+}
+
+/* Info Box */
+.sched-info-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  background: #fff8f3;
+  border-radius: 12px;
+  margin-top: 24px;
+  border: 1px solid #ffe5d6;
+}
+
+.sched-info-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.sched-info-text {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 4px 0 0 0;
+}
+
+/* Submit Button */
+.sched-submit-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 400px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.sched-submit-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 159, 90, 0.4);
+}
+
+.sched-submit-btn:active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.sched-submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sched-time-inputs {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sched-weekday-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+}
+/* Animation for form submission */
+@keyframes schedSubmitPulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(0.95);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+.sched-submit-btn.sched-submitting {
+  animation: schedSubmitPulse 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+/* Focus styles for accessibility */
+.sched-weekday-btn:focus,
+.sched-category-btn:focus,
+.sched-submit-btn:focus {
+  outline: 2px solid #ff9f5a;
+  outline-offset: 2px;
+}
+
+/* Ripple effect container */
+.sched-weekday-btn,
+.sched-category-btn,
+.sched-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.sched-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: schedRippleAnimation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes schedRippleAnimation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+/* Form validation styles */
+.sched-form-input:invalid,
+.sched-time-input:invalid {
+  border-color: #ff6b6b;
+}
+
+.sched-form-input:valid,
+.sched-time-input:valid {
+  border-color: #e0e0e0;
+}
+
+/* Error state */
+.sched-form-input.sched-error,
+.sched-time-input.sched-error {
+  border-color: #ff6b6b;
+}
+
+/* Loading state */
+.sched-submit-btn.sched-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: schedSpinner 0.6s linear infinite;
+}
+
+@keyframes schedSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.sched-submit-btn.sched-loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+/* Placeholder animation */
+@keyframes schedPlaceholderShimmer {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.sched-form-input:-moz-placeholder, .sched-memo-textarea:-moz-placeholder {
+  animation: schedPlaceholderShimmer 2s ease-in-out infinite;
+}
+.sched-form-input:placeholder-shown,
+.sched-memo-textarea:placeholder-shown {
+  animation: schedPlaceholderShimmer 2s ease-in-out infinite;
+}
+
+/* Toast notification styles */
+.sched-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 24px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sched-toast.sched-toast-success {
+  background: #4caf50;
+}
+
+.sched-toast.sched-toast-error {
+  background: #ff6b6b;
+}
+
+.sched-toast.sched-toast-warning {
+  background: #ff9f5a;
+}
+
+.sched-toast.sched-toast-info {
+  background: #2196f3;
+}
+
+/* Character counter */
+.sched-character-counter {
+  text-align: right;
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 .calendar-fixed-header {
   position: sticky;
   top: 0;
@@ -547,4 +1400,262 @@ input[type=radio]:checked + .mood-card {
   display: block;
   width: 95%;
   margin: 0 auto;
+}
+
+.task_suggestion {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: clamp(12px, 2.5vw, 20px);
+}
+.task_suggestion * {
+  box-sizing: border-box;
+}
+.task_suggestion .BOX {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.task_suggestion .header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 12px;
+}
+.task_suggestion .header .return_btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.task_suggestion .header h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  font-weight: 600;
+}
+.task_suggestion .section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.task_suggestion .section h1 {
+  margin: 6px 0 0;
+  font-size: clamp(1.15rem, 3.6vw, 1.5rem);
+  font-weight: 600;
+  text-align: center;
+}
+.task_suggestion .section h2 {
+  margin: 0 0 10px;
+  font-size: clamp(0.85rem, 2.6vw, 0.95rem);
+  color: #7F7777;
+  text-align: center;
+}
+.task_suggestion .section .container {
+  position: relative;
+  width: 100%;
+  border: 3px solid #EAC9A5;
+  background-color: #FCF1E6;
+  border-radius: clamp(18px, 15vw, 48px);
+  overflow: hidden;
+  min-height: 360px;
+  max-height: min(65dvh, 620px);
+  display: flex;
+}
+.task_suggestion .section .track {
+  position: relative;
+  top: 20px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  transition: transform 0.25s ease;
+}
+.task_suggestion .section .item {
+  flex: 0 0 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow: hidden;
+}
+.task_suggestion .section .sum_time {
+  align-self: flex-end;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #793908;
+  font-size: clamp(0.9rem, 2.6vw, 1rem);
+  font-weight: 600;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+}
+.task_suggestion .section .task_list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 6px;
+}
+.task_suggestion .section .task {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background-color: #fff;
+  border: 2px solid #E9C59A;
+  border-radius: 16px;
+  padding: 12px 14px;
+  min-height: clamp(56px, 9vh, 84px);
+}
+.task_suggestion .section .task_name {
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 6px;
+  min-width: 0;
+  font-size: 1.1rem;
+}
+.task_suggestion .section .task_name .deadline_tag {
+  margin-top: 0;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #F7DEC7;
+  color: #F3822B;
+  font-size: clamp(0.85rem, 2.6vw, 1rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.task_suggestion .section .plan_min {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  color: #F09942;
+  font-size: clamp(0.95rem, 3vw, 1.05rem);
+}
+.task_suggestion .section .slider_btn {
+  position: absolute;
+  bottom: 0;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.task_suggestion .section .slider_btn:active {
+  opacity: 0.6;
+}
+.task_suggestion .section .back_btn {
+  left: 10px;
+  color: lightgray;
+}
+.task_suggestion .section .next_btn {
+  right: 10px;
+  color: #F7BD58;
+}
+.task_suggestion .section .indicator_container {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  position: relative;
+  bottom: 70px;
+}
+.task_suggestion .section .indicator_container .indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: lightgray;
+}
+.task_suggestion .section .indicator_container .indicator1 {
+  background-color: #EFAB6F;
+}
+.task_suggestion .section .start {
+  width: 100%;
+  max-width: 520px;
+  margin: 10px auto 0;
+  height: clamp(48px, 7vh, 60px);
+  border-radius: 999px;
+  border: none;
+  background-color: #FFAF5A;
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  bottom: -20px;
+}
+@media (min-width: 768px) {
+  .task_suggestion {
+    padding: 24px;
+  }
+  .task_suggestion .section {
+    gap: 14px;
+  }
+  .task_suggestion .section .container {
+    max-height: min(62dvh, 720px);
+  }
+  .task_suggestion .section .slider_btn {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .task_suggestion .section .container {
+    border-radius: 52px;
+  }
+}
+
+.task_suggestion .section .container {
+  height: clamp(420px, 65dvh, 680px);
+  overflow: hidden;
+}
+
+.task_suggestion .section .track {
+  height: 100%;
+}
+
+.task_suggestion .section .item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.task_suggestion .section .task_list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 6px;
 }/*# sourceMappingURL=style.css.map */
