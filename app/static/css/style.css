@@ -246,9 +246,7 @@ body {
   color: #FFAF5A;
   font-size: 14px;
   cursor: pointer;
-<<<<<<< HEAD
   padding: 0;
-=======
   margin-top: 25px;
   transition: all 0.3s ease;
   box-shadow: 0 6px 16px rgba(244, 160, 76, 0.3);
@@ -419,5 +417,4 @@ body {
   display: block;
   width: 95%;
   margin: 0 auto;
->>>>>>> 1afaff748f893a7027e0146636a26a031dd84cda
 }/*# sourceMappingURL=style.css.map */
