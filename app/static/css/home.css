@@ -1,0 +1,53 @@
+main {
+  padding: 20px;
+  text-align: center;
+
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+
+    img {
+      width: 80px;
+      margin-right: 15px;
+    }
+
+    .bubble {
+      position: relative;
+      background: #FFEEDB;
+      border-radius: 20px;
+      padding: 15px 20px;
+      max-width: 260px;
+      font-size: 14px;
+      color: #555;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: -12px;
+        top: 25px;
+        border-width: 8px;
+        border-style: solid;
+        border-color: transparent #FFEEDB transparent transparent;
+      }
+    }
+  }
+
+  section:last-of-type {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+
+    button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #FFC547;
+      margin: 0 15px;
+      cursor: pointer;
+    }
+  }
+}
