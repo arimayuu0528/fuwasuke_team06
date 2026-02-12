@@ -36,6 +36,10 @@ def create_app():
     def index():
         return render_template('auth/login.html')
     
+    # @app.before_request
+    # def check_user():
+    #     return   # ← これで完全スルー（開発用）
+
 
 
     @app.before_request

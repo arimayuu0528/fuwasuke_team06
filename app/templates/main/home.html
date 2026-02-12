@@ -1,6 +1,8 @@
 {% extends "base2.html" %}
 
+
 {% block header_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 <div class="fuwasuke_log1">
     <p><img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ロゴ"></p>
 </div>
@@ -9,12 +11,26 @@
 
 {% block content %}
 
-<section class="content-section" style="padding: 20px;">
-    <h2 style="color: #FFC547; margin-bottom: 20px;">こんにちは！</h2>
-    <div class="card" style="background: #FFF5EA; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-        <p style="font-weight: bold;">今日の予定</p>
-        <p style="font-size: 14px; color: #666;">予定はありません</p>
-    </div>
-</section>
+<main>
+
+    <section class="top">
+        <img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ふわすけ">
+
+        <div class="bubble">
+            今日はたくさんの予定があります。<br>
+            しっかりがんばりましょう。
+        </div>
+    </section>
+
+    <section>
+        <button onclick="changeDate(-1)">◀</button>
+        <span id="today"></span>
+        <button onclick="changeDate(1)">▶</button>
+    </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
 
 {% endblock %}

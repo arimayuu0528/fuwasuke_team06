@@ -32,7 +32,7 @@
             <p><i class="fa-solid fa-house house_icon"></i></p>
             <p>ホーム</p>
         </a>
-        <a href="{{ url_for('main.main_form') }}" class="icon {% if request.endpoint == 'main.main_form' %}active{% endif %}">
+        <a href="{{ url_for('main.main_form') }}" class="icon {% if request.endpoint == 'main.main_form' %}active{% endif %}" data-turbo="false">
             <p><i class="fa-solid fa-calendar calender_icon"></i></p>
             <p>カレンダー</p>
         </a>
@@ -40,7 +40,7 @@
             <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
             <p>レポート</p>
         </a>
-        <a href="{{ url_for('main.mypage') }}" class="icon {% if request.endpoint == 'main.mypage' %}active{% endif %}">
+        <a href="{{ url_for('main.mypage') }}" class="icon {% if request.endpoint == 'main.mypage' %}active{% endif %}" data-turbo="false">
             <p><i class="fa-solid fa-user user_icon"></i></p>
             <p>マイページ</p>
         </a>

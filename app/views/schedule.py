@@ -11,18 +11,19 @@ schedule_bp = Blueprint('schedule', __name__, url_prefix='/schedule')
 # -----------------------------------------------------
 @schedule_bp.route('/schedule', methods=['GET', 'POST'])
 def schedule_form():
+    # カテゴリーのリストを定義
+    categories = ['セルフケア', '仕事', '勉強', '趣味', '運動', '家事']
+
     if request.method == 'POST':
         title = request.form['title']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
-        active_days = request.form['active_days']
+        active_days = request.form.get('active_days', "")
         category = request.form['category']
         memo = request.form['memo']
 
-        # 仮ユーザーID（ログイン後は session['user_id']）
         user_id = 1
 
-        # duration_min 計算
         fmt = "%H:%M"
         duration_min = (
             datetime.strptime(end_time, fmt)
@@ -35,37 +36,30 @@ def schedule_form():
         sql = """
         INSERT INTO t_fixed_schedule_masters
         (
-            user_id,
-            title,
-            duration_min,
-            start_time,
-            end_time,
-            repeat_type,
-            day_of_week,
-            location,
-            tag,
-            memo
+            user_id,title,duration_min,start_time,end_time,
+            repeat_type,day_of_week,location,tag,memo
         )
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """
 
         params = (
-            user_id,
-            title,
-            duration_min,
-            start_time,
-            end_time,
-            "weekly",
-            active_days,
-            "",
-            category,
-            memo
+            user_id,title,duration_min,start_time,end_time,
+            "weekly",active_days,"",category,memo
         )
 
-        db.execute_query(sql, params)
+        # 👇 直接実行してcommit
+        db.cursor.execute(sql, params)
+        db.connection.commit()
+
+        print("保存完了")
+
         db.disconnect()
 
         return redirect(url_for('schedule.schedule_list'))
+
+    # GETの場合、カテゴリーを渡す
+    return render_template("schedule/register_schedule.html", categories=categories)
+
 
 
 
@@ -75,6 +69,7 @@ def schedule_form():
 # -----------------------------------------------------
 @schedule_bp.route("/list")
 def schedule_list():
+
     db = DatabaseManager()
     db.connect()
 
@@ -93,10 +88,8 @@ def schedule_list():
 
     rows = db.fetch_all(sql)
 
-    if not rows:
-        rows = []
-
     tasks = []
+
     for row in rows:
         tasks.append({
             "id": row["master_id"],
@@ -107,10 +100,27 @@ def schedule_list():
             "comment": row["memo"],
             "active_days": list(row["day_of_week"]) if row["day_of_week"] else []
         })
-        rows = db.fetch_all("SELECT * FROM t_fixed_schedule_masters")
-
-    print("DEBUG rows:", rows)
-
 
     db.disconnect()
+
     return render_template("schedule/schedule_list.html", tasks=tasks)
+
+# -----------------------------------------------------
+# 固定タスク削除
+# URL：/schedule/delete/<id>
+# -----------------------------------------------------
+@schedule_bp.route("/delete/<int:master_id>", methods=["POST"])
+def delete_schedule(master_id):
+    db = DatabaseManager()
+    db.connect()
+
+    sql_child = "DELETE FROM t_fixed_schedule_instances WHERE master_id = %s"
+    db.cursor.execute(sql_child, (master_id,))
+
+    sql_parent = "DELETE FROM t_fixed_schedule_masters WHERE master_id = %s"
+    db.cursor.execute(sql_parent, (master_id,))
+
+    db.connection.commit()
+    db.disconnect()
+
+    return redirect(url_for("schedule.schedule_list"))

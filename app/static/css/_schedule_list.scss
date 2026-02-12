@@ -1,0 +1,362 @@
+.fixed-task-page {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
+  background-color: #f5f5f5;
+  padding-bottom: 80px;
+}
+
+/* Header */
+.fixed-task-page .header {
+  background-color: #fff;
+  padding: 20px 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fixed-task-page .header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+/* Tabs */
+.fixed-task-page .tab-container {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.fixed-task-page .tab {
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.fixed-task-page .tab.active {
+  color: #ff9f5a;
+  border-bottom-color: #ff9f5a;
+}
+
+/* Task List */
+.fixed-task-page .task-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card */
+.fixed-task-page .task-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+/* Header */
+.fixed-task-page .task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.fixed-task-page .task-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.fixed-task-page .delete-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  transition: color 0.2s;
+}
+
+.fixed-task-page .delete-btn:hover {
+  color: #ff6b6b;
+}
+
+/* Meta */
+.fixed-task-page .task-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.fixed-task-page .task-category {
+  background: #ffe5d6;
+  color: #ff9f5a;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fixed-task-page .task-time {
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fixed-task-page .task-time::before {
+  content: "🕐";
+  font-size: 16px;
+}
+
+/* Comment */
+.fixed-task-page .comment-section {
+  margin: 12px 0;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.fixed-task-page .comment-toggle {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fixed-task-page .comment-toggle .arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.fixed-task-page .comment-toggle.collapsed .arrow {
+  transform: rotate(-90deg);
+}
+
+.fixed-task-page .comment-content {
+  margin-top: 8px;
+  padding: 8px 0;
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1.5;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.fixed-task-page .comment-content.hidden {
+  display: none;
+}
+
+/* Weekdays */
+.fixed-task-page .weekday-pills {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fixed-task-page .weekday {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  background: #e8e8e8;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.fixed-task-page .weekday.active {
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 159, 90, 0.4);
+  transform: scale(1.05);
+}
+/* Add Button */
+.fixed-task-page .add-task-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 400px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+}
+
+.fixed-task-page .add-task-btn::before {
+  content: "+";
+  font-size: 24px;
+}
+
+/* Empty & Count */
+.fixed-task-page .empty-message {
+  text-align: center;
+  padding: 40px 16px;
+  color: #ff6b6b;
+  font-size: 14px;
+}
+
+.fixed-task-page .task-count {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  padding: 8px;
+}
+
+/* Animation */
+@keyframes fixedTaskFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.fixed-task-page .task-card.deleting {
+  animation: fixedTaskFadeOut 0.3s forwards;
+}
+
+/* Delete Modal */
+.delete-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.delete-modal.show {
+  display: flex;
+}
+
+.delete-modal-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  max-width: 340px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+}
+
+.delete-modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.delete-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.delete-modal-text {
+  font-size: 14px;
+  color: #999;
+  margin: 0 0 24px 0;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-modal-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.delete-cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.delete-cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.delete-confirm-btn {
+  background: linear-gradient(135deg, #ff8a80 0%, #ff6b6b 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.delete-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.delete-confirm-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
