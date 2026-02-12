@@ -5,7 +5,7 @@
   <h2 class="mood-title">今日の気分はどうですか？</h2>
   <p class="mood-subtitle">ふわすけに今の気持ちを教えてね</p>
 
-  <form class="mood-form">
+  <form method="post" action="{{ url_for('mood.register') }}" class="mood-form">
     <input type="radio" id="genki" name="mood" value="genki" checked />
     <label for="genki" class="mood-card">
       <div class="icon-circle">

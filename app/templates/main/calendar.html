@@ -1,0 +1,31 @@
+{% extends "base2.html" %}
+
+{% block header_content %}
+<div class="fuwasuke_log1">
+    <p><img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ロゴ"></p>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="calendar-fixed-header">
+    <h2 id="current-month-display" class="calendar-title">{{current_year}}年 {{current_month}}月</h2>
+    <table  class="calendar-table sticky-thead">
+        <thead>
+            <tr><th>日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th></tr>
+        </thead>
+    </table>
+</div>
+
+<main class="calendar-content"
+    id="calendar-container"
+    data-holidays='{{holidays_json | tojson | safe}}'
+    data-events='{{events_json | tojson | safe}}'
+    data-today-year="{{current_year}}"
+    data-today-month="{{current_month}}">
+</main>
+
+<script src="../../static/js/calendar.js"></script>
+
+{% endblock %}
