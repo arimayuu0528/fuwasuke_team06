@@ -1,543 +1,52 @@
-{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %}
-<style>
-  /* Fixed Task Registration Form - Complete CSS Replication */
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
-      "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
-    background-color: #f5f5f5;
-    padding-bottom: 100px;
-  }
-
-  /* Header Styles */
-  .header {
-    background-color: #fff;
-    padding: 20px 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  }
-
-  .header h1 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-  }
-
-  /* Tab Container */
-  .tab-container {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 0;
-    padding: 0 8px;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 10px 20px;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 14px;
-    color: #999;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-  }
-
-  .tab.active {
-    color: #ff9f5a;
-    border-bottom-color: #ff9f5a;
-  }
-
-  /* Form Container */
-  .form-container {
-    padding: 20px 16px;
-  }
-
-  /* Form Section */
-  .form-section {
-    margin-bottom: 24px;
-  }
-
-  /* Form Label */
-  .form-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    color: #ffb380;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .template-link {
-    color: #ff9f5a;
-    text-decoration: none;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: opacity 0.2s;
-  }
-
-  .template-link:hover {
-    opacity: 0.7;
-  }
-
-  /* Form Input */
-  .form-input {
-    width: 100%;
-    padding: 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 15px;
-    background: #fff;
-    color: #333;
-    font-family: inherit;
-    transition: all 0.2s;
-  }
-
-  .form-input::placeholder {
-    color: #ccc;
-  }
-
-  .form-input:focus {
-    outline: none;
-    border-color: #ff9f5a;
-    box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
-  }
-
-  /* Time Inputs */
-  .time-inputs {
-    display: flex;
-    gap: 12px;
-  }
-
-  .time-input-wrapper {
-    flex: 1;
-    position: relative;
-  }
-
-  .time-label {
-    display: block;
-    color: #999;
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .time-input {
-    width: 100%;
-    padding: 14px 40px 14px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 15px;
-    background: #fff;
-    color: #999;
-    font-family: inherit;
-    transition: all 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  .time-input:focus {
-    outline: none;
-    border-color: #ff9f5a;
-    box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
-    color: #333;
-  }
-
-  .time-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    pointer-events: none;
-    margin-top: 12px; /* Adjust for label */
-  }
-
-  /* Weekday Selector */
-  .weekday-selector {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .weekday-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: none;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #e8e8e8;
-    color: #999;
-    font-family: inherit;
-  }
-
-  .weekday-btn.active {
-    background: #ff9f5a;
-    color: #fff;
-    transform: scale(1.05);
-  }
-
-  .weekday-btn:hover {
-    transform: scale(1.08);
-  }
-
-  .weekday-btn:active {
-    transform: scale(0.95);
-  }
-
-  /* Category Selector */
-  .category-selector {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .category-btn {
-    padding: 12px 24px;
-    border-radius: 20px;
-    border: 1px solid #e0e0e0;
-    background: #fff;
-    color: #999;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-
-  .category-btn.active {
-    background: #ff9f5a;
-    color: #fff;
-    border-color: #ff9f5a;
-  }
-
-  .category-btn:hover {
-    border-color: #ff9f5a;
-    color: #ff9f5a;
-  }
-
-  .category-btn.active:hover {
-    color: #fff;
-  }
-
-  /* Memo Textarea */
-  .memo-textarea {
-    width: 100%;
-    min-height: 150px;
-    padding: 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 14px;
-    background: #f8f9fa;
-    color: #333;
-    font-family: inherit;
-    resize: vertical;
-    transition: all 0.2s;
-    line-height: 1.6;
-  }
-
-  .memo-textarea::placeholder {
-    color: #ccc;
-  }
-
-  .memo-textarea:focus {
-    outline: none;
-    border-color: #ff9f5a;
-    box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
-    background: #fff;
-  }
-
-  /* Info Box */
-  .info-box {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 16px;
-    background: #fff8f3;
-    border-radius: 12px;
-    margin-top: 24px;
-    border: 1px solid #ffe5d6;
-  }
-
-  .info-icon {
-    font-size: 28px;
-    flex-shrink: 0;
-  }
-
-  .info-text {
-    color: #666;
-    font-size: 13px;
-    line-height: 1.6;
-    margin: 4px 0 0 0;
-  }
-
-  /* Submit Button */
-  .submit-btn {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 400px;
-    padding: 16px;
-    background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
-    color: #fff;
-    border: none;
-    border-radius: 28px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-
-  .submit-btn:hover {
-    transform: translateX(-50%) translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 159, 90, 0.4);
-  }
-
-  .submit-btn:active {
-    transform: translateX(-50%) translateY(0);
-  }
-
-  .submit-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  /* Bottom Navigation */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #fff;
-    display: flex;
-    justify-content: space-around;
-    padding: 8px 0 12px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
-  }
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-decoration: none;
-    color: #999;
-    font-size: 11px;
-    flex: 1;
-    padding: 4px;
-    transition: color 0.2s;
-  }
-
-  .nav-item.active {
-    color: #ff9f5a;
-  }
-
-  .nav-icon {
-    font-size: 24px;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .time-inputs {
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .weekday-btn {
-      width: 44px;
-      height: 44px;
-      font-size: 14px;
-    }
-  }
-
-  /* Animation for form submission */
-  @keyframes submitPulse {
-    0% {
-      transform: translateX(-50%) scale(1);
-    }
-    50% {
-      transform: translateX(-50%) scale(0.95);
-    }
-    100% {
-      transform: translateX(-50%) scale(1);
-    }
-  }
-
-  .submit-btn.submitting {
-    animation: submitPulse 0.3s ease-in-out;
-    pointer-events: none;
-  }
-
-  /* Focus styles for accessibility */
-  .weekday-btn:focus,
-  .category-btn:focus,
-  .submit-btn:focus {
-    outline: 2px solid #ff9f5a;
-    outline-offset: 2px;
-  }
-
-  /* Ripple effect container */
-  .weekday-btn,
-  .category-btn,
-  .submit-btn {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(0);
-    animation: ripple-animation 0.6s ease-out;
-    pointer-events: none;
-  }
-
-  @keyframes ripple-animation {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  /* Form validation styles */
-  .form-input:invalid,
-  .time-input:invalid {
-    border-color: #ff6b6b;
-  }
-
-  .form-input:valid,
-  .time-input:valid {
-    border-color: #e0e0e0;
-  }
-
-  /* Loading state */
-  .submit-btn.loading::after {
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 50%;
-    left: 50%;
-    margin-left: -8px;
-    margin-top: -8px;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: spinner 0.6s linear infinite;
-  }
-
-  @keyframes spinner {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .submit-btn.loading {
-    color: transparent;
-    pointer-events: none;
-  }
-
-  /* Smooth transitions */
-  * {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  button {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-  }
-
-  /* Placeholder animation */
-  @keyframes placeholder-shimmer {
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
-  .form-input:placeholder-shown,
-  .memo-textarea:placeholder-shown {
-    animation: placeholder-shimmer 2s ease-in-out infinite;
-  }
-</style>
-{%block content %}
-<div class="header">
-  <h1>固定タスク登録</h1>
-  <div class="tab-container">
-    <button class="tab">タスク登録</button>
-    <button class="tab active">固定タスク登録</button>
+{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %} {%block
+content %}
+<div class="sched-header">
+  <h1 class="sched-title">固定タスク登録</h1>
+  <div class="sched-tab-container">
+    <button class="sched-tab">タスク登録</button>
+    <button class="sched-tab sched-tab-active">固定タスク登録</button>
   </div>
 </div>
 
-<div class="form-container">
+<div class="sched-form-container">
   <form
-    id="taskForm"
+    id="schedTaskForm"
     method="POST"
-    action="{{ url_for('schedule.schedule_form') }}"
+    action="{{ url_for('.schedule_form') }}"
   >
-    <div class="form-section">
-      <div class="form-label">
+    <div class="sched-form-section">
+      <div class="sched-form-label">
         <span>タスク名</span>
-        <a href="#" class="template-link">固定タスク一覧 ☰</a>
+        <a href="#" class="sched-template-link">固定タスク一覧 ☰</a>
       </div>
       <input
         type="text"
         name="title"
-        class="form-input"
+        class="sched-form-input"
         placeholder="何をする？"
         value="{{ task.title if task else '' }}"
         required
       />
     </div>
 
-    <div class="form-section">
-      <div class="time-inputs">
-        <div class="time-input-wrapper">
-          <span class="time-label">開始時間</span>
+    <div class="sched-form-section">
+      <div class="sched-time-inputs">
+        <div class="sched-time-input-wrapper">
+          <span class="sched-time-label">開始時間</span>
           <input
             type="time"
             name="start_time"
-            class="time-input"
+            class="sched-time-input"
             value="{{ task.start_time if task else '09:10' }}"
             required
           />
         </div>
-        <div class="time-input-wrapper">
-          <span class="time-label">終了時間</span>
+        <div class="sched-time-input-wrapper">
+          <span class="sched-time-label">終了時間</span>
           <input
             type="time"
             name="end_time"
-            class="time-input"
+            class="sched-time-input"
             value="{{ task.end_time if task else '09:50' }}"
             required
           />
@@ -545,91 +54,95 @@
       </div>
     </div>
 
-    <div class="form-section">
-      <div class="form-label">繰り返す曜日</div>
-      <div class="weekday-selector">
-        {% set weekdays = ['月', '火', '水', '木', '金', '土', '日'] %} {% set
-        default_active = ['月', '火', '水', '木', '金'] %} {% for day in
-        weekdays %}
-        <button
-          type="button"
-          class="weekday-btn {% if (task and day in task.active_days) or (not task and day in default_active) %}active{% endif %}"
-          data-day="{{ day }}"
-          onclick="toggleWeekday(this)"
-        >
+    <div class="sched-form-section">
+      <div class="sched-form-label">繰り返す曜日</div>
+      <div class="sched-weekday-selector">
+        {% set weekdays = ['月', '火', '水', '木', '金', '土', '日'] %} {% for
+        day in weekdays %}
+        <button type="button" class="sched-weekday-btn" data-day="{{ day }}">
           {{ day }}
         </button>
         {% endfor %}
       </div>
-      <input type="hidden" name="active_days" id="activeDays" value="" />
+      <input type="hidden" name="active_days" id="schedActiveDays" value="" />
     </div>
 
-    <div class="form-section">
-      <div class="form-label">カテゴリー</div>
-      <div class="category-selector">
-        {% set categories = ['セルフケア', 'セルフケア', 'セルフケア'] %} {% for
-        category in categories %}
+    <div class="sched-form-section">
+      <div class="sched-form-label">カテゴリー</div>
+      <div class="sched-category-selector">
+        {% for category in categories %}
         <button
           type="button"
-          class="category-btn {% if loop.first %}active{% endif %}"
-          onclick="selectCategory(this)"
+          class="sched-category-btn {% if loop.first %}sched-category-active{% endif %}"
+          onclick="schedSelectCategory(this)"
         >
           {{ category }}
         </button>
         {% endfor %}
       </div>
-      <input type="hidden" name="category" id="category" value="セルフケア" />
+      <input
+        type="hidden"
+        name="category"
+        id="schedCategory"
+        value="{{ categories[0] if categories else 'セルフケア' }}"
+      />
     </div>
 
-    <div class="form-section">
-      <div class="form-label">モチベーション</div>
+    <div class="sched-form-section">
+      <div class="sched-form-label">モチベーション</div>
       <textarea
         name="memo"
-        class="memo-textarea"
+        class="sched-memo-textarea"
         placeholder="タスクのメモや手順を入力してください"
       >
 {{ task.memo if task else '' }}</textarea
       >
     </div>
 
-    <div class="info-box">
-      <span class="info-icon">ふわすけ</span>
-      <p class="info-text">
+    <div class="sched-info-box">
+      <span class="sched-info-icon"><img src="" alt="" /></span>
+      <p class="sched-info-text">
         固定タスクは毎週決まった時間にカレンダーに追加されるよ
       </p>
     </div>
   </form>
 </div>
 
-<button type="submit" form="taskForm" class="submit-btn">登録</button>
+<button type="submit" form="schedTaskForm" class="sched-submit-btn">
+  登録
+</button>
 <script>
   // Fixed Task Registration Form - Complete JavaScript
 
   // Initialize form on page load
   document.addEventListener("DOMContentLoaded", function () {
-    initializeForm();
-    setupFormValidation();
-    setupTimeInputs();
-    setupCategorySelection();
-    setupWeekdaySelection();
-    addRippleEffects();
-    setupFormSubmission();
+    schedInitializeForm();
+    schedSetupFormValidation();
+    schedSetupTimeInputs();
+    schedSetupCategorySelection();
+    schedSetupWeekdaySelection();
+    schedAddRippleEffects();
+    schedSetupFormSubmission();
   });
 
   // Initialize form with default values
-  function initializeForm() {
+  function schedInitializeForm() {
     // Set initial active days value
-    updateActiveDaysInput();
+    schedUpdateActiveDaysInput();
 
     // Set initial category value
-    const activeCategory = document.querySelector(".category-btn.active");
+    const activeCategory = document.querySelector(
+      ".sched-category-btn.sched-category-active",
+    );
     if (activeCategory) {
-      document.getElementById("category").value =
+      document.getElementById("schedCategory").value =
         activeCategory.textContent.trim();
     }
 
     // Auto-focus on task name input
-    const taskNameInput = document.querySelector('.form-input[name="title"]');
+    const taskNameInput = document.querySelector(
+      '.sched-form-input[name="title"]',
+    );
     if (taskNameInput && !taskNameInput.value) {
       setTimeout(() => {
         taskNameInput.focus();
@@ -638,8 +151,10 @@
   }
 
   // Toggle weekday selection
-  function toggleWeekday(btn) {
-    btn.classList.toggle("active");
+  // Toggle weekday selection
+  function schedToggleWeekday(btn) {
+    // トグル処理
+    btn.classList.toggle("sched-weekday-active");
 
     // Add haptic feedback if available
     if (navigator.vibrate) {
@@ -647,32 +162,32 @@
     }
 
     // Update hidden input
-    updateActiveDaysInput();
-
-    // Add ripple effect
-    addRipple(btn, event);
+    schedUpdateActiveDaysInput();
   }
 
   // Update active days hidden input
-  function updateActiveDaysInput() {
-    const actives = document.querySelectorAll(".weekday-btn.active");
+  function schedUpdateActiveDaysInput() {
+    const actives = document.querySelectorAll(
+      ".sched-weekday-btn.sched-weekday-active",
+    );
     const days = Array.from(actives)
       .map((b) => b.dataset.day)
       .join("");
-    document.getElementById("activeDays").value = days;
-  }
+    document.getElementById("schedActiveDays").value = days;
 
+    console.log("Selected days:", days); // デバッグ用
+  }
   // Select category
-  function selectCategory(btn) {
+  function schedSelectCategory(btn) {
     // Remove active class from all category buttons
-    const categoryBtns = document.querySelectorAll(".category-btn");
-    categoryBtns.forEach((b) => b.classList.remove("active"));
+    const categoryBtns = document.querySelectorAll(".sched-category-btn");
+    categoryBtns.forEach((b) => b.classList.remove("sched-category-active"));
 
     // Add active class to clicked button
-    btn.classList.add("active");
+    btn.classList.add("sched-category-active");
 
     // Update hidden input
-    document.getElementById("category").value = btn.textContent.trim();
+    document.getElementById("schedCategory").value = btn.textContent.trim();
 
     // Add haptic feedback if available
     if (navigator.vibrate) {
@@ -680,46 +195,46 @@
     }
 
     // Add ripple effect
-    addRipple(btn, event);
+    schedAddRipple(btn, event);
   }
 
   // Setup form validation
-  function setupFormValidation() {
-    const form = document.getElementById("taskForm");
+  function schedSetupFormValidation() {
+    const form = document.getElementById("schedTaskForm");
     const inputs = form.querySelectorAll("input[required], textarea[required]");
 
     inputs.forEach((input) => {
       input.addEventListener("blur", function () {
-        validateField(this);
+        schedValidateField(this);
       });
 
       input.addEventListener("input", function () {
-        if (this.classList.contains("error")) {
-          validateField(this);
+        if (this.classList.contains("sched-error")) {
+          schedValidateField(this);
         }
       });
     });
   }
 
   // Validate individual field
-  function validateField(field) {
+  function schedValidateField(field) {
     if (!field.value.trim() && field.hasAttribute("required")) {
-      field.classList.add("error");
+      field.classList.add("sched-error");
       return false;
     } else {
-      field.classList.remove("error");
+      field.classList.remove("sched-error");
       return true;
     }
   }
 
   // Setup time inputs
-  function setupTimeInputs() {
-    const timeInputs = document.querySelectorAll(".time-input");
+  function schedSetupTimeInputs() {
+    const timeInputs = document.querySelectorAll(".sched-time-input");
 
     timeInputs.forEach((input) => {
       // Format time on change
       input.addEventListener("change", function () {
-        formatTimeInput(this);
+        schedFormatTimeInput(this);
       });
 
       // Add focus animation
@@ -740,12 +255,12 @@
     if (startTime && endTime) {
       const validateTimes = () => {
         if (startTime.value && endTime.value) {
-          const start = timeToMinutes(startTime.value);
-          const end = timeToMinutes(endTime.value);
+          const start = schedTimeToMinutes(startTime.value);
+          const end = schedTimeToMinutes(endTime.value);
 
           if (end <= start) {
             endTime.setCustomValidity("終了時間は開始時間より後にしてください");
-            showToast("終了時間は開始時間より後にしてください", "warning");
+            schedShowToast("終了時間は開始時間より後にしてください", "warning");
           } else {
             endTime.setCustomValidity("");
           }
@@ -758,13 +273,13 @@
   }
 
   // Convert time to minutes for comparison
-  function timeToMinutes(time) {
+  function schedTimeToMinutes(time) {
     const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
   }
 
   // Format time input
-  function formatTimeInput(input) {
+  function schedFormatTimeInput(input) {
     let value = input.value;
     if (value) {
       // Ensure proper format
@@ -776,46 +291,58 @@
   }
 
   // Setup category selection
-  function setupCategorySelection() {
-    const categoryBtns = document.querySelectorAll(".category-btn");
+  function schedSetupCategorySelection() {
+    const categoryBtns = document.querySelectorAll(".sched-category-btn");
 
     categoryBtns.forEach((btn) => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
-        selectCategory(this);
+        schedSelectCategory(this);
       });
     });
   }
 
   // Setup weekday selection
-  function setupWeekdaySelection() {
-    const weekdayBtns = document.querySelectorAll(".weekday-btn");
+  // Setup weekday selection
+  function schedSetupWeekdaySelection() {
+    const weekdayBtns = document.querySelectorAll(".sched-weekday-btn");
 
     weekdayBtns.forEach((btn) => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
-        toggleWeekday(this);
+        e.stopPropagation();
+
+        // トグル処理
+        this.classList.toggle("sched-weekday-active");
+
+        // Add haptic feedback if available
+        if (navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+
+        // Update hidden input
+        schedUpdateActiveDaysInput();
       });
     });
   }
 
   // Add ripple effects to buttons
-  function addRippleEffects() {
+  function schedAddRippleEffects() {
     const buttons = document.querySelectorAll(
-      ".weekday-btn, .category-btn, .submit-btn",
+      ".sched-weekday-btn, .sched-category-btn, .sched-submit-btn",
     );
 
     buttons.forEach((button) => {
       button.addEventListener("click", function (e) {
-        addRipple(this, e);
+        schedAddRipple(this, e);
       });
     });
   }
 
   // Add ripple effect to element
-  function addRipple(element, event) {
+  function schedAddRipple(element, event) {
     const ripple = document.createElement("span");
-    ripple.classList.add("ripple");
+    ripple.classList.add("sched-ripple");
 
     const rect = element.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
@@ -827,7 +354,7 @@
     ripple.style.top = y + "px";
 
     // Remove existing ripples
-    const existingRipples = element.querySelectorAll(".ripple");
+    const existingRipples = element.querySelectorAll(".sched-ripple");
     existingRipples.forEach((r) => r.remove());
 
     element.appendChild(ripple);
@@ -836,21 +363,21 @@
   }
 
   // Setup form submission
-  function setupFormSubmission() {
-    const form = document.getElementById("taskForm");
-    const submitBtn = document.querySelector(".submit-btn");
+  function schedSetupFormSubmission() {
+    const form = document.getElementById("schedTaskForm");
+    const submitBtn = document.querySelector(".sched-submit-btn");
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
       // Validate form
-      if (!validateForm()) {
-        showToast("入力内容を確認してください", "error");
+      if (!schedValidateForm()) {
+        schedShowToast("入力内容を確認してください", "error");
         return;
       }
 
       // Show loading state
-      submitBtn.classList.add("loading");
+      submitBtn.classList.add("sched-loading");
       submitBtn.disabled = true;
 
       // Haptic feedback
@@ -864,14 +391,14 @@
         form.submit();
 
         // Or handle with AJAX:
-        // submitFormAjax(form);
+        // schedSubmitFormAjax(form);
       }, 500);
     });
   }
 
   // Validate entire form
-  function validateForm() {
-    const form = document.getElementById("taskForm");
+  function schedValidateForm() {
+    const form = document.getElementById("schedTaskForm");
     const requiredInputs = form.querySelectorAll(
       "input[required], textarea[required]",
     );
@@ -881,7 +408,7 @@
     const taskName = form.querySelector('input[name="title"]');
     if (!taskName.value.trim()) {
       isValid = false;
-      taskName.classList.add("error");
+      taskName.classList.add("sched-error");
     }
 
     // Check times
@@ -892,16 +419,16 @@
     }
 
     // Check at least one weekday selected
-    const activeDays = document.getElementById("activeDays").value;
+    const activeDays = document.getElementById("schedActiveDays").value;
     if (!activeDays) {
-      showToast("繰り返す曜日を選択してください", "warning");
+      schedShowToast("繰り返す曜日を選択してください", "warning");
       isValid = false;
     }
 
     // Check category selected
-    const category = document.getElementById("category").value;
+    const category = document.getElementById("schedCategory").value;
     if (!category) {
-      showToast("カテゴリーを選択してください", "warning");
+      schedShowToast("カテゴリーを選択してください", "warning");
       isValid = false;
     }
 
@@ -909,7 +436,7 @@
   }
 
   // Submit form via AJAX (optional)
-  function submitFormAjax(form) {
+  function schedSubmitFormAjax(form) {
     const formData = new FormData(form);
 
     fetch(form.action, {
@@ -919,32 +446,36 @@
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          showToast("固定タスクを登録しました", "success");
+          schedShowToast("固定タスクを登録しました", "success");
           setTimeout(() => {
             window.location.href = data.redirect || "/schedule/list";
           }, 1000);
         } else {
-          showToast(data.message || "エラーが発生しました", "error");
-          document.querySelector(".submit-btn").classList.remove("loading");
-          document.querySelector(".submit-btn").disabled = false;
+          schedShowToast(data.message || "エラーが発生しました", "error");
+          document
+            .querySelector(".sched-submit-btn")
+            .classList.remove("sched-loading");
+          document.querySelector(".sched-submit-btn").disabled = false;
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        showToast("エラーが発生しました", "error");
-        document.querySelector(".submit-btn").classList.remove("loading");
-        document.querySelector(".submit-btn").disabled = false;
+        schedShowToast("エラーが発生しました", "error");
+        document
+          .querySelector(".sched-submit-btn")
+          .classList.remove("sched-loading");
+        document.querySelector(".sched-submit-btn").disabled = false;
       });
   }
 
   // Show toast notification
-  function showToast(message, type = "info") {
+  function schedShowToast(message, type = "info") {
     // Remove existing toasts
-    const existingToasts = document.querySelectorAll(".toast");
+    const existingToasts = document.querySelectorAll(".sched-toast");
     existingToasts.forEach((toast) => toast.remove());
 
     const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
+    toast.className = `sched-toast sched-toast-${type}`;
     toast.textContent = message;
 
     const styles = {
@@ -958,7 +489,7 @@
       fontSize: "14px",
       fontWeight: "500",
       zIndex: "10000",
-      animation: "slideDown 0.3s ease-out",
+      animation: "schedSlideDown 0.3s ease-out",
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
     };
 
@@ -977,7 +508,7 @@
 
     // Add animation
     const keyframes = `
-    @keyframes slideDown {
+    @keyframes schedSlideDown {
       from {
         opacity: 0;
         transform: translateX(-50%) translateY(-20px);
@@ -995,29 +526,29 @@
 
     // Auto remove after 3 seconds
     setTimeout(() => {
-      toast.style.animation = "slideUp 0.3s ease-out";
+      toast.style.animation = "schedSlideUp 0.3s ease-out";
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
 
   // Auto-save draft (optional feature)
-  function setupAutoSave() {
-    const form = document.getElementById("taskForm");
+  function schedSetupAutoSave() {
+    const form = document.getElementById("schedTaskForm");
     const inputs = form.querySelectorAll("input, textarea");
 
     inputs.forEach((input) => {
       input.addEventListener(
         "input",
-        debounce(function () {
-          saveDraft();
+        schedDebounce(function () {
+          schedSaveDraft();
         }, 1000),
       );
     });
   }
 
   // Save form data to localStorage
-  function saveDraft() {
-    const form = document.getElementById("taskForm");
+  function schedSaveDraft() {
+    const form = document.getElementById("schedTaskForm");
     const formData = new FormData(form);
     const data = {};
 
@@ -1025,16 +556,16 @@
       data[key] = value;
     }
 
-    data.activeDays = document.getElementById("activeDays").value;
-    data.category = document.getElementById("category").value;
+    data.activeDays = document.getElementById("schedActiveDays").value;
+    data.category = document.getElementById("schedCategory").value;
 
-    localStorage.setItem("taskDraft", JSON.stringify(data));
+    localStorage.setItem("schedTaskDraft", JSON.stringify(data));
     console.log("Draft saved");
   }
 
   // Load draft from localStorage
-  function loadDraft() {
-    const draft = localStorage.getItem("taskDraft");
+  function schedLoadDraft() {
+    const draft = localStorage.getItem("schedTaskDraft");
     if (draft) {
       const data = JSON.parse(draft);
 
@@ -1049,24 +580,24 @@
       // Restore weekday selections
       if (data.activeDays) {
         const days = data.activeDays.split("");
-        const weekdayBtns = document.querySelectorAll(".weekday-btn");
+        const weekdayBtns = document.querySelectorAll(".sched-weekday-btn");
         weekdayBtns.forEach((btn) => {
           if (days.includes(btn.dataset.day)) {
-            btn.classList.add("active");
+            btn.classList.add("sched-weekday-active");
           } else {
-            btn.classList.remove("active");
+            btn.classList.remove("sched-weekday-active");
           }
         });
       }
 
       // Restore category selection
       if (data.category) {
-        const categoryBtns = document.querySelectorAll(".category-btn");
+        const categoryBtns = document.querySelectorAll(".sched-category-btn");
         categoryBtns.forEach((btn) => {
           if (btn.textContent.trim() === data.category) {
-            btn.classList.add("active");
+            btn.classList.add("sched-category-active");
           } else {
-            btn.classList.remove("active");
+            btn.classList.remove("sched-category-active");
           }
         });
       }
@@ -1074,7 +605,7 @@
   }
 
   // Debounce function
-  function debounce(func, wait) {
+  function schedDebounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
       const later = () => {
@@ -1087,16 +618,16 @@
   }
 
   // Clear draft after successful submission
-  function clearDraft() {
-    localStorage.removeItem("taskDraft");
+  function schedClearDraft() {
+    localStorage.removeItem("schedTaskDraft");
   }
 
   // Character counter for memo textarea (optional)
-  function setupCharacterCounter() {
-    const textarea = document.querySelector(".memo-textarea");
+  function schedSetupCharacterCounter() {
+    const textarea = document.querySelector(".sched-memo-textarea");
     if (textarea) {
       const counter = document.createElement("div");
-      counter.className = "character-counter";
+      counter.className = "sched-character-counter";
       counter.style.cssText =
         "text-align: right; color: #999; font-size: 12px; margin-top: 4px;";
 
