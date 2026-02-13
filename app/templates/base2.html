@@ -9,11 +9,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPMincho&family=Hina+Mincho&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@100..900&family=Permanent+Marker&family=Roboto:ital,wght@0,100..900;1,100..900&family=Saira+Condensed:wght@100;200;300;400;500;600;700;800;900&family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@hotwired/turbo@7.1.0/dist/turbo.es2017-umd.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header class="fuwasuke_log1">
         {% block header_content %}
-        <div class="logo">ふわすけ</div>
+        {% if request.endpoint not in ['schedule.schedule_form','schedule.schedule_list'] %}
+            <div class="logo">ふわすけ</div>
+        {% endif %}
         {% endblock %}
     </header>
 
@@ -22,7 +25,7 @@
         {% endblock %}
     </turbo-frame>
 
-    <a href="{{url_for('main.add_event')}}" class="add-event-btn {% if request.endpoint in ['main.home','main.main_form'] %}is-visible{% endif %}">
+    <a href="{{url_for('schedule.schedule_form')}}" class="add-event-btn {% if request.endpoint in ['main.home','main.main_form'] %}is-visible{% endif %}">
         <i class="fa-solid fa-plus"></i>
     </a>
 
@@ -36,7 +39,7 @@
             <p><i class="fa-solid fa-calendar calender_icon"></i></p>
             <p>カレンダー</p>
         </a>
-        <a href="{{ url_for('main.report') }}" class="icon {% if request.endpoint == 'main.report' %}active{% endif %}">
+        <a href="{{ url_for('main.mood_graph', user_id=1) }}" class="icon {% if request.endpoint == 'main.mood_graph' %}active{% endif %}">
             <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
             <p>レポート</p>
         </a>
