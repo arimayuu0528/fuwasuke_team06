@@ -52,6 +52,7 @@ def create_app():
         # ★追加
         if endpoint.startswith("static"):
             return
+        
         if endpoint in (
             'auth.login_form',
             'auth.login_process',
@@ -71,7 +72,9 @@ def create_app():
         ):
             return
 
+        # セッションにuser_idが無い＝未ログイン
         if not session.get('user_id'):
+            # 未ログインはログイン画面へ強制送還
             return redirect(url_for('auth.login_form'))
 
         db = DatabaseManager()
@@ -89,8 +92,9 @@ def create_app():
         db.disconnect()
 
 
+        # 今日の気分が無い（未登録）の場合:
         if not mood:
-            # ★追加
+            # # 気分登録フォームへ誘導
             try:
                 return redirect(url_for("mood.register_mood_form"))
             except BuildError:
@@ -102,12 +106,12 @@ def create_app():
         #  - 今日の提案が3件（未選択）なら → タスク提案へ
         #  - 今日の提案が1件（選択済み）なら → main.home を表示（何もしない）
         # =============================
-        if endpoint == "main.home":
-            ref = request.referrer or ""
-            if "/mood" in ref:
+        if endpoint == "main.home": # 今から行こうとしているのが main.home の場合:
+            ref = request.referrer or "" # 直前ページURL
+            if "/mood" in ref:      # mood系ページから来た（＝気分登録直後）と判断できる場合だけ
                 # 初期化
-                cnt = 0
-                sid = None
+                cnt = 0             # 今日の提案が何件あるか
+                sid = None          # 今日の提案IDを入れる
 
                 db2 = DatabaseManager()
                 db2.connect()
@@ -120,31 +124,33 @@ def create_app():
                 db2.disconnect()
 
                 # dict/tuple両対応で必ずcnt/sidに代入
-                if row2 is None:
-                    cnt, sid = 0, None
-                elif isinstance(row2, dict):
-                    cnt = int(row2.get("cnt", 0))
-                    sid = row2.get("sid")
+                if row2 is None: # 何も返らない（0件・異常）場合:
+                    cnt, sid = 0, None       # 0件扱いにする
+                elif isinstance(row2, dict): # dict形式（例：{"cnt": 3, "sid": 10}）の場合:
+                    cnt = int(row2.get("cnt", 0)) # cntを取り出してint化（無ければ0）
+                    sid = row2.get("sid")    # sidを取り出す（Noneの可能性あり）
                 else:
+                    # 1要素目をcntとして読む
                     cnt = int(row2[0]) if len(row2) > 0 and row2[0] is not None else 0
+                    # 2要素目をsidとして読む（無ければNone）
                     sid = row2[1] if len(row2) > 1 else None
 
-                # 未選択（3件など）→ タスク提案へ
+                # 未選択（3件など）→ タスク提案へ ※3案がある状態（複数案）ならタスク提案画面に送る
                 if cnt >= 2:
                     return redirect(url_for("task.task_suggestion"))
 
-                # 選択済み（1件）→ main.home を表示（redirectしない）
+                # 選択済み（1件）→ main.home を表示（redirectしない）※# 1件だけなら既に選択済みとみなす
                 if cnt == 1 and sid is not None:
-                    sid = int(sid)
-                    session["selected_task_suggestion_id"] = sid
-                    session["current_task_suggestion_id"] = sid
+                    sid = int(sid) # 提案IDをintに揃える
+                    session["selected_task_suggestion_id"] = sid # 選択済み提案IDとしてセッションに保存
+                    session["current_task_suggestion_id"] = sid  # 現在の提案IDとしてもセッションに保存
                     return  # Noneを返して main.home を表示
                 
                     # # ◇ task/taskに飛ばしたい場合:
                     # return redirect(url_for("task.task_form"))
 
 
-                # 0件は異常なので提案へ（保険）
+                # 0件は異常なので提案へ（保険）※今日の提案が0件は想定外＝タスク提案作成へ送る
                 return redirect(url_for("task.task_suggestion"))
 
     return app   

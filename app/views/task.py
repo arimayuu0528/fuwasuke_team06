@@ -18,43 +18,54 @@ def task_form():
     # GET（リダイレクト先として使う）
     # ----------------------------
     if request.method == "GET":
-        # 優先：開始済み → 選択済み → クエリ
-        suggestion_id = (
-            session.get("current_task_suggestion_id")
-            or session.get("selected_task_suggestion_id")
-            or request.args.get("task_suggestion_id", type=int)
-        )
+        # 優先：開始済み → 選択済み → クエリ＜どの提案IDを表示するかの優先順位ルール＞
+        suggestion_id = ( # 表示対象の task_suggestion_id を1つに決める（最初に見つかったものを採用)
+            session.get("current_task_suggestion_id")           # 今「開始中」の提案ID（セッションに保存されている想定）
+            or session.get("selected_task_suggestion_id")       #「選択済み」 の提案ID（セッションに保存されている想定）
+            or request.args.get("task_suggestion_id", type=int) # URLの ?task_suggestion_id= をintに変換して取得
+        ) # ここまでで suggestion_id が決まる（取得できない場合：None）
 
-        if suggestion_id is None:
+        # 提案IDが取得できなかった場合:
+        if suggestion_id is None: 
+            # 提案を作成/選択する画面へ戻す
             return redirect(url_for("task.task_suggestion"))
 
+        # DB操作クラスをインスタンス化
         db = DatabaseManager()
+        # DBへ接続
         db.connect()
+
+        # 例外処理
         try:
+            # 提案IDの詳細（タスク一覧 等）をDBから取得
             details = fetch_suggestion_details(db, int(suggestion_id))
+            # 取得した提案IDの詳細からtask_nameだけを抽出
             task_names = [row.get("task_name") for row in details if row.get("task_name")]
 
             return render_template(
-                "task/task_home.html",
-                task_suggestion_id=int(suggestion_id),
-                task_names=task_names,
+                "task/task_home.html",                  # 表示するHTML
+                task_suggestion_id=int(suggestion_id),  # 提案ID（型をintで統一）
+                task_names=task_names,                  # タスク名のリスト
             )
-        finally:
-            db.disconnect()
+        finally: # try内で成功/失敗しても必ず通る
+            db.disconnect() # DB接続を必ず切断する
     # ----------------------------
     # POST（formから受け取って表示）
     # ----------------------------
+    # formのtask_suggestion_idをintで取得（hidden等を想定）
     task_suggestion_id = request.form.get("task_suggestion_id", type=int)
+    # 同名のtask_nameをリストで取得
     task_names = request.form.getlist("task_name")  # 複数受け取り
 
-    # POSTでidが無い保険（セッションから拾う）
+    # formから提案IDが取れない場合:
     if task_suggestion_id is None:
+        # セッションに残っているIDを拾う
         task_suggestion_id = session.get("current_task_suggestion_id") or session.get("selected_task_suggestion_id")
 
     return render_template(
-        "task/task_home.html",
-        task_suggestion_id=task_suggestion_id,
-        task_names=task_names,
+        "task/task_home.html",                 # 表示するHTML
+        task_suggestion_id=task_suggestion_id, # 提案ID（型をintで統一）
+        task_names=task_names,                 # タスク名のリスト
     )
 
 # -----------------------------------------------------
