@@ -39,7 +39,7 @@
             <p><i class="fa-solid fa-calendar calender_icon"></i></p>
             <p>カレンダー</p>
         </a>
-        <a href="{{ url_for('main.report') }}" class="icon {% if request.endpoint == 'main.report' %}active{% endif %}">
+        <a href="{{ url_for('main.mood_graph', user_id=1) }}" class="icon {% if request.endpoint == 'main.mood_graph' %}active{% endif %}">
             <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
             <p>レポート</p>
         </a>
