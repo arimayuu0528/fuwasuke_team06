@@ -93,3 +93,10 @@ def register_process():
     session["user_name"] = user_name
 
     return redirect(url_for("auth.login_form"))
+# -----------------------------------------------------
+# ログアウト処理　（エンドポイント：' ')  担当者名：
+# -----------------------------------------------------
+@auth_bp.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("auth.login_form"))
