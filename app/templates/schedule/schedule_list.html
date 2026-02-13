@@ -1,4 +1,4 @@
-{% extends "base3.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
+{% extends "base2.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
 block content %}
 <div class="fixed-task-page">
   <div class="header">
@@ -18,24 +18,36 @@ block content %}
       </div>
 
       <div class="task-meta">
-        <span class="task-category">{{ task.category }}</span>
+        <span class="task-category">{{ task.tag }}</span>
         <span class="task-time">{{ task.start_time }}~{{ task.end_time }}</span>
+        <span class="task-duration">{{ task.duration_min }}分</span>
       </div>
 
-      {% if task.comment %}
+      {% if task.location %}
+      <div class="task-location">
+        <span class="location-icon">📍</span>
+        <span>{{ task.location }}</span>
+      </div>
+      {% endif %}
+
+      <div class="task-repeat-info">
+        <span class="repeat-badge">{{ task.repeat_type }}</span>
+      </div>
+
+      {% if task.memo %}
       <div class="comment-section">
         <button class="comment-toggle" onclick="toggleComment(this)">
           <span class="arrow">▼</span>
-          <span>コメント</span>
+          <span>メモ</span>
         </button>
-        <div class="comment-content">{{ task.comment }}</div>
+        <div class="comment-content">{{ task.memo }}</div>
       </div>
       {% endif %}
 
       <div class="weekday-pills">
         {% for day in ['月', '火', '水', '木', '金', '土', '日'] %}
         <div
-          class="weekday {% if day in task.active_days %}active{% else %}inactive{% endif %}"
+          class="weekday {% if day in task.day_of_week %}active{% else %}inactive{% endif %}"
         >
           {{ day }}
         </div>
