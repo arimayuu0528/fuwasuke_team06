@@ -137,42 +137,50 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Turbo環境を考慮し、turbo:loadイベントを使用
-    document.addEventListener("turbo:load", function() {
-        
-        // --- 1. 日付の動的表示 ---
-        let displayDate = new Date(); // 開いた日の日付
-        const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+    (function() {
+        // 関数を定義して再利用可能にする
+        function initHome() {
+            console.log("Home initialized"); // デバッグ用
 
-        function refreshDateDisplay() {
-            const m = displayDate.getMonth() + 1;
-            const d = displayDate.getDate();
-            const w = dayLabels[displayDate.getDay()];
-            $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
-        }
-        
-        refreshDateDisplay();
+            // --- 1. 日付の動的表示 ---
+            let displayDate = new Date();
+            const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
 
-        // 日付の戻る・進む
-        $('#prevDate').off().on('click', function() {
-            displayDate.setDate(displayDate.getDate() - 1);
+            function refreshDateDisplay() {
+                const m = displayDate.getMonth() + 1;
+                const d = displayDate.getDate();
+                const w = dayLabels[displayDate.getDay()];
+                $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+            }
+            
             refreshDateDisplay();
-        });
 
-        $('#nextDate').off().on('click', function() {
-            displayDate.setDate(displayDate.getDate() + 1);
-            refreshDateDisplay();
-        });
-
-        // --- 2. タスクリストの表示・非表示（トグル） ---
-        $('#toggleTasks').off().on('click', function() {
-            const $list = $('#task-list');
-            $list.slideToggle(300, function() {
-                // アニメーション完了後にテキストを切り替え
-                const isHidden = $list.is(':hidden');
-                $('#toggleTasks').text(isHidden ? 'すべて見る ＞' : '閉じる ＜');
+            // イベントを .off() でリセットしてから貼り直す（二重登録防止）
+            $('#prevDate').off('click').on('click', function() {
+                displayDate.setDate(displayDate.getDate() - 1);
+                refreshDateDisplay();
             });
-        });
-    });
+
+            $('#nextDate').off('click').on('click', function() {
+                displayDate.setDate(displayDate.getDate() + 1);
+                refreshDateDisplay();
+            });
+
+            // --- 2. タスクリストのトグル ---
+            $('#toggleTasks').off('click').on('click', function() {
+                const $list = $('#task-list');
+                $list.slideToggle(300, function() {
+                    const isHidden = $list.is(':hidden');
+                    $('#toggleTasks').text(isHidden ? 'すべて見る ＞' : '閉じる ＜');
+                });
+            });
+        }
+
+        // Turboのロード時、およびレンダリング時に実行
+        document.addEventListener("turbo:load", initHome);
+        
+        // 戻るボタン対策：キャッシュから復元された時にも実行
+        document.addEventListener("turbo:render", initHome);
+    })();
 </script>
 {% endblock %}
