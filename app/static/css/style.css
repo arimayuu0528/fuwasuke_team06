@@ -194,11 +194,11 @@ body {
 }
 .register .life-rhythm {
   margin: 2rem 0;
+  margin-left: -0.5rem;
 }
 .register .life-rhythm .section-title {
   text-align: left;
   font-size: 14px;
-  margin-left: 1rem;
   margin-bottom: 0.8rem;
 }
 .register .life-rhythm .time-group {
@@ -214,6 +214,11 @@ body {
 }
 .register .life-rhythm .time-group label {
   font-size: 12px;
+}
+.register .life-rhythm p {
+  border-left: 5px solid #FF9966;
+  padding-left: 12px;
+  line-height: 1.5;
 }
 .register .life-rhythm .time-group input[type=time] {
   width: 100%;
