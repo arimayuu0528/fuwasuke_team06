@@ -58,4 +58,34 @@ document.addEventListener('DOMContentLoaded', () => {
             if (saveButton) saveButton.disabled = true;
         });
     }
+
+    const logoutBtn = document.querySelector('.logout'); // ログアウトボタン本体
+    const logoutModal = document.getElementById('logout-modal');
+    const confirmLogout = document.getElementById('confirm-logout');
+    const cancelLogout = document.getElementById('cancel-logout');
+
+    if (logoutBtn && logoutModal) {
+        // ログアウトボタンを押したらモーダルを表示
+        logoutBtn.addEventListener('click', () => {
+            logoutModal.style.display = 'flex';
+        });
+
+        // 「いいえ」ボタン：モーダルを閉じる
+        cancelLogout.addEventListener('click', () => {
+            logoutModal.style.display = 'none';
+        });
+
+        // 「はい」ボタン：ログアウト処理を実行
+        confirmLogout.addEventListener('click', () => {
+            // FlaskなどのバックエンドのログアウトURLへリダイレクト
+            window.location.href = "/auth/logout"; 
+        });
+
+        // 背景（オーバーレイ）をクリックしても閉じるようにする
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) {
+                logoutModal.style.display = 'none';
+            }
+        });
+    }
 });

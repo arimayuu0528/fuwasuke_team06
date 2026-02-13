@@ -252,3 +252,17 @@
         }
     }
 }
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+
+    button {
+        flex: 1;
+        padding: 12px 0;
+        min-width: 100px;
+        /* transitionなどは既存のbutton設定が引き継がれます */
+    }
+}
