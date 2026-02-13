@@ -1,8 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from datetime import datetime, timedelta
 from app.db import DatabaseManager
+import mysql.connector
+
 # Blueprintオブジェクト作成
 mood_bp = Blueprint('mood',__name__,url_prefix='/mood')
+report_bp = Blueprint('report', __name__)
 
 
 # -----------------------------------------------------
@@ -47,11 +50,5 @@ def register():
         db.disconnect()
 
         return redirect(url_for("main.home"))
-        # # ◇「ログイン → 気分入力 → task/task」にしたい場合:
-        # return redirect(url_for("task.task_form"))
 
     return render_template("mood/register_mood.html")
-
-
-    
-
