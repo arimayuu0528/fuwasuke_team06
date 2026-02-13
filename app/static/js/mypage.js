@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 「はい」ボタン：ログアウト処理を実行
         confirmLogout.addEventListener('click', () => {
             // FlaskなどのバックエンドのログアウトURLへリダイレクト
-            window.location.href = "/logout"; 
+            window.location.href = "/auth/logout"; 
         });
 
         // 背景（オーバーレイ）をクリックしても閉じるようにする
