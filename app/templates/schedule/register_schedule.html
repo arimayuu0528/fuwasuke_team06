@@ -17,7 +17,12 @@ content %}
     <div class="sched-form-section">
       <div class="sched-form-label">
         <span>タスク名</span>
-        <a href="#" class="sched-template-link">固定タスク一覧 ☰</a>
+        <a
+          href="{{ url_for('schedule.schedule_list') }}"
+          class="sched-template-link"
+        >
+          固定タスク一覧 ☰
+        </a>
       </div>
       <input
         type="text"
