@@ -147,17 +147,6 @@ body {
   text-align: center;
   margin: 0rem 0.5rem;
   /* ---------- 共通入力 ---------- */
-  /* ---------- タイトル ---------- */
-  /* ---------- フォームグループ ---------- */
-  /* ---------- 生活リズム ---------- */
-  /* セクションタイトル */
-  /* 横並び＆中央寄せ */
-  /* 起床時間・就寝時間それぞれ */
-  /* ラベル */
-  /* 時間入力 */
-  /* ---------- エラー ---------- */
-  /* ---------- 登録ボタン ---------- */
-  /* ---------- ログインリンク ---------- */
 }
 .register input[type=text],
 .register input[type=email],
@@ -172,6 +161,9 @@ body {
   font-size: 14px;
   border: none;
 }
+.register {
+  /* ---------- タイトル ---------- */
+}
 .register .register-header {
   margin-bottom: 1rem;
 }
@@ -184,6 +176,9 @@ body {
   font-size: 12px;
   line-height: 1.4;
 }
+.register {
+  /* ---------- フォームグループ ---------- */
+}
 .register .form-group {
   margin-bottom: 1.2rem;
 }
@@ -192,25 +187,40 @@ body {
   font-size: 14px;
   margin-left: 1rem;
 }
+.register {
+  /* ---------- 生活リズム ---------- */
+}
 .register .life-rhythm {
   margin: 2rem 0;
   margin-left: -0.5rem;
+}
+.register {
+  /* セクションタイトル */
 }
 .register .life-rhythm .section-title {
   text-align: left;
   font-size: 14px;
   margin-bottom: 0.8rem;
 }
+.register {
+  /* 横並び＆中央寄せ */
+}
 .register .life-rhythm .time-group {
   display: flex;
   justify-content: center;
   gap: 1.2rem;
+}
+.register {
+  /* 起床時間・就寝時間それぞれ */
 }
 .register .life-rhythm .time-group > div {
   flex: 0 1 45%;
   display: flex;
   flex-direction: column;
   align-items: center; /* ← 中央寄せ */
+}
+.register {
+  /* ラベル */
 }
 .register .life-rhythm .time-group label {
   font-size: 12px;
@@ -224,10 +234,16 @@ body {
   width: 100%;
   text-align: left;
 }
+.register {
+  /* ---------- エラー ---------- */
+}
 .register .register-error {
   color: #ff4d4d;
   font-size: 14px;
   margin: 1rem 0;
+}
+.register {
+  /* ---------- 登録ボタン ---------- */
 }
 .register .register-btn {
   background-color: #FFAF5A;
@@ -236,6 +252,9 @@ body {
   border-radius: 30px;
   font-size: 18px;
   border: none;
+}
+.register {
+  /* ---------- ログインリンク ---------- */
 }
 .register .new_register {
   color: #999;
@@ -686,8 +705,7 @@ input[type=radio]:checked + .mood-card {
   z-index: 1000;
   justify-content: center;
   align-items: center;
-  -webkit-backdrop-filter: blur(4px);
-          backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -1369,12 +1387,12 @@ input[type=radio]:checked + .mood-card {
   font-size: 14px;
 }
 
-.day-cell.is-holiday {
-  background-color: #fffafa;
-}
 .day-cell.is-holiday .day-number {
   color: #ff4d4d !important;
   font-weight: bold;
+}
+.day-cell.is-holiday {
+  background-color: #fffafa;
 }
 .day-cell.is-saturday .day-number {
   color: #4d94ff !important;
@@ -1693,11 +1711,13 @@ input[type=radio]:checked + .mood-card {
   align-items: center;
   color: #999;
   margin-bottom: 5%;
-  gap: 30px;
 }
 .mypage-content .today_task .task_num {
   font-size: 24px;
   color: #000;
+}
+.mypage-content .today_task {
+  gap: 30px;
 }
 .mypage-content .today_task .now_task {
   background-color: #FCF1E6;
@@ -1886,4 +1906,17 @@ input[type=radio]:checked + .mood-card {
   border-radius: 50px;
   cursor: pointer;
   font-weight: bold;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+.modal-buttons button {
+  flex: 1;
+  padding: 12px 0;
+  min-width: 100px;
+  /* transitionなどは既存のbutton設定が引き継がれます */
 }/*# sourceMappingURL=style.css.map */
