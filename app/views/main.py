@@ -23,9 +23,9 @@ def home():
 # -----------------------------------------------------
 # タスク・固定予定登録画面遷移ボタン処理　（エンドポイント：'/add_event')  担当者名：日髙
 # -----------------------------------------------------
-@main_bp.route("/add_event")
-def add_event():
-    return render_template('task/register_task.html')
+# @main_bp.route("/add_event")
+# def add_event():
+#     return render_template('schedule/register_schedule.html')
 
 
 # -----------------------------------------------------

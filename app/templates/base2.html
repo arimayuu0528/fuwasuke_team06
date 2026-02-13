@@ -22,7 +22,7 @@
         {% endblock %}
     </turbo-frame>
 
-    <a href="{{url_for('main.add_event')}}" class="add-event-btn {% if request.endpoint in ['main.home','main.main_form'] %}is-visible{% endif %}">
+    <a href="{{url_for('schedule.schedule_form')}}" class="add-event-btn {% if request.endpoint in ['main.home','main.main_form'] %}is-visible{% endif %}">
         <i class="fa-solid fa-plus"></i>
     </a>
 
