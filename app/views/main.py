@@ -17,8 +17,80 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
-    return render_template('main/home.html')
+    # return render_template('main/home.html')
+  
+    current_user_id = 1
+    today = date.today()
+    
+    rec = []
+    percent = 0
+    remain_count = 0
+    
+    db = DatabaseManager()
+    db.connect()
+    
+    try:
+        # 1. プロパティからカーソルを直接取得（withは使わない）
+        cursor = db.cursor 
+        
+        # 2. 今日のタスク提案(Header)を取得
+        sql_suggestion = """
+            SELECT task_suggestion_id 
+            FROM t_task_suggestions 
+            WHERE user_id = %s AND suggestion_date = %s
+            LIMIT 1
+        """
+        cursor.execute(sql_suggestion, (current_user_id, today))
+        suggestion = cursor.fetchone()
 
+        if suggestion:
+            # 3. 提案詳細(Detail)とタスク名を結合して取得
+            sql_details = """
+                SELECT 
+                    t.task_name, 
+                    d.plan_min,
+                    d.actual_work_min
+                FROM t_task_suggestion_detail d
+                JOIN t_tasks t ON d.task_id = t.task_id
+                WHERE d.task_suggestion_id = %s
+            """
+            cursor.execute(sql_details, (suggestion['task_suggestion_id'],))
+            details = cursor.fetchall()
+
+            for row in details:
+                # actual_work_minがあれば完了(done)とみなす
+                is_done = True if row['actual_work_min'] and row['actual_work_min'] > 0 else False
+                rec.append({
+                    "name": row['task_name'],
+                    "time": f"{row['plan_min']}分",
+                    "done": is_done
+                })
+        
+        # カーソルを閉じる
+        cursor.close()
+
+        # 4. 達成度と残り数の計算
+        total_tasks = len(rec)
+        if total_tasks > 0:
+            completed_tasks = len([t for t in rec if t["done"]])
+            percent = int((completed_tasks / total_tasks) * 100)
+            remain_count = total_tasks - completed_tasks
+
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # クラスの設計に合わせて disconnect または close を呼ぶ
+        if hasattr(db, 'disconnect'):
+            db.disconnect()
+        elif hasattr(db, 'close'):
+            db.close()
+
+    return render_template(
+        'task/task_home.html', 
+        rec=rec, 
+        percent=percent, 
+        remain_count=remain_count
+    )
 
 # -----------------------------------------------------
 # タスク・固定予定登録画面遷移ボタン処理　（エンドポイント：'/add_event')  担当者名：日髙
