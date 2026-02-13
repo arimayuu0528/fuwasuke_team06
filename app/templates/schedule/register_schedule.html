@@ -37,7 +37,7 @@ content %}
             type="time"
             name="start_time"
             class="sched-time-input"
-            value="{{ task.start_time if task else '09:10' }}"
+            value="{{ task.start_time if task else '09:00' }}"
             required
           />
         </div>
@@ -47,11 +47,37 @@ content %}
             type="time"
             name="end_time"
             class="sched-time-input"
-            value="{{ task.end_time if task else '09:50' }}"
+            value="{{ task.end_time if task else '09:30' }}"
             required
           />
         </div>
       </div>
+    </div>
+
+    <div class="sched-form-section">
+      <div class="sched-form-label">繰り返しタイプ</div>
+      <div class="sched-category-selector">
+        <button
+          type="button"
+          class="sched-category-btn sched-category-active"
+          onclick="schedSelectRepeatType(this)"
+        >
+          毎日
+        </button>
+        <button
+          type="button"
+          class="sched-category-btn"
+          onclick="schedSelectRepeatType(this)"
+        >
+          毎週
+        </button>
+      </div>
+      <input
+        type="hidden"
+        name="repeat_type"
+        id="schedRepeatType"
+        value="毎日"
+      />
     </div>
 
     <div class="sched-form-section">
@@ -64,32 +90,57 @@ content %}
         </button>
         {% endfor %}
       </div>
-      <input type="hidden" name="active_days" id="schedActiveDays" value="" />
+      <input type="hidden" name="day_of_week" id="schedDayOfWeek" value="" />
     </div>
 
     <div class="sched-form-section">
-      <div class="sched-form-label">カテゴリー</div>
-      <div class="sched-category-selector">
-        {% for category in categories %}
-        <button
-          type="button"
-          class="sched-category-btn {% if loop.first %}sched-category-active{% endif %}"
-          onclick="schedSelectCategory(this)"
-        >
-          {{ category }}
-        </button>
-        {% endfor %}
-      </div>
+      <div class="sched-form-label">場所</div>
       <input
-        type="hidden"
-        name="category"
-        id="schedCategory"
-        value="{{ categories[0] if categories else 'セルフケア' }}"
+        type="text"
+        name="location"
+        class="sched-form-input"
+        placeholder="場所を入力してください（例：会議室A、ジム）"
+        value="{{ task.location if task else '' }}"
       />
     </div>
 
     <div class="sched-form-section">
-      <div class="sched-form-label">モチベーション</div>
+      <div class="sched-form-label">タグ</div>
+      <div class="sched-category-selector">
+        <button
+          type="button"
+          class="sched-category-btn sched-category-active"
+          onclick="schedSelectTag(this)"
+        >
+          仕事
+        </button>
+        <button
+          type="button"
+          class="sched-category-btn"
+          onclick="schedSelectTag(this)"
+        >
+          休憩
+        </button>
+        <button
+          type="button"
+          class="sched-category-btn"
+          onclick="schedSelectTag(this)"
+        >
+          健康
+        </button>
+        <button
+          type="button"
+          class="sched-category-btn"
+          onclick="schedSelectTag(this)"
+        >
+          趣味
+        </button>
+      </div>
+      <input type="hidden" name="tag" id="schedTag" value="仕事" />
+    </div>
+
+    <div class="sched-form-section">
+      <div class="sched-form-label">メモ</div>
       <textarea
         name="memo"
         class="sched-memo-textarea"
@@ -100,7 +151,7 @@ content %}
     </div>
 
     <div class="sched-info-box">
-      <span class="sched-info-icon"><img src="" alt="" /></span>
+      <span class="sched-info-icon">💡</span>
       <p class="sched-info-text">
         固定タスクは毎週決まった時間にカレンダーに追加されるよ
       </p>
@@ -119,24 +170,25 @@ content %}
     schedInitializeForm();
     schedSetupFormValidation();
     schedSetupTimeInputs();
-    schedSetupCategorySelection();
+    schedSetupTagSelection();
+    schedSetupRepeatTypeSelection();
     schedSetupWeekdaySelection();
     schedAddRippleEffects();
     schedSetupFormSubmission();
+    schedCalculateDuration();
   });
 
   // Initialize form with default values
   function schedInitializeForm() {
-    // Set initial active days value
-    schedUpdateActiveDaysInput();
+    // Set initial day of week value
+    schedUpdateDayOfWeekInput();
 
-    // Set initial category value
-    const activeCategory = document.querySelector(
+    // Set initial tag value
+    const activeTag = document.querySelector(
       ".sched-category-btn.sched-category-active",
     );
-    if (activeCategory) {
-      document.getElementById("schedCategory").value =
-        activeCategory.textContent.trim();
+    if (activeTag) {
+      document.getElementById("schedTag").value = activeTag.textContent.trim();
     }
 
     // Auto-focus on task name input
@@ -150,44 +202,31 @@ content %}
     }
   }
 
-  // Toggle weekday selection
-  // Toggle weekday selection
-  function schedToggleWeekday(btn) {
-    // トグル処理
-    btn.classList.toggle("sched-weekday-active");
-
-    // Add haptic feedback if available
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
-    }
-
-    // Update hidden input
-    schedUpdateActiveDaysInput();
-  }
-
-  // Update active days hidden input
-  function schedUpdateActiveDaysInput() {
+  // Update day of week hidden input
+  function schedUpdateDayOfWeekInput() {
     const actives = document.querySelectorAll(
       ".sched-weekday-btn.sched-weekday-active",
     );
     const days = Array.from(actives)
       .map((b) => b.dataset.day)
       .join("");
-    document.getElementById("schedActiveDays").value = days;
+    document.getElementById("schedDayOfWeek").value = days;
 
-    console.log("Selected days:", days); // デバッグ用
+    console.log("Selected days:", days);
   }
-  // Select category
-  function schedSelectCategory(btn) {
-    // Remove active class from all category buttons
-    const categoryBtns = document.querySelectorAll(".sched-category-btn");
-    categoryBtns.forEach((b) => b.classList.remove("sched-category-active"));
+
+  // Select tag
+  function schedSelectTag(btn) {
+    // Remove active class from all tag buttons in the same section
+    const tagSection = btn.closest(".sched-form-section");
+    const tagBtns = tagSection.querySelectorAll(".sched-category-btn");
+    tagBtns.forEach((b) => b.classList.remove("sched-category-active"));
 
     // Add active class to clicked button
     btn.classList.add("sched-category-active");
 
     // Update hidden input
-    document.getElementById("schedCategory").value = btn.textContent.trim();
+    document.getElementById("schedTag").value = btn.textContent.trim();
 
     // Add haptic feedback if available
     if (navigator.vibrate) {
@@ -196,6 +235,52 @@ content %}
 
     // Add ripple effect
     schedAddRipple(btn, event);
+  }
+
+  // Select repeat type
+  function schedSelectRepeatType(btn) {
+    // Remove active class from all repeat type buttons in the same section
+    const repeatSection = btn.closest(".sched-form-section");
+    const repeatBtns = repeatSection.querySelectorAll(".sched-category-btn");
+    repeatBtns.forEach((b) => b.classList.remove("sched-category-active"));
+
+    // Add active class to clicked button
+    btn.classList.add("sched-category-active");
+
+    // Update hidden input
+    document.getElementById("schedRepeatType").value = btn.textContent.trim();
+
+    // Add haptic feedback if available
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+
+    // Add ripple effect
+    schedAddRipple(btn, event);
+  }
+
+  // Calculate duration in minutes
+  function schedCalculateDuration() {
+    const startTime = document.querySelector('input[name="start_time"]');
+    const endTime = document.querySelector('input[name="end_time"]');
+
+    if (startTime && endTime) {
+      const calculateDurationMin = () => {
+        if (startTime.value && endTime.value) {
+          const start = schedTimeToMinutes(startTime.value);
+          const end = schedTimeToMinutes(endTime.value);
+
+          if (end > start) {
+            const duration = end - start;
+            console.log("Duration:", duration, "minutes");
+            // duration_minはサーバー側で計算するため、ここでは表示のみ
+          }
+        }
+      };
+
+      startTime.addEventListener("change", calculateDurationMin);
+      endTime.addEventListener("change", calculateDurationMin);
+    }
   }
 
   // Setup form validation
@@ -290,19 +375,28 @@ content %}
     }
   }
 
-  // Setup category selection
-  function schedSetupCategorySelection() {
-    const categoryBtns = document.querySelectorAll(".sched-category-btn");
+  // Setup tag selection
+  function schedSetupTagSelection() {
+    const tagBtns = document.querySelectorAll(".sched-category-btn");
 
-    categoryBtns.forEach((btn) => {
+    tagBtns.forEach((btn) => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
-        schedSelectCategory(this);
       });
     });
   }
 
-  // Setup weekday selection
+  // Setup repeat type selection
+  function schedSetupRepeatTypeSelection() {
+    const repeatBtns = document.querySelectorAll(".sched-category-btn");
+
+    repeatBtns.forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
+    });
+  }
+
   // Setup weekday selection
   function schedSetupWeekdaySelection() {
     const weekdayBtns = document.querySelectorAll(".sched-weekday-btn");
@@ -312,7 +406,7 @@ content %}
         e.preventDefault();
         e.stopPropagation();
 
-        // トグル処理
+        // Toggle処理
         this.classList.toggle("sched-weekday-active");
 
         // Add haptic feedback if available
@@ -321,7 +415,7 @@ content %}
         }
 
         // Update hidden input
-        schedUpdateActiveDaysInput();
+        schedUpdateDayOfWeekInput();
       });
     });
   }
@@ -399,9 +493,6 @@ content %}
   // Validate entire form
   function schedValidateForm() {
     const form = document.getElementById("schedTaskForm");
-    const requiredInputs = form.querySelectorAll(
-      "input[required], textarea[required]",
-    );
     let isValid = true;
 
     // Check task name
@@ -419,16 +510,23 @@ content %}
     }
 
     // Check at least one weekday selected
-    const activeDays = document.getElementById("schedActiveDays").value;
-    if (!activeDays) {
+    const dayOfWeek = document.getElementById("schedDayOfWeek").value;
+    if (!dayOfWeek) {
       schedShowToast("繰り返す曜日を選択してください", "warning");
       isValid = false;
     }
 
-    // Check category selected
-    const category = document.getElementById("schedCategory").value;
-    if (!category) {
-      schedShowToast("カテゴリーを選択してください", "warning");
+    // Check tag selected
+    const tag = document.getElementById("schedTag").value;
+    if (!tag) {
+      schedShowToast("タグを選択してください", "warning");
+      isValid = false;
+    }
+
+    // Check repeat type selected
+    const repeatType = document.getElementById("schedRepeatType").value;
+    if (!repeatType) {
+      schedShowToast("繰り返しタイプを選択してください", "warning");
       isValid = false;
     }
 
@@ -556,8 +654,9 @@ content %}
       data[key] = value;
     }
 
-    data.activeDays = document.getElementById("schedActiveDays").value;
-    data.category = document.getElementById("schedCategory").value;
+    data.dayOfWeek = document.getElementById("schedDayOfWeek").value;
+    data.tag = document.getElementById("schedTag").value;
+    data.repeatType = document.getElementById("schedRepeatType").value;
 
     localStorage.setItem("schedTaskDraft", JSON.stringify(data));
     console.log("Draft saved");
@@ -578,8 +677,8 @@ content %}
       });
 
       // Restore weekday selections
-      if (data.activeDays) {
-        const days = data.activeDays.split("");
+      if (data.dayOfWeek) {
+        const days = data.dayOfWeek.split("");
         const weekdayBtns = document.querySelectorAll(".sched-weekday-btn");
         weekdayBtns.forEach((btn) => {
           if (days.includes(btn.dataset.day)) {
@@ -590,14 +689,24 @@ content %}
         });
       }
 
-      // Restore category selection
-      if (data.category) {
-        const categoryBtns = document.querySelectorAll(".sched-category-btn");
-        categoryBtns.forEach((btn) => {
-          if (btn.textContent.trim() === data.category) {
+      // Restore tag selection
+      if (data.tag) {
+        const tagBtns = document.querySelectorAll(".sched-category-btn");
+        tagBtns.forEach((btn) => {
+          if (btn.textContent.trim() === data.tag) {
             btn.classList.add("sched-category-active");
           } else {
             btn.classList.remove("sched-category-active");
+          }
+        });
+      }
+
+      // Restore repeat type selection
+      if (data.repeatType) {
+        const repeatBtns = document.querySelectorAll(".sched-category-btn");
+        repeatBtns.forEach((btn) => {
+          if (btn.textContent.trim() === data.repeatType) {
+            btn.classList.add("sched-category-active");
           }
         });
       }
