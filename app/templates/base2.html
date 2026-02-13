@@ -13,7 +13,9 @@
 <body>
     <header class="fuwasuke_log1">
         {% block header_content %}
-        <div class="logo">ふわすけ</div>
+        {% if request.endpoint not in ['schedule.schedule_form','schedule.schedule_list'] %}
+            <div class="logo">ふわすけ</div>
+        {% endif %}
         {% endblock %}
     </header>
 
