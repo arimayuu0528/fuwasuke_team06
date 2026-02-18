@@ -19,23 +19,59 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
-    # return render_template('main/home.html')
-  
     current_user_id = 1
-    today = date.today()
     
+    # データ確認用に日付を固定（サンプルデータに合わせる）
+    today = date(2026, 1, 26)  
+
     rec = []
     percent = 0
     remain_count = 0
-    
+
     db = DatabaseManager()
     db.connect()
-    
+
     try:
-        # 1. プロパティからカーソルを直接取得（withは使わない）
-        cursor = db.cursor 
-        
-        # 2. 今日のタスク提案(Header)を取得
+        cursor = db.cursor
+
+        # ==========================
+        # 1. 今日の曜日
+        # ==========================
+        week_labels = ["日","月","火","水","木","金","土"]
+        today_week = week_labels[today.weekday()]
+
+        # ==========================
+        # 2. 固定予定（曜日判定＋キャンセル反映）
+        # ==========================
+        sql_fixed = """
+            SELECT m.master_id, m.title, m.start_time, m.end_time,
+                   i.is_cancelled
+            FROM t_fixed_schedule_masters m
+            LEFT JOIN t_fixed_schedule_instances i
+              ON m.master_id = i.master_id AND i.schedule_date = %s
+            WHERE m.user_id = %s
+              AND (m.repeat_type='毎日' OR m.day_of_week LIKE CONCAT('%%', %s, '%%'))
+            ORDER BY m.start_time
+        """
+        cursor.execute(sql_fixed, (today, current_user_id, today_week))
+        fixed_schedules = cursor.fetchall()
+
+        for item in fixed_schedules:
+            # インスタンスでキャンセルされていればスキップ
+            if item.get('is_cancelled'):
+                continue
+            s_time = item['start_time'].strftime('%H:%M') if hasattr(item['start_time'], 'strftime') else str(item['start_time'])
+            e_time = item['end_time'].strftime('%H:%M') if hasattr(item['end_time'], 'strftime') else str(item['end_time'])
+            rec.append({
+                "name": item['title'],
+                "time": f"{s_time} - {e_time}",
+                "done": False,
+                "is_fixed": True
+            })
+
+        # ==========================
+        # 3. 今日の提案タスク
+        # ==========================
         sql_suggestion = """
             SELECT task_suggestion_id 
             FROM t_task_suggestions 
@@ -46,12 +82,8 @@ def home():
         suggestion = cursor.fetchone()
 
         if suggestion:
-            # 3. 提案詳細(Detail)とタスク名を結合して取得
             sql_details = """
-                SELECT 
-                    t.task_name, 
-                    d.plan_min,
-                    d.actual_work_min
+                SELECT t.task_name, d.plan_min, d.actual_work_min
                 FROM t_task_suggestion_detail d
                 JOIN t_tasks t ON d.task_id = t.task_id
                 WHERE d.task_suggestion_id = %s
@@ -60,32 +92,30 @@ def home():
             details = cursor.fetchall()
 
             for row in details:
-                # actual_work_minがあれば完了(done)とみなす
-                is_done = True if row['actual_work_min'] and row['actual_work_min'] > 0 else False
+                is_done = True if row.get('actual_work_min') and row['actual_work_min'] > 0 else False
                 rec.append({
                     "name": row['task_name'],
                     "time": f"{row['plan_min']}分",
-                    "done": is_done
+                    "done": is_done,
+                    "is_fixed": False
                 })
-        
-        # カーソルを閉じる
+
         cursor.close()
 
-        # 4. 達成度と残り数の計算
-        total_tasks = len(rec)
+        # ==========================
+        # 4. 達成度と残り数（提案タスクのみ）
+        # ==========================
+        proposal_tasks = [t for t in rec if not t["is_fixed"]]
+        total_tasks = len(proposal_tasks)
         if total_tasks > 0:
-            completed_tasks = len([t for t in rec if t["done"]])
+            completed_tasks = len([t for t in proposal_tasks if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
             remain_count = total_tasks - completed_tasks
 
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        # クラスの設計に合わせて disconnect または close を呼ぶ
-        if hasattr(db, 'disconnect'):
-            db.disconnect()
-        elif hasattr(db, 'close'):
-            db.close()
+        db.disconnect()
 
     return render_template(
         'task/task_home.html', 
@@ -93,6 +123,8 @@ def home():
         percent=percent, 
         remain_count=remain_count
     )
+
+
 
 # -----------------------------------------------------
 # タスク・固定予定登録画面遷移ボタン処理　（エンドポイント：'/add_event')  担当者名：日髙
