@@ -16,6 +16,10 @@
         margin-bottom: 5%;
         .username{
             font-size: 32px;
+            font-weight: lighter;
+            span{
+                font-weight: bolder;
+            }
         }
         .today_mood{
             font-size: 14px;
