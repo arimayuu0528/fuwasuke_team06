@@ -67,7 +67,7 @@ def create_app():
             "mood.register_mood_form",
             "mood.register_mood_process",
 
-            # 'mood.register',   # ← 修正
+            'mood.register',   # ← 修正
             'schedule_list',
 
             'auth.register_process', 
