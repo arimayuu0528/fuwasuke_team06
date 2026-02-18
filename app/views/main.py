@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template
+from flask import Blueprint,render_template,session,redirect,url_for,request
 from app.db import DatabaseManager
 
 from flask import render_template
@@ -15,7 +15,7 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 
 
 # -----------------------------------------------------
-# ホーム画面処理　（エンドポイント：'/home')  担当者名：日髙
+# ホーム画面処理　（エンドポイント：'/home')  担当者名：
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
@@ -191,80 +191,67 @@ def main_form():
 
 
 # -----------------------------------------------------
-# レポート画面表示処理　（エンドポイント：'/report')  担当者名：日髙
-# -----------------------------------------------------
-
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="huwasuke_db"
-    )
-
-
-@main_bp.route("/mood_graph/<int:user_id>")
-def mood_graph(user_id):
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # 直近7日分を取得
-    query = """
-        SELECT DATE(mood_date) as d, mood_point
-        FROM t_today_moods
-        WHERE user_id = %s
-        AND mood_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-        ORDER BY d
-    """
-
-    cursor.execute(query, (user_id,))
-    results = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    # DB結果を辞書化
-    mood_dict = {}
-    for row in results:
-        mood_dict[row["d"]] = row["mood_point"]
-
-    # 直近7日をすべて生成（欠け日も埋める）
-    today = datetime.today().date()
-    dates = []
-    values = []
-
-    for i in range(6, -1, -1):  # 7日前〜今日
-        day = today - timedelta(days=i)
-        dates.append(day.strftime("%m-%d"))
-        values.append(mood_dict.get(day, None))  # 無い日は None
-
-    return render_template(
-        "mood/mood_graph.html",
-        dates=dates,
-        values=values
-    )
-
-
-# -----------------------------------------------------
 # マイページ画面表示処理　（エンドポイント：'/mypage')  担当者名：日髙
 # -----------------------------------------------------
 # main.py の末尾付近に追加、または既存のmypageがあれば修正
 
-@main_bp.route("/mypage")
+@main_bp.route("/mypage", methods=["GET","POST"])
 def mypage():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return redirect(url_for('auth.login_form'))
+
     db = DatabaseManager()
     db.connect()
+
+    if request.method == "POST":
+        wakeup_time = request.form.get("wakeup_time")
+        sleep_time = request.form.get("sleep_time")
+
+        update_sql = "UPDATE t_users SET wakeup_time = %s, sleep_time = %s WHERE user_id = %s"
+        db.execute_query(update_sql,(wakeup_time,sleep_time,user_id))
+        return redirect(url_for('main.mypage'))
     
-    # 本来はセッションからユーザーIDを取得しますが、一旦 ID=1 のユーザーを取得
-    user_id = 1 
-    user = db.fetch_one("SELECT user_name, email FROM t_users WHERE user_id = %s", (user_id,))
+    user = db.fetch_one("SELECT user_name, email, wakeup_time, sleep_time FROM t_users WHERE user_id = %s" , (user_id,))
+
+    if user:
+        if user.get('wakeup_time'):
+            total_seconds = int(user['wakeup_time'].total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            user['wakeup_time'] = f"{hours:02}:{minutes:02}"
+
+        if user.get('sleep_time'):
+            total_seconds = int(user['sleep_time'].total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            user['sleep_time'] = f"{hours:02}:{minutes:02}"
+
+    today = date.today()
+    sql_mood = """
+        SELECT mood
+        FROM t_today_moods
+        WHERE user_id = %s AND DATE(mood_date) = %s
+        ORDER BY mood_date DESC LIMIT 1
+    """
+    mood_data = db.fetch_one(sql_mood,(user_id,today))
     
     db.disconnect()
 
-    # もしユーザーが見つからない場合のデフォルト値
-    if not user:
-        user = {'user_name': 'ゲストユーザー', 'email': '-'}
+    
 
-    return render_template('main/mypage.html', user=user)
+    mood_map = {
+        "genk" : "元気",
+        "futu" : "普通",
+        "waru" : "悪い"
+    }
+
+    display_mood = "未登録"
+    if mood_data:
+        display_mood = mood_map.get(mood_data['mood'],mood_data['mood'])
+
+    print(display_mood)
+
+
+    return render_template('main/mypage.html', user=user,today_mood=display_mood)

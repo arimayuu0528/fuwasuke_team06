@@ -12,8 +12,8 @@
 {% block content %}
 <main class="mypage-content">
     <div class="profile-header">
-        <h3 class="username">{{ user.user_name if user else "ユーザー名" }}さん</h3>
-        <p class="today_mood">今日の気分：元気</p>
+        <h3 class="username">{{ user.user_name if user else "ユーザー名" }}<span>さん</span></h3>
+        <p class="today_mood">今日の気分：{{ today_mood }}</p>
     </div>
 
     <div class="today_task">
@@ -37,7 +37,7 @@
 
     <div class="setting_life_rhythm">
     <h3>生活リズムの設定</h3>
-    <form class="life_rhythm_form">
+    <form class="life_rhythm_form" method="POST" action="{{url_for('main.mypage')}}">
         <div class="setting_items">
             <div class="setting_time">
                 <div class="setting_item">
@@ -45,7 +45,7 @@
                         <i class="fa-solid fa-sun"></i>
                         <p>起床時間</p>
                     </div>
-                    <input type="time" name="wakeup_time" value="07:00" class="time_input">
+                    <input type="time" name="wakeup_time" value="{{ user.wakeup_time }}" class="time_input">
                 </div>
                 
                 <div class="setting_item">
@@ -53,7 +53,7 @@
                         <i class="fa-solid fa-moon"></i>
                         <p>就寝時間</p>
                     </div>
-                    <input type="time" name="sleep_time" value="23:00" class="time_input">
+                    <input type="time" name="sleep_time" value="{{ user.sleep_time }}" class="time_input">
                 </div>
             </div>
             
