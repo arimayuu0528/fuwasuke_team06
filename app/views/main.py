@@ -107,6 +107,10 @@ def home():
 # -----------------------------------------------------
 @main_bp.route("/calendar")
 def main_form():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('auth.login_form'))
+    
     db = DatabaseManager()
     db.connect()
 
