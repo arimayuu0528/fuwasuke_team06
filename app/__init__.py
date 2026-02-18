@@ -93,12 +93,21 @@ def create_app():
 
 
         # 今日の気分が無い（未登録）の場合:
+        # if not mood:
+        #     # # 気分登録フォームへ誘導
+        #     try:
+        #         return redirect(url_for("mood.register_mood_form"))
+        #     except BuildError:
+        #         return redirect(url_for('mood.register'))  # ← 修正
+
         if not mood:
-            # # 気分登録フォームへ誘導
-            try:
-                return redirect(url_for("mood.register_mood_form"))
-            except BuildError:
-                return redirect(url_for('mood.register'))  # ← 修正
+            db.disconnect()
+            return redirect(url_for("mood.register_mood_form"))
+        
+
+        
+
+
 
 
         # =============================
