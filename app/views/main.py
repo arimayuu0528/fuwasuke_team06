@@ -5,6 +5,8 @@ from flask import render_template
 from datetime import datetime, date, timedelta
 import jpholiday
 
+import mysql.connector
+
 # Blueprintオブジェクト作成
 main_bp = Blueprint('main',__name__,url_prefix='/main')
 
@@ -17,15 +19,87 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
-    return render_template('main/home.html')
+    # return render_template('main/home.html')
+  
+    current_user_id = 1
+    today = date.today()
+    
+    rec = []
+    percent = 0
+    remain_count = 0
+    
+    db = DatabaseManager()
+    db.connect()
+    
+    try:
+        # 1. プロパティからカーソルを直接取得（withは使わない）
+        cursor = db.cursor 
+        
+        # 2. 今日のタスク提案(Header)を取得
+        sql_suggestion = """
+            SELECT task_suggestion_id 
+            FROM t_task_suggestions 
+            WHERE user_id = %s AND suggestion_date = %s
+            LIMIT 1
+        """
+        cursor.execute(sql_suggestion, (current_user_id, today))
+        suggestion = cursor.fetchone()
 
+        if suggestion:
+            # 3. 提案詳細(Detail)とタスク名を結合して取得
+            sql_details = """
+                SELECT 
+                    t.task_name, 
+                    d.plan_min,
+                    d.actual_work_min
+                FROM t_task_suggestion_detail d
+                JOIN t_tasks t ON d.task_id = t.task_id
+                WHERE d.task_suggestion_id = %s
+            """
+            cursor.execute(sql_details, (suggestion['task_suggestion_id'],))
+            details = cursor.fetchall()
+
+            for row in details:
+                # actual_work_minがあれば完了(done)とみなす
+                is_done = True if row['actual_work_min'] and row['actual_work_min'] > 0 else False
+                rec.append({
+                    "name": row['task_name'],
+                    "time": f"{row['plan_min']}分",
+                    "done": is_done
+                })
+        
+        # カーソルを閉じる
+        cursor.close()
+
+        # 4. 達成度と残り数の計算
+        total_tasks = len(rec)
+        if total_tasks > 0:
+            completed_tasks = len([t for t in rec if t["done"]])
+            percent = int((completed_tasks / total_tasks) * 100)
+            remain_count = total_tasks - completed_tasks
+
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        # クラスの設計に合わせて disconnect または close を呼ぶ
+        if hasattr(db, 'disconnect'):
+            db.disconnect()
+        elif hasattr(db, 'close'):
+            db.close()
+
+    return render_template(
+        'task/task_home.html', 
+        rec=rec, 
+        percent=percent, 
+        remain_count=remain_count
+    )
 
 # -----------------------------------------------------
 # タスク・固定予定登録画面遷移ボタン処理　（エンドポイント：'/add_event')  担当者名：日髙
 # -----------------------------------------------------
-@main_bp.route("/add_event")
-def add_event():
-    return render_template('task/register_task.html')
+# @main_bp.route("/add_event")
+# def add_event():
+#     return render_template('schedule/register_schedule.html')
 
 
 # -----------------------------------------------------
@@ -119,9 +193,58 @@ def main_form():
 # -----------------------------------------------------
 # レポート画面表示処理　（エンドポイント：'/report')  担当者名：日髙
 # -----------------------------------------------------
-@main_bp.route('/report')
-def report():
-    return render_template('mood/mood_graph.html')
+
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="huwasuke_db"
+    )
+
+
+@main_bp.route("/mood_graph/<int:user_id>")
+def mood_graph(user_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 直近7日分を取得
+    query = """
+        SELECT DATE(mood_date) as d, mood_point
+        FROM t_today_moods
+        WHERE user_id = %s
+        AND mood_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ORDER BY d
+    """
+
+    cursor.execute(query, (user_id,))
+    results = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # DB結果を辞書化
+    mood_dict = {}
+    for row in results:
+        mood_dict[row["d"]] = row["mood_point"]
+
+    # 直近7日をすべて生成（欠け日も埋める）
+    today = datetime.today().date()
+    dates = []
+    values = []
+
+    for i in range(6, -1, -1):  # 7日前〜今日
+        day = today - timedelta(days=i)
+        dates.append(day.strftime("%m-%d"))
+        values.append(mood_dict.get(day, None))  # 無い日は None
+
+    return render_template(
+        "mood/mood_graph.html",
+        dates=dates,
+        values=values
+    )
 
 
 # -----------------------------------------------------

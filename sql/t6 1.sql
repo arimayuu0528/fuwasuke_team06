@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS huwasuke_db;
 CREATE DATABASE huwasuke_db DEFAULT CHARACTER SET utf8mb4;
 USE huwasuke_db;
 
@@ -167,6 +168,12 @@ INSERT INTO t_users (email, user_name, password, wakeup_time, sleep_time) VALUES
 -- motivation_id ： 1(かんたん) 2(ふつう) 3(がんばる)
 INSERT INTO t_tasks (user_id, task_name, motivation_id ,deadline, duration_min, remaining_min, created_date, category_name) VALUES
 (1,'レポート作成',1,'2026-01-31',120,120,'2026-01-26','仕事'),
+(1, '会議資料準備', 2, '2026-02-05', 90, 90, '2026-01-27', '仕事'),
+(1, '買い物リスト作成', 3, '2026-01-30', 30, 30, '2026-01-26', '生活'),
+(1, 'ジムトレーニング', 3, '2026-01-29', 60, 60, '2026-01-26', '健康'),
+(1, '友人への誕生日メッセージ', 2, '2026-02-01', 20, 20, '2026-01-26', 'プライベート'),
+(1, '確定申告の準備', 1, '2026-02-15', 180, 180, '2026-01-28', '生活'),
+(1, '読書（技術書）', 3, '2026-02-10', 45, 45, '2026-01-26', '学習'),
 (2,'コードレビュー',2,'2026-01-28',60,60,'2026-01-25','仕事'),
 (3,'会議準備',3,'2026-02-02',90,90,'2026-01-26','仕事');
 

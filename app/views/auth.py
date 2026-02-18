@@ -1,9 +1,14 @@
 from flask import Blueprint,render_template,request,session,redirect,url_for
 from app.db import DatabaseManager
+from datetime import timedelta
 
 # Blueprintオブジェクト作成
 auth_bp = Blueprint('auth',__name__,url_prefix='/auth')
 
+# Blueprint内でセッション有効期限を設定（30日）
+@auth_bp.before_app_request
+def make_session_permanent():
+    session.permanent = True
 
 # -----------------------------------------------------
 # ログイン画面表示　（エンドポイント：' ')  担当者名：
@@ -44,7 +49,8 @@ def login_process():
             error='メールアドレスまたはパスワードが違います'
         )
     
-    #sessionに保存
+    #sessionに保存、30日間保持
+    session.permanent = True
     session["user_id"] = user["user_id"]
     session["user_name"] = user["user_name"]
 

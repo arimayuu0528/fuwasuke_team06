@@ -3,22 +3,27 @@
 # Descriptions  : Application Factory
 # ==========================================================
 from flask import Flask, render_template,session,request,redirect,url_for
-from datetime import date
+from datetime import date, timedelta 
 from werkzeug.routing import BuildError
 from app.db import DatabaseManager
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
- 
+
     # 1) 共有デフォルト（Git管理）
     app.config.from_object("app.config.Config")
  
     # 2) ローカル秘密（Git管理しない）※あれば上書き
     app.config.from_pyfile("config.py", silent=True)
- 
-  
-   
 
+# --- 修正箇所：設定を config 辞書に直接入れる ---
+    # Secret Keyが設定されていないとセッションは保存されません
+    if not app.config.get("SECRET_KEY"):
+        app.config["SECRET_KEY"] = "your-very-secret-key-12345" 
+    
+    # 30日間の有効期限を設定
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+    # --------------------------------------------
 
     # --- Blueprintの登録 ---
     # viewsパッケージからproductsとauthのBlueprintをインポート
@@ -62,7 +67,7 @@ def create_app():
             "mood.register_mood_form",
             "mood.register_mood_process",
 
-            'mood.register',   # ← 修正
+            # 'mood.register',   # ← 修正
             'schedule_list',
 
             'auth.register_process', 
@@ -71,6 +76,7 @@ def create_app():
             'static'
         ):
             return
+
 
         # セッションにuser_idが無い＝未ログイン
         if not session.get('user_id'):
@@ -101,6 +107,7 @@ def create_app():
         #         return redirect(url_for('mood.register'))  # ← 修正
 
         if not mood:
+<<<<<<< HEAD
             db.disconnect()
             return redirect(url_for("mood.register_mood_form"))
         
@@ -108,6 +115,13 @@ def create_app():
         
 
 
+=======
+            # 気分登録フォームへ誘導
+            try:
+                return redirect(url_for("mood.register_mood_form"))
+            except BuildError:
+                return redirect(url_for('mood.register'))  # ← 修正
+>>>>>>> 16e211aeece615c5510ce35f1c1f142e1ce580c2
 
 
         # =============================
