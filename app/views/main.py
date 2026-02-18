@@ -191,6 +191,64 @@ def main_form():
 
 
 # -----------------------------------------------------
+# レポート画面表示処理　（エンドポイント：'/report')  担当者名：日髙
+# -----------------------------------------------------
+
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="huwasuke_db"
+    )
+
+
+@main_bp.route("/mood_graph/<int:user_id>")
+def mood_graph(user_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # 直近7日分を取得
+    query = """
+        SELECT DATE(mood_date) as d, mood_point
+        FROM t_today_moods
+        WHERE user_id = %s
+        AND mood_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ORDER BY d
+    """
+
+    cursor.execute(query, (user_id,))
+    results = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # DB結果を辞書化
+    mood_dict = {}
+    for row in results:
+        mood_dict[row["d"]] = row["mood_point"]
+
+    # 直近7日をすべて生成（欠け日も埋める）
+    today = datetime.today().date()
+    dates = []
+    values = []
+
+    for i in range(6, -1, -1):  # 7日前〜今日
+        day = today - timedelta(days=i)
+        dates.append(day.strftime("%m-%d"))
+        values.append(mood_dict.get(day, None))  # 無い日は None
+
+    return render_template(
+        "mood/mood_graph.html",
+        dates=dates,
+        values=values
+    )
+
+
+
+# -----------------------------------------------------
 # マイページ画面表示処理　（エンドポイント：'/mypage')  担当者名：日髙
 # -----------------------------------------------------
 # main.py の末尾付近に追加、または既存のmypageがあれば修正

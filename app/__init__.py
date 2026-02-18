@@ -107,21 +107,11 @@ def create_app():
         #         return redirect(url_for('mood.register'))  # ← 修正
 
         if not mood:
-<<<<<<< HEAD
-            db.disconnect()
-            return redirect(url_for("mood.register_mood_form"))
-        
-
-        
-
-
-=======
             # 気分登録フォームへ誘導
             try:
                 return redirect(url_for("mood.register_mood_form"))
             except BuildError:
                 return redirect(url_for('mood.register'))  # ← 修正
->>>>>>> 16e211aeece615c5510ce35f1c1f142e1ce580c2
 
 
         # =============================
