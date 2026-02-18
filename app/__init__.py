@@ -97,6 +97,13 @@ def create_app():
         mood = db.fetch_one(sql, (session['user_id'], today))
         db.disconnect()
 
+        if mood and endpoint in (
+            "mood.register_mood_form",
+            "mood.register_mood_process",
+            "mood.register"
+        ):
+            return redirect(url_for("index"))
+
 
         # 今日の気分が無い（未登録）の場合:
         if not mood:
@@ -105,6 +112,7 @@ def create_app():
                 return redirect(url_for("mood.register_mood_form"))
             except BuildError:
                 return redirect(url_for('mood.register'))  # ← 修正
+
 
 
         # =============================

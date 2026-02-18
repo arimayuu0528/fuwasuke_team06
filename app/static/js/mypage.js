@@ -44,18 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault(); 
-            if (modal) modal.style.display = 'flex';
+            if (modal){
+                modal.style.display = 'flex';
+            }
         });
     }
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            if (modal) modal.style.display = 'none';
-            // 現在の値を新しい初期値として保存（ボタンを再度グレーアウト）
-            inputs.forEach(input => {
-                initialValues[input.name] = input.value;
-            });
-            if (saveButton) saveButton.disabled = true;
+            modal.style.display = 'none';
+            form.submit();
         });
     }
 
