@@ -19,59 +19,42 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
-    current_user_id = 1
-    
-    # データ確認用に日付を固定（サンプルデータに合わせる）
-    today = date(2026, 1, 26)  
+    current_user_id = session.get("user_id")
+    today = date(2026, 1, 26)
 
     rec = []
-    percent = 0
-    remain_count = 0
-
     db = DatabaseManager()
     db.connect()
 
     try:
         cursor = db.cursor
 
-        # ==========================
-        # 1. 今日の曜日
-        # ==========================
-        week_labels = ["日","月","火","水","木","金","土"]
-        today_week = week_labels[today.weekday()]
-
-        # ==========================
-        # 2. 固定予定（曜日判定＋キャンセル反映）
-        # ==========================
-        sql_fixed = """
-            SELECT m.master_id, m.title, m.start_time, m.end_time,
-                   i.is_cancelled
-            FROM t_fixed_schedule_masters m
-            LEFT JOIN t_fixed_schedule_instances i
-              ON m.master_id = i.master_id AND i.schedule_date = %s
-            WHERE m.user_id = %s
-              AND (m.repeat_type='毎日' OR m.day_of_week LIKE CONCAT('%%', %s, '%%'))
-            ORDER BY m.start_time
+        # --- 1. 固定予定マスターを全件取得して rec に追加 ---
+        sql_fixed_master = """
+            SELECT master_id, title, start_time, end_time, repeat_type, day_of_week
+            FROM t_fixed_schedule_masters
+            WHERE user_id = %s
         """
-        cursor.execute(sql_fixed, (today, current_user_id, today_week))
-        fixed_schedules = cursor.fetchall()
+        cursor.execute(sql_fixed_master, (current_user_id,))
+        fixed_masters_raw = cursor.fetchall()
 
-        for item in fixed_schedules:
-            # インスタンスでキャンセルされていればスキップ
-            if item.get('is_cancelled'):
-                continue
-            s_time = item['start_time'].strftime('%H:%M') if hasattr(item['start_time'], 'strftime') else str(item['start_time'])
-            e_time = item['end_time'].strftime('%H:%M') if hasattr(item['end_time'], 'strftime') else str(item['end_time'])
+        for item in fixed_masters_raw:
+            # 時刻のフォーマット
+            s_time = item["start_time"].strftime("%H:%M") if hasattr(item["start_time"], "strftime") else str(item["start_time"])[:5]
+            e_time = item["end_time"].strftime("%H:%M") if hasattr(item["end_time"], "strftime") else str(item["end_time"])[:5]
+            
+            # 重要：JavaScriptで判別できるように全ての情報を一つの辞書にまとめる
             rec.append({
-                "name": item['title'],
+                "id": item["master_id"],
+                "name": item["title"],
                 "time": f"{s_time} - {e_time}",
-                "done": False,
-                "is_fixed": True
+                "done": False, # 固定予定の初期値
+                "is_fixed": True, # 固定予定フラグ
+                "repeat_type": item["repeat_type"],
+                "day_of_week": item["day_of_week"] # "月火水" など
             })
 
-        # ==========================
-        # 3. 今日の提案タスク
-        # ==========================
+        # --- 2. 今日の提案タスクを取得して rec に追加 ---
         sql_suggestion = """
             SELECT task_suggestion_id 
             FROM t_task_suggestions 
@@ -83,30 +66,31 @@ def home():
 
         if suggestion:
             sql_details = """
-                SELECT t.task_name, d.plan_min, d.actual_work_min
+                SELECT t.task_id, t.task_name, d.plan_min, d.actual_work_min
                 FROM t_task_suggestion_detail d
                 JOIN t_tasks t ON d.task_id = t.task_id
                 WHERE d.task_suggestion_id = %s
             """
-            cursor.execute(sql_details, (suggestion['task_suggestion_id'],))
+            cursor.execute(sql_details, (suggestion["task_suggestion_id"],))
             details = cursor.fetchall()
 
             for row in details:
-                is_done = True if row.get('actual_work_min') and row['actual_work_min'] > 0 else False
+                is_done = bool(row.get("actual_work_min") and row["actual_work_min"] > 0)
                 rec.append({
-                    "name": row['task_name'],
+                    "id": row["task_id"],
+                    "name": row["task_name"],
                     "time": f"{row['plan_min']}分",
                     "done": is_done,
-                    "is_fixed": False
+                    "is_fixed": False,
+                    "repeat_type": None,
+                    "day_of_week": None
                 })
 
-        cursor.close()
-
-        # ==========================
-        # 4. 達成度と残り数（提案タスクのみ）
-        # ==========================
+        # 達成度計算（提案タスクのみで計算する場合）
         proposal_tasks = [t for t in rec if not t["is_fixed"]]
         total_tasks = len(proposal_tasks)
+        percent = 0
+        remain_count = 0
         if total_tasks > 0:
             completed_tasks = len([t for t in proposal_tasks if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
@@ -116,13 +100,15 @@ def home():
         print(f"Error: {e}")
     finally:
         db.disconnect()
-
+    print(rec)
     return render_template(
-        'task/task_home.html', 
-        rec=rec, 
-        percent=percent, 
+        "task/task_home.html",
+        rec=rec, # これで固定と提案の両方がJSに渡る
+        percent=percent,
         remain_count=remain_count
     )
+
+
 
 
 
@@ -146,13 +132,11 @@ def main_form():
     db = DatabaseManager()
     db.connect()
 
-    # 1. t_fixed_schedule_mastersのみを使用。schedule_name, day_of_weekを取得
     sql_masters = """
-        SELECT title, day_of_week, DATE(created_at) as created_date
+        SELECT title, start_time, end_time, location, tag, memo, day_of_week, DATE(created_at) as created_date
         FROM t_fixed_schedule_masters
         WHERE user_id = %s AND is_cancelled = 0
     """
-    # fetch_allの結果がNoneでも空リストとして扱う（NoneTypeエラー対策）
     masters = db.fetch_all(sql_masters, (user_id,)) or []
 
     print(masters)
@@ -160,8 +144,9 @@ def main_form():
 
     # 2. 表示範囲の設定
     today = date.today()
-    start_date = (today - timedelta(days=90)).replace(day=1)
-    end_date = (today + timedelta(days=120)).replace(day=1) - timedelta(days=1)
+    start_date = (today - timedelta(days=365)).replace(day=1)
+    end_date = (today + timedelta(days=365)).replace(day=1) - timedelta(days=31)
+    end_date = end_date.replace(day=1) - timedelta(days=1)
 
     events_json = {}
     holidays_json = {}
@@ -190,8 +175,28 @@ def main_form():
             
             # 条件：作成日以降、かつ、マスタの曜日文字列に今日の漢字が含まれているか
             if curr >= m_created and current_kanji in m['day_of_week']:
-                event_title = m.get('title')
-                day_events.append(m['title'])
+                def format_timedelta(td):
+                    if td is None:
+                        return ""
+                    if isinstance(td, timedelta):
+                        total_seconds = int(td.total_seconds())
+                        hours = total_seconds // 3600
+                        minutes = (total_seconds % 3600) // 60
+                        return f"{hours:02}:{minutes:02}"
+                    if hasattr(td, 'strftime'):
+                        return td.strftime('%H:%M')
+                    return str(td)
+                
+                s_time = format_timedelta(m['start_time'])
+                e_time = format_timedelta(m['end_time'])
+                day_events.append({
+                    "title":m['title'],
+                    "start_time":s_time,
+                    "end_time":e_time,
+                    "location":m['location'] or "",
+                    "tag":m['tag'] or "",
+                    "memo":m['memo'] or ""
+                })
             
 
         # 予定リストに中身があれば、日付をキーにして保存
