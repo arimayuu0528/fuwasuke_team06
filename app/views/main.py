@@ -160,8 +160,9 @@ def main_form():
 
     # 2. 表示範囲の設定
     today = date.today()
-    start_date = (today - timedelta(days=90)).replace(day=1)
-    end_date = (today + timedelta(days=120)).replace(day=1) - timedelta(days=1)
+    start_date = (today - timedelta(days=365)).replace(day=1)
+    end_date = (today + timedelta(days=365)).replace(day=1) - timedelta(days=31)
+    end_date = end_date.replace(day=1) - timedelta(days=1)
 
     events_json = {}
     holidays_json = {}
