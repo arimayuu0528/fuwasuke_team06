@@ -395,6 +395,7 @@ input[type=radio]:checked + .mood-card {
 
 /* 決定ボタン */
 .decide-button {
+  text-align: center;
   width: 100%;
   background: linear-gradient(135deg, #ffb966 0%, #f4a04c 100%);
   color: white;
