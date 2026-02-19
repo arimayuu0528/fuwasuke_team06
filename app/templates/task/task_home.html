@@ -29,7 +29,7 @@
     <div class="progress-card">
         <div class="progress-info">
             <span class="label">今日の達成度</span>
-            <span class="percent-text">{{ percent | default(75) }}%</span>
+            <span class="percent-text" id="percentText">{{ percent | default(75) }}%</span>
         </div>
         <div class="progress-track">
             <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent | default(75) }}%;"></div>
@@ -37,11 +37,13 @@
         
         <p class="progress-hint">
             <span class="star">✦</span> 
+            <span id="remainHint">
             {% if remain_count and remain_count > 0 %}
                 あと<span id="remainCount">{{ remain_count }}</span>つのタスクで目標達成です
             {% else %}
                 今日のタスクはすべて達成です！
             {% endif %}
+            </span>
         </p>
     </div>
 
@@ -54,26 +56,7 @@
         </div>
 
         <div id="task-list" class="task-container" style="display: none;">
-            {% for task in rec %}
-            <div class="task-card">
-                <div class="task-check">
-                    {% if task.done %}
-                        <i class="fa-solid fa-check done-icon"></i>
-                    {% else %}
-                        <span class="circle-icon">○</span>
-                    {% endif %}
-                </div>
-                <div class="task-body">
-                    <p class="task-title">
-                        {{ task.name }}
-                        {% if task.is_fixed %}
-                            <span class="fixed-label">固定</span>
-                        {% endif %}
-                    </p>
-                    <p class="task-time">{{ task.time }}</p>
-                </div>
-            </div>
-            {% endfor %}
+            <!-- JSで描画 -->
         </div>
     </div>
 </div>
@@ -104,16 +87,10 @@
 </div>
 
 <style>
-.fixed-label {
-    background: #f9dab5;
-    color: #8a745d;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 10px;
-    margin-left: 6px;
-}
+/* 固定ラベル */
+.fixed-label { background: #f9dab5; color: #8a745d; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 6px; }
 
-/* 以下既存CSSをそのまま保持 */
+/* 既存CSS保持 */
 .container { padding: 20px; max-width: 400px; margin: 0 auto; padding-bottom: 100px; }
 .header-msg-row, .modal-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .message-bubble, .modal-bubble { background: #fffce7; border: 2px solid #f9dab5; border-radius: 18px; padding: 10px 12px; font-size: 12px !important; color: #8a745d; line-height: 1.4; position: relative; flex: 1; }
@@ -126,7 +103,7 @@
 .progress-card { background: #fff9f0; border-radius: 35px; padding: 25px; border: 1px solid #ffe8d0; margin-bottom: 30px; }
 .progress-info { display: flex; justify-content: space-between; margin-bottom: 10px; color: #f19710; font-weight: bold; }
 .progress-track { background: #e0e0e0; height: 14px; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
-.progress-bar-fill { background: #fbc02d; height: 100%; transition: width 0.8s ease; }
+.progress-bar-fill { background: #fbc02d; height: 100%; transition: width 0.3s ease; }
 .progress-hint { font-size: 13px; color: #666; }
 .star { color: #333; margin-right: 4px; }
 .action-btn { display: block; width: 80%; margin: 0 auto 30px; background: #f09540; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 0 #d47e2a; cursor: pointer; }
@@ -153,57 +130,153 @@
 </style>
 
 <script>
-(function() {
-    function initHome() {
-        let displayDate = new Date();
-        const dayLabels = ["日","月","火","水","木","金","土"];
+(function(){
+    // 1. 初期化：今日の日付を取得
+    let displayDate = new Date();
+    const dayLabels = ["日","月","火","水","木","金","土"];
+    
+    // Jinja2から渡された rec (固定+提案の混合リスト) を取得
+    const allTasks = {{ rec | tojson | safe }};
 
-        function refreshDateDisplay() {
-            const m = displayDate.getMonth() + 1;
-            const d = displayDate.getDate();
-            const w = dayLabels[displayDate.getDay()];
-            $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+    function refreshDateDisplay(){
+        const m = displayDate.getMonth() + 1;
+        const d = displayDate.getDate();
+        const wIndex = displayDate.getDay();
+        const w = dayLabels[wIndex];
+        
+        // ヘッダーの日付表示を更新
+        $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+        
+        // 現在の曜日に基づいてタスクを描画
+        renderTasksForDate(w);
+    }
+
+    function renderTasksForDate(currentWeek){
+        const $list = $('#task-list');
+        $list.empty();
+
+        let displayTasks = [];
+
+        allTasks.forEach(task => {
+            if(task.is_fixed){
+                // 固定タスク：毎日設定、または設定された曜日文字列に現在の曜日が含まれているか判定
+                if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
+                    displayTasks.push(task);
+                }
+            } else {
+                // 提案タスク：(現在はバックエンドで取得したものをそのまま表示)
+                displayTasks.push(task);
+            }
+        });
+
+        // 描画処理
+        displayTasks.forEach(task => {
+            const html = `
+            <div class="task-card">
+                <div class="task-check">
+                    <input type="checkbox" class="task-checkbox" 
+                        data-task-id="${task.id}"
+                        data-is-fixed="${task.is_fixed}"
+                        ${task.done ? "checked" : ""}>
+                </div>
+                <div class="task-body">
+                    <p class="task-title">${task.name} ${task.is_fixed ? '<span class="fixed-label">固定</span>' : ''}</p>
+                    <p class="task-time">${task.time}</p>
+                </div>
+            </div>`;
+            $list.append(html);
+        });
+
+        // プログレスバーの更新
+        updateProgress();
+        // チェックボックスの監視を再設定
+        attachCheckboxHandler();
+    }
+
+    function updateProgress(){
+        const $list = $('#task-list');
+        const checkboxes = $list.find('.task-checkbox');
+        const total = checkboxes.length;
+        const completed = checkboxes.filter(':checked').length;
+        const percent = total > 0 ? Math.floor((completed / total) * 100) : 0;
+        const remain = total - completed;
+
+        $('#dynamicBar').css('width', percent + '%');
+        $('#percentText').text(percent + '%');
+        if(remain > 0){
+            $('#remainHint').html(`あと<span id="remainCount">${remain}</span>つのタスクで目標達成です`);
+        } else {
+            $('#remainHint').text('今日のタスクはすべて達成です！');
         }
+    }
+
+    function attachCheckboxHandler(){
+        $('.task-checkbox').off('change').on('change', function(){
+            const taskId = $(this).data('task-id');
+            const isFixed = $(this).data('is-fixed');
+            const done = $(this).is(':checked');
+            
+            // 日付を YYYY-MM-DD 形式で取得
+            const year = displayDate.getFullYear();
+            const month = ("0" + (displayDate.getMonth() + 1)).slice(-2);
+            const date = ("0" + displayDate.getDate()).slice(-2);
+            const dateStr = `${year}-${month}-${date}`;
+
+            $.ajax({
+                url: '/update_task_done',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({task_id: taskId, is_fixed: isFixed, done: done, date: dateStr}),
+                success: function(res){
+                    updateProgress();
+                }
+            });
+        });
+    }
+
+    $(document).ready(function(){
+        // 初回表示
         refreshDateDisplay();
 
-        $('#prevDate').off('click').on('click', function() {
+        // 日付変更ボタン
+        $('#prevDate').on('click', function(){
             displayDate.setDate(displayDate.getDate() - 1);
             refreshDateDisplay();
         });
 
-        $('#nextDate').off('click').on('click', function() {
+        $('#nextDate').on('click', function(){
             displayDate.setDate(displayDate.getDate() + 1);
             refreshDateDisplay();
         });
 
-        $('#toggleTasks').off('click').on('click', function() {
+        // アコーディオン
+        $('#toggleTasks').on('click', function(){
             const $list = $('#task-list');
-            $list.slideToggle(300, function() {
+            $list.slideToggle(300, function(){
                 const isHidden = $list.is(':hidden');
                 $('#toggleTasks').text(isHidden ? 'すべて見る ＞' : '閉じる ＜');
             });
         });
 
+        // モーダル関連
         const $modal = $('#evaluationModal');
-        $('#openEvalModal').off('click').on('click', function() { $modal.fadeIn(200); });
-        $('#closeModal').off('click').on('click', function() { $modal.fadeOut(200); });
-        $modal.off('click').on('click', function(e) { if(e.target===this){$modal.fadeOut(200);} });
+        $('#openEvalModal').on('click', function(){ $modal.fadeIn(200); });
+        $('#closeModal').on('click', function(){ $modal.fadeOut(200); });
+        $modal.on('click', function(e){ if(e.target === this) $modal.fadeOut(200); });
 
-        $('.eval-choice').off('click').on('click', function() {
+        $('.eval-choice').on('click', function(){
             $('.eval-choice').removeClass('selected');
             $(this).addClass('selected');
         });
 
-        $('#submitEval').off('click').on('click', function() {
+        $('#submitEval').on('click', function(){
             const selectedVal = $('.eval-choice.selected').data('value');
             if(!selectedVal){ alert("評価を選んでね！"); return; }
             alert(selectedVal + " で評価を送信しました！");
             $modal.fadeOut(200);
         });
-    }
-
-    document.addEventListener("turbo:load", initHome);
-    document.addEventListener("turbo:render", initHome);
+    });
 })();
 </script>
+
 {% endblock %}
