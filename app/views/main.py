@@ -146,13 +146,11 @@ def main_form():
     db = DatabaseManager()
     db.connect()
 
-    # 1. t_fixed_schedule_mastersのみを使用。schedule_name, day_of_weekを取得
     sql_masters = """
-        SELECT title, day_of_week, DATE(created_at) as created_date
+        SELECT title, start_time, end_time, location, tag, memo, day_of_week, DATE(created_at) as created_date
         FROM t_fixed_schedule_masters
         WHERE user_id = %s AND is_cancelled = 0
     """
-    # fetch_allの結果がNoneでも空リストとして扱う（NoneTypeエラー対策）
     masters = db.fetch_all(sql_masters, (user_id,)) or []
 
     print(masters)
@@ -191,8 +189,28 @@ def main_form():
             
             # 条件：作成日以降、かつ、マスタの曜日文字列に今日の漢字が含まれているか
             if curr >= m_created and current_kanji in m['day_of_week']:
-                event_title = m.get('title')
-                day_events.append(m['title'])
+                def format_timedelta(td):
+                    if td is None:
+                        return ""
+                    if isinstance(td, timedelta):
+                        total_seconds = int(td.total_seconds())
+                        hours = total_seconds // 3600
+                        minutes = (total_seconds % 3600) // 60
+                        return f"{hours:02}:{minutes:02}"
+                    if hasattr(td, 'strftime'):
+                        return td.strftime('%H:%M')
+                    return str(td)
+                
+                s_time = format_timedelta(m['start_time'])
+                e_time = format_timedelta(m['end_time'])
+                day_events.append({
+                    "title":m['title'],
+                    "start_time":s_time,
+                    "end_time":e_time,
+                    "location":m['location'] or "",
+                    "tag":m['tag'] or "",
+                    "memo":m['memo'] or ""
+                })
             
 
         # 予定リストに中身があれば、日付をキーにして保存
