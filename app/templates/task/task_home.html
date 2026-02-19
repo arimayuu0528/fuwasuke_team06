@@ -29,10 +29,10 @@
     <div class="progress-card">
         <div class="progress-info">
             <span class="label">今日の達成度</span>
-            <span class="percent-text" id="percentText">{{ percent | default(75) }}%</span>
+            <span class="percent-text" id="percentText">{{ percent}}%</span>
         </div>
         <div class="progress-track">
-            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent | default(75) }}%;"></div>
+            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent}}%;"></div>
         </div>
         
         <p class="progress-hint">
@@ -68,7 +68,7 @@
         <div class="modal-header-row">
             <img src="../../static/image/bouhuwasuke.png" width="45" class="chara-img">
             <div class="modal-bubble">
-                <p>お疲れ様でした。<br>タスク案を評価して欲しいな。</p>
+                <p>お疲れ様でした。<br>タスク案を評価して<br>欲しいな。</p>
             </div>
         </div>
 
@@ -131,11 +131,8 @@
 
 <script>
 (function(){
-    // 1. 初期化：今日の日付を取得
     let displayDate = new Date();
     const dayLabels = ["日","月","火","水","木","金","土"];
-    
-    // Jinja2から渡された rec (固定+提案の混合リスト) を取得
     const allTasks = {{ rec | tojson | safe }};
 
     function refreshDateDisplay(){
@@ -144,10 +141,7 @@
         const wIndex = displayDate.getDay();
         const w = dayLabels[wIndex];
         
-        // ヘッダーの日付表示を更新
         $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
-        
-        // 現在の曜日に基づいてタスクを描画
         renderTasksForDate(w);
     }
 
@@ -155,30 +149,38 @@
         const $list = $('#task-list');
         $list.empty();
 
-        let displayTasks = [];
+        const now = new Date();
+        // 時間を 00:00:00 にして純粋に日付だけで比較
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const viewingDate = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime();
+        const isToday = (today === viewingDate);
 
+        let displayTasks = [];
         allTasks.forEach(task => {
             if(task.is_fixed){
-                // 固定タスク：毎日設定、または設定された曜日文字列に現在の曜日が含まれているか判定
                 if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
                     displayTasks.push(task);
                 }
             } else {
-                // 提案タスク：(現在はバックエンドで取得したものをそのまま表示)
                 displayTasks.push(task);
             }
         });
 
-        // 描画処理
         displayTasks.forEach(task => {
-            const html = `
-            <div class="task-card">
-                <div class="task-check">
+            let checkHtml = '';
+            if (isToday) {
+                checkHtml = `
                     <input type="checkbox" class="task-checkbox" 
                         data-task-id="${task.id}"
                         data-is-fixed="${task.is_fixed}"
-                        ${task.done ? "checked" : ""}>
-                </div>
+                        ${task.done ? "checked" : ""}>`;
+            } else {
+                checkHtml = task.done ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '';
+            }
+
+            const html = `
+            <div class="task-card">
+                <div class="task-check">${checkHtml}</div>
                 <div class="task-body">
                     <p class="task-title">${task.name} ${task.is_fixed ? '<span class="fixed-label">固定</span>' : ''}</p>
                     <p class="task-time">${task.time}</p>
@@ -187,58 +189,67 @@
             $list.append(html);
         });
 
-        // プログレスバーの更新
-        updateProgress();
-        // チェックボックスの監視を再設定
+        // 描画が終わったら進捗を更新
+        updateProgress(isToday);
         attachCheckboxHandler();
     }
 
-    function updateProgress(){
-        const $list = $('#task-list');
-        const checkboxes = $list.find('.task-checkbox');
+    function updateProgress(isToday){
+        // セレクタを確実に指定
+        const checkboxes = $('.task-checkbox');
         const total = checkboxes.length;
         const completed = checkboxes.filter(':checked').length;
-        const percent = total > 0 ? Math.floor((completed / total) * 100) : 0;
+        
+        // 計算 (0除算防止)
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
         const remain = total - completed;
 
-        $('#dynamicBar').css('width', percent + '%');
+        // 【ここが重要】DOMを直接書き換え
+        $('#dynamicBar').stop().animate({ 'width': percent + '%' }, 300); // アニメーションで動かす
         $('#percentText').text(percent + '%');
-        if(remain > 0){
-            $('#remainHint').html(`あと<span id="remainCount">${remain}</span>つのタスクで目標達成です`);
+
+        if(isToday){
+            if(remain > 0){
+                $('#remainHint').html(`あと<span id="remainCount">${remain}</span>つのタスクで目標達成です`);
+            } else if(total > 0) {
+                $('#remainHint').text('今日のタスクはすべて達成です！');
+            } else {
+                $('#remainHint').text('予定はありません');
+            }
         } else {
-            $('#remainHint').text('今日のタスクはすべて達成です！');
+            $('#remainHint').text('この日の記録を表示中');
         }
     }
 
     function attachCheckboxHandler(){
-        $('.task-checkbox').off('change').on('change', function(){
+        // イベントの重複登録を防ぐ
+        $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function(){
+            const now = new Date();
+            const isToday = (new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime() === 
+                             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime());
+            
+            // 1. まず数値を即座に動かす
+            updateProgress(isToday);
+
             const taskId = $(this).data('task-id');
             const isFixed = $(this).data('is-fixed');
             const done = $(this).is(':checked');
             
-            // 日付を YYYY-MM-DD 形式で取得
-            const year = displayDate.getFullYear();
-            const month = ("0" + (displayDate.getMonth() + 1)).slice(-2);
-            const date = ("0" + displayDate.getDate()).slice(-2);
-            const dateStr = `${year}-${month}-${date}`;
+            const dateStr = displayDate.toISOString().split('T')[0];
 
+            // 2. 通信
             $.ajax({
                 url: '/update_task_done',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({task_id: taskId, is_fixed: isFixed, done: done, date: dateStr}),
-                success: function(res){
-                    updateProgress();
-                }
             });
         });
     }
 
     $(document).ready(function(){
-        // 初回表示
         refreshDateDisplay();
 
-        // 日付変更ボタン
         $('#prevDate').on('click', function(){
             displayDate.setDate(displayDate.getDate() - 1);
             refreshDateDisplay();
@@ -249,7 +260,6 @@
             refreshDateDisplay();
         });
 
-        // アコーディオン
         $('#toggleTasks').on('click', function(){
             const $list = $('#task-list');
             $list.slideToggle(300, function(){
@@ -258,22 +268,13 @@
             });
         });
 
-        // モーダル関連
+        // モーダル処理はそのまま
         const $modal = $('#evaluationModal');
         $('#openEvalModal').on('click', function(){ $modal.fadeIn(200); });
         $('#closeModal').on('click', function(){ $modal.fadeOut(200); });
-        $modal.on('click', function(e){ if(e.target === this) $modal.fadeOut(200); });
-
         $('.eval-choice').on('click', function(){
             $('.eval-choice').removeClass('selected');
             $(this).addClass('selected');
-        });
-
-        $('#submitEval').on('click', function(){
-            const selectedVal = $('.eval-choice.selected').data('value');
-            if(!selectedVal){ alert("評価を選んでね！"); return; }
-            alert(selectedVal + " で評価を送信しました！");
-            $modal.fadeOut(200);
         });
     });
 })();
