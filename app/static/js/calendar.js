@@ -121,7 +121,7 @@ function createMonthSection(year, month) {
         if (window.EVENTS && window.EVENTS[dateStr]) {
             const dayEvents = window.EVENTS[dateStr];
             if (Array.isArray(dayEvents)){
-                eventHtml = dayEvents.map(title => `<div class="event-item">${title}</div>`).join('');
+                eventHtml = dayEvents.map(ev => `<div class="event-item">${ev.title || ev}</div>`).join('');
             } else{
                 eventHtml = `<div class="event-item">${dayEvents}</div>`;
             }
@@ -144,3 +144,74 @@ function createMonthSection(year, month) {
     section.innerHTML = html;
     return section;
 }
+
+
+document.addEventListener('turbo:load', function() {
+    const container = document.getElementById('calendar-container');
+    const titleDisplay = document.getElementById('current-month-display');
+    const modal = document.getElementById('event-modal');
+    const modalDateTitle = document.getElementById('modal-date-title');
+    const modalEventBody = document.getElementById('modal-event-body');
+    const closeModal = document.getElementById('close-modal');
+
+    if (!container || !titleDisplay || !modal) return;
+    // --- モーダル表示ロジック ---
+    container.addEventListener('click', (e) => {
+        const cell = e.target.closest('.day-cell');
+        if (!cell) return;
+
+        const section = cell.closest('.month-section');
+        const dateStr = `${section.dataset.year}-${String(section.dataset.month).padStart(2, '0')}-${String(cell.querySelector('.day-number').textContent).padStart(2, '0')}`;
+
+        const formatTime = (timeStr) => {
+            if (!timeStr) return '--:--';
+            return timeStr.substring(0, 5); // "09:00:00" -> "09:00"
+        };
+
+        modalDateTitle.textContent = `${dateStr.replace(/-/g, '/')} の予定`;
+        
+        const dayEvents = window.EVENTS[dateStr];
+        modalEventBody.innerHTML = ''; // クリア
+
+        if (dayEvents && Array.isArray(dayEvents)) {
+            dayEvents.forEach(ev => {
+                // 各予定の詳細カードを作成
+                const card = `
+                    <div class="event-detail-card">
+                        <div class="event-detail-title">${ev.title || '無題'}</div>
+                        <div class="event-info-grid">
+                            <div class="info-label">時間</div>
+                            <div class="info-value">${ev.start_time || '--:--'} 〜 ${ev.end_time || '--:--'}</div>
+                            
+                            <div class="info-label">場所</div>
+                            <div class="info-value">${ev.location || '設定なし'}</div>
+                            
+                            <div class="info-label">タグ</div>
+                            <div class="info-value"><span class="tag-badge">${ev.tag || 'なし'}</span></div>
+                            
+                            <div class="info-label">メモ</div>
+                            <div class="info-value">${ev.memo || '-'}</div>
+                        </div>
+                    </div>
+                `;
+                modalEventBody.insertAdjacentHTML('beforeend', card);
+            });
+        } else {
+            modalEventBody.innerHTML = '<p style="text-align:center; color:#999;">予定はありません。</p>';
+        }
+
+        modal.style.display = 'flex';
+    });
+
+    // 閉じるボタン
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // 背景クリックで閉じる
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+});

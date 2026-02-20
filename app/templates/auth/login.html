@@ -28,9 +28,23 @@
         </form>
     </div>
 
-    <p class="register_info">登録することで、ふわすけの<a href="">利用規約</a>および<a href="">プライバシーポリシー</a>に同意したものとみなされます。</p>
+    <p class="register_info">登録することで、ふわすけの<a href="#" class="legal-link" data-type="terms">利用規約</a>および<a href="#" class="legal-link" data-type="privacy">プライバシーポリシー</a>に同意したものとみなされます。</p>
     
 
 </main>
+
+<div id="legal-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content legal-view"> <div class="modal-header">
+            <h3 id="legal-title">利用規約</h3>
+        </div>
+        <div id="legal-body" class="modal-body">
+            </div>
+        <div class="modal-footer">
+            <button class="footer-close-btn" onclick="document.getElementById('legal-modal').style.display='none'">閉じる</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
 {% endblock %}
