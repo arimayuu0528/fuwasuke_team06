@@ -1,4 +1,12 @@
-{% extends "base2.html" %} {% block title %} {% endblock %} {% block content %}
+{% extends "base2.html" %}
+
+{% block header_content %}
+<div class="fuwasuke_log1">
+    <p><img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ロゴ"></p>
+</div>
+{% endblock %}
+
+{% block content %}
 
 <!-- JS読み込み -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
