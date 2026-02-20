@@ -20,7 +20,7 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 @main_bp.route("/home")
 def home():
     current_user_id = session.get("user_id")
-    today = date(2026, 1, 26)
+    today = date.today()
 
     rec = []
     db = DatabaseManager()
@@ -64,17 +64,19 @@ def home():
         """
         cursor.execute(sql_suggestion, (current_user_id, today))
         suggestion = cursor.fetchone()
-
+        print(suggestion)
+        print("---")
         if suggestion:
             sql_details = """
                 SELECT t.task_id, t.task_name, d.plan_min, d.actual_work_min
                 FROM t_task_suggestion_detail d
                 JOIN t_tasks t ON d.task_id = t.task_id
                 WHERE d.task_suggestion_id = %s
+                ORDER BY plan_min ASC
             """
             cursor.execute(sql_details, (suggestion["task_suggestion_id"],))
             details = cursor.fetchall()
-
+            print(details)
             for row in details:
                 is_done = bool(row.get("actual_work_min") and row["actual_work_min"] > 0)
                 rec.append({
