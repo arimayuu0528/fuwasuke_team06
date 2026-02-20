@@ -66,6 +66,7 @@ def create_app():
             # ★追加
             "mood.register_mood_form",
             "mood.register_mood_process",
+            "mood.register",
 
             # 'mood.register',   # ← 修正
             'schedule_list',
@@ -100,11 +101,7 @@ def create_app():
 
         # 今日の気分が無い（未登録）の場合:
         if not mood:
-            # 気分登録フォームへ誘導
-            try:
-                return redirect(url_for("mood.register_mood_form"))
-            except BuildError:
-                return redirect(url_for('mood.register'))  # ← 修正
+            return redirect(url_for("mood.register"))
 
 
         # =============================
