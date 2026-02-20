@@ -6,7 +6,13 @@
 
 <h2>直近1週間の気分遷移</h2>
 
-<canvas id="moodChart"></canvas>
+<div class="mood-chart-wrapper">
+    <canvas id="moodChart"></canvas>
+</div>
+
+
+
+
 
 <script>
     const moodDates = {{ dates | tojson }};
@@ -17,3 +23,5 @@
 <script src="{{ url_for('static', filename='js/mood_graph.js') }}"></script>
 
 {% endblock %}
+
+
