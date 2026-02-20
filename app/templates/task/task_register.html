@@ -1,381 +1,582 @@
-{% extends "base3.html" %}
+{% extends "base3.html" %} {% block title %}タスク作成{% endblock %} {% block
+content %}
 
-{% block title %}
+<div class="tr-header">
+  <h1 class="tr-title">タスク作成</h1>
+  <div class="tr-tab-container">
+    <button class="tr-tab tr-tab-active">タスク登録</button>
+    <button class="tr-tab">固定タスク登録</button>
+  </div>
+</div>
 
-{% endblock %}
-
-
-{% block content %}
-<head>
-    <title>タスク作成</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            background-color: #FFF5F0;
-            padding: 20px;
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .container {
-            background-color: #FFF5F0;
-            min-height: 100vh;
-            padding-bottom: 80px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            border-radius: 25px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
-            background-color: white;
-            color: #999;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background-color: #FFE4D6;
-            color: #FF9966;
-        }
-
-        .section-label {
-            color: #FFB380;
-            font-size: 14px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .task-list-icon {
-            color: #FFB380;
-            font-size: 18px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            border: 1px solid #F0E0D6;
-            background-color: #FAF0EB;
-            font-size: 14px;
-            margin-bottom: 30px;
-            color: #999;
-        }
-
-        .category-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .category-btn {
-            padding: 12px 24px;
-            border-radius: 25px;
-            border: 1px solid #FFB380;
-            background-color: white;
-            color: #FFB380;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .category-btn.active {
-            background-color: #FF9955;
-            color: white;
-            border-color: #FF9955;
-        }
-
-        .time-date-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .time-section, .date-section {
-            flex: 1;
-        }
-
-        .time-input, .date-input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 25px;
-            border: 1px solid #F0E0D6;
-            background-color: white;
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-        }
-
-        .date-input {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .motivation-section {
-            margin-bottom: 30px;
-        }
-
-        .motivation-options {
-            display: flex;
-            gap: 15px;
-            justify-content: space-between;
-        }
-
-        .motivation-card {
-            flex: 1;
-            background-color: #FFF0E8;
-            border-radius: 15px;
-            padding: 20px 10px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .motivation-card:hover {
-            border-color: #FFB380;
-        }
-
-        .motivation-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .motivation-label {
-            font-size: 13px;
-            color: #666;
-        }
-
-        .notification-toggle {
-            background-color: #FFF0E8;
-            padding: 15px 20px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            cursor: pointer;
-        }
-
-        .lock-icon {
-            font-size: 20px;
-            margin-right: 10px;
-        }
-
-        .notification-text {
-            flex: 1;
-        }
-
-        .notification-main {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 3px;
-        }
-
-        .notification-sub {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            border-radius: 30px;
-            border: none;
-            background: linear-gradient(135deg, #FFB366 0%, #FF9955 100%);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(255, 153, 85, 0.3);
-            transition: all 0.3s;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 153, 85, 0.4);
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        .nav-item {
-            text-align: center;
-            cursor: pointer;
-            padding: 5px 15px;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 3px;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            color: #999;
-        }
-
-        .nav-item.active .nav-icon {
-            color: #FF9955;
-        }
-
-        .nav-item.active .nav-label {
-            color: #FF9955;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>タスク作成</h1>
-
-        <div class="tabs">
-            <button class="tab active">タスク登録</button>
-            <button class="tab">固定タスク登録</button>
-        </div>
-
-        <div class="section-label">
-            タスク名
-            <span class="task-list-icon">☰</span>
-        </div>
-        <input type="text" class="input-field" placeholder="何をする？">
-
-        <div class="section-label">カテゴリー</div>
-        <div class="category-buttons">
-            <button class="category-btn active">セルフケア</button>
-            <button class="category-btn">セルフケア</button>
-            <button class="category-btn">セルフケア</button>
-        </div>
-
-        <div class="time-date-row">
-            <div class="time-section">
-                <div class="section-label">予定時間</div>
-                <div class="time-input">15分</div>
-            </div>
-            <div class="date-section">
-                <div class="section-label">日付</div>
-                <div class="date-input">
-                    <span>2026/01/01</span>
-                    <span>📅</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="section-label">モチベーション</div>
-        <div class="motivation-section">
-            <div class="motivation-options">
-                <div class="motivation-card">
-                    <div class="motivation-icon"><img src="../../static/image/huwasuke.png"></div>
-                    <div class="motivation-label">かんたん</div>
-                </div>
-                <div class="motivation-card">
-                    <div class="motivation-icon"><img src="../../static/image/huwasuke.png"></div>
-                    <div class="motivation-label">ふつう</div>
-                </div>
-                <div class="motivation-card">
-                    <div class="motivation-icon"><img src="../../static/image/huwasuke.png"></div>
-                    <div class="motivation-label">がんばる</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="notification-toggle">
-            <span class="lock-icon">🔓</span>
-            <div class="notification-text">
-                <div class="notification-main">通知を受け取る</div>
-                <div class="notification-sub">5分前に通知します</div>
-            </div>
-        </div>
-
-        <button class="submit-btn">登録</button>
+<div class="tr-form-container">
+  <form
+    id="trTaskForm"
+    method="POST"
+    action="{{ url_for('task.task_create') }}"
+  >
+    <!-- タスク名 -->
+    <div class="tr-form-section">
+      <div class="tr-form-label">
+        <span>タスク名</span>
+        <a href="{{ url_for('task.task_list') }}" class="tr-template-link"
+          >タスク一覧 ☰</a
+        >
+      </div>
+      <input
+        type="text"
+        name="title"
+        class="tr-form-input"
+        placeholder="何をする？"
+        value="{{ task.title if task else '' }}"
+        required
+      />
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">ホーム</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">📅</div>
-            <div class="nav-label">カレンダー</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label">レポート</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">👤</div>
-            <div class="nav-label">マイページ</div>
-        </div>
+    <!-- カテゴリー -->
+    <div class="tr-form-section">
+      <div class="tr-form-label">カテゴリー</div>
+      <div class="tr-category-selector">
+        {% set categories = ['セルフケア', '仕事', '健康', '趣味'] %} {% set
+        current_category = task.category if task else 'セルフケア' %} {% for cat
+        in categories %}
+        <button
+          type="button"
+          class="tr-category-btn {% if cat == current_category %}tr-category-active{% endif %}"
+          onclick="trSelectCategory(this)"
+        >
+          {{ cat }}
+        </button>
+        {% endfor %}
+      </div>
+      <input
+        type="hidden"
+        name="category"
+        id="trCategory"
+        value="{{ current_category }}"
+      />
     </div>
 
-    <script>
-        // タブ切り替え
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+    <!-- 予定時間 & 日付 -->
+    <div class="tr-form-section">
+      <div class="tr-time-date-row">
+        <div class="tr-time-input-wrapper">
+          <span class="tr-box-label">予定時間</span>
+          <select name="duration" class="tr-duration-select">
+            {% set current_duration = task.duration if task else 15 %} {% for m
+            in [5, 10, 15, 20, 30, 45, 60, 90, 120] %} {% if m ==
+            current_duration %}
+            <option value="{{ m }}" selected>{{ m }}分</option>
+            {% else %}
+            <option value="{{ m }}">{{ m }}分</option>
+            {% endif %} {% endfor %}
+          </select>
+        </div>
+        <div class="tr-date-input-wrapper">
+          <span class="tr-box-label">日付</span>
+          <div class="tr-date-inner-row">
+            <input
+              type="date"
+              name="date"
+              class="tr-date-input"
+              value="{{ task.date if task else '' }}"
+              required
+            />
+            <span>📅</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        // カテゴリーボタン
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+    <!-- モチベーション -->
+    <div class="tr-form-section">
+      <div class="tr-form-label">モチベーション</div>
+      <div class="tr-motivation-selector">
+        {% set current_motivation = task.motivation if task else 1 %} {% set
+        motivations = [ (1, 'かんたん', 'gennki.png'), (2, 'ふつう',
+        'futu.png'), (3, 'がんばる', 'warui.png') ] %} {% for val, label, img in
+        motivations %}
+        <button
+          type="button"
+          class="tr-motivation-btn {% if val == current_motivation %}tr-motivation-active{% endif %}"
+          data-value="{{ val }}"
+          onclick="trSelectMotivation(this)"
+        >
+          <span class="tr-motivation-icon">
+            <img
+              src="{{ url_for('static', filename='image/' + img) }}"
+              alt="{{ label }}"
+              style="width: 44px; height: 44px; object-fit: contain"
+            />
+          </span>
+          <span class="tr-motivation-label">{{ label }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      <input
+        type="hidden"
+        name="motivation"
+        id="trMotivation"
+        value="{{ current_motivation }}"
+      />
+    </div>
 
-        // モチベーションカード
-        document.querySelectorAll('.motivation-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.motivation-card').forEach(c => c.style.borderColor = 'transparent');
-                this.style.borderColor = '#FFB380';
-            });
-        });
+    <!-- 通知 -->
+    <div class="tr-form-section">
+      <div class="tr-notif-box" onclick="trToggleNotif()">
+        <span class="tr-notif-icon">🔔</span>
+        <div class="tr-notif-texts">
+          <div class="tr-notif-title">通知を受け取る</div>
+          <div class="tr-notif-sub" id="trNotifSub">5分前に通知します</div>
+        </div>
+      </div>
+      <input
+        type="hidden"
+        name="notification_enabled"
+        id="trNotification"
+        value="{{ task.notification_enabled if task else 1 }}"
+      />
+      <input
+        type="hidden"
+        name="notification_min"
+        id="trNotificationMin"
+        value="{{ task.notification_min if task else 5 }}"
+      />
+    </div>
+  </form>
+</div>
 
-        // ナビゲーション
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-    </script>
-</body>
+<button type="submit" form="trTaskForm" class="tr-submit-btn">登録</button>
+
+<style>
+  .tr-header {
+    background-color: #fff;
+    padding: 20px 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .tr-header .tr-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+  .tr-tab-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 0 8px;
+  }
+  .tr-tab {
+    flex: 1;
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    font-family: inherit;
+    text-align: left;
+  }
+  .tr-tab.tr-tab-active {
+    color: #ff9f5a;
+    border-bottom-color: #ff9f5a;
+  }
+  .tr-form-container {
+    padding: 20px 16px;
+  }
+  .tr-form-section {
+    margin-bottom: 24px;
+  }
+  .tr-form-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: #ffb380;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .tr-template-link {
+    color: #ff9f5a;
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.2s;
+  }
+  .tr-template-link:hover {
+    opacity: 0.7;
+  }
+  .tr-form-input {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 15px;
+    background: #fff;
+    color: #333;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .tr-form-input::placeholder {
+    color: #ccc;
+  }
+  .tr-form-input:focus {
+    outline: none;
+    border-color: #ff9f5a;
+    box-shadow: 0 0 0 3px rgba(255, 159, 90, 0.1);
+  }
+  .tr-form-input.tr-error {
+    border-color: #ff6b6b;
+  }
+  .tr-category-selector {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .tr-category-btn {
+    padding: 12px 24px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .tr-category-btn.tr-category-active {
+    background: #ff9f5a;
+    color: #fff;
+    border-color: #ff9f5a;
+  }
+  .tr-category-btn:hover:not(.tr-category-active) {
+    border-color: #ff9f5a;
+    color: #ff9f5a;
+  }
+  .tr-time-date-row {
+    display: flex;
+    gap: 12px;
+  }
+  .tr-time-input-wrapper,
+  .tr-date-input-wrapper {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .tr-box-label {
+    display: block;
+    color: #999;
+    font-size: 13px;
+  }
+  .tr-duration-select {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    outline: none;
+    width: 100%;
+  }
+  .tr-date-inner-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+  }
+  .tr-date-input {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    width: 100%;
+  }
+  .tr-motivation-selector {
+    display: flex;
+    gap: 12px;
+  }
+  .tr-motivation-btn {
+    flex: 1;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 18px;
+    padding: 16px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.22s;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  .tr-motivation-btn.tr-motivation-active {
+    border-color: #ff9f5a;
+    background: #fff8f3;
+  }
+  .tr-motivation-btn:hover:not(.tr-motivation-active) {
+    border-color: #ffb380;
+  }
+  .tr-motivation-icon {
+    width: 56px;
+    height: 56px;
+    background: #fff3ec;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+  }
+  .tr-motivation-btn.tr-motivation-active .tr-motivation-icon {
+    background: #ffe8d6;
+  }
+  .tr-motivation-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #999;
+  }
+  .tr-motivation-btn.tr-motivation-active .tr-motivation-label {
+    color: #ff9f5a;
+  }
+  .tr-notif-box {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    background: #fff8f3;
+    border-radius: 12px;
+    border: 1px solid #ffe5d6;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .tr-notif-box:hover {
+    background: #fff0e8;
+  }
+  .tr-notif-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .tr-notif-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+  }
+  .tr-notif-sub {
+    font-size: 12px;
+    color: #999;
+    margin-top: 2px;
+  }
+  .tr-submit-btn {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 400px;
+    padding: 16px;
+    background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+    transition: all 0.2s;
+    font-family: inherit;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .tr-submit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 159, 90, 0.4);
+  }
+  .tr-submit-btn:active {
+    transform: translateX(-50%) translateY(0);
+  }
+  .tr-submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .tr-submit-btn.tr-loading {
+    color: transparent;
+    pointer-events: none;
+  }
+  .tr-submit-btn.tr-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: trSpinner 0.6s linear infinite;
+  }
+  @keyframes trSpinner {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .tr-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    animation: trRippleAnim 0.6s ease-out;
+    pointer-events: none;
+  }
+  @keyframes trRippleAnim {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+  .tr-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 24px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+  }
+  .tr-toast-success {
+    background: #4caf50;
+  }
+  .tr-toast-error {
+    background: #ff6b6b;
+  }
+  .tr-toast-warning {
+    background: #ff9f5a;
+  }
+  .tr-toast-info {
+    background: #2196f3;
+  }
+  @media (max-width: 768px) {
+    .tr-time-date-row {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    /* ── カテゴリー選択 ── */
+    function trSelectCategory(btn) {
+      btn.closest('.tr-category-selector')
+         .querySelectorAll('.tr-category-btn')
+         .forEach(b => b.classList.remove('tr-category-active'));
+      btn.classList.add('tr-category-active');
+      document.getElementById('trCategory').value = btn.textContent.trim();
+      trRipple(btn, event);
+    }
+
+    /* ── モチベーション選択 ── */
+    function trSelectMotivation(btn) {
+      btn.closest('.tr-motivation-selector')
+         .querySelectorAll('.tr-motivation-btn')
+         .forEach(b => b.classList.remove('tr-motivation-active'));
+      btn.classList.add('tr-motivation-active');
+      document.getElementById('trMotivation').value = btn.dataset.value;
+      if (navigator.vibrate) navigator.vibrate(10);
+    }
+
+    /* ── 通知トグル ── */
+    let trNotifOn = {{ task.notification_enabled if task else 1 }};
+    function trToggleNotif() {
+      trNotifOn = trNotifOn ? 0 : 1;
+      document.getElementById('trNotification').value = trNotifOn;
+      document.getElementById('trNotifSub').textContent = trNotifOn ? '5分前に通知します' : '通知オフ';
+    }
+
+    /* ── フォーム送信 ── */
+    document.getElementById('trTaskForm').addEventListener('submit', function (e) {
+      const title = this.querySelector('[name="title"]');
+      if (!title.value.trim()) {
+        e.preventDefault();
+        title.classList.add('tr-error');
+        trShowToast('タスク名を入力してください', 'warning');
+        title.focus();
+        return;
+      }
+      title.classList.remove('tr-error');
+      const btn = document.querySelector('.tr-submit-btn');
+      btn.classList.add('tr-loading');
+      btn.disabled = true;
+    });
+
+    /* ── タブ：固定タスク登録へ遷移 ── */
+    document.querySelectorAll('.tr-tab')[1].addEventListener('click', function () {
+      window.location.href = "{{ url_for('schedule.schedule_form') }}";
+    });
+
+    /* ── リップル ── */
+    function trRipple(el, ev) {
+      const r = document.createElement('span');
+      r.className = 'tr-ripple';
+      const rect = el.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${(ev.clientX||0) - rect.left - size/2}px;top:${(ev.clientY||0) - rect.top - size/2}px`;
+      el.querySelectorAll('.tr-ripple').forEach(x => x.remove());
+      el.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    }
+
+    /* ── トースト ── */
+    function trShowToast(msg, type) {
+      document.querySelectorAll('.tr-toast').forEach(t => t.remove());
+      const t = document.createElement('div');
+      t.className = `tr-toast tr-toast-${type || 'info'}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    /* ── グローバル公開（onclick属性用） ── */
+    window.trSelectCategory   = trSelectCategory;
+    window.trSelectMotivation = trSelectMotivation;
+    window.trToggleNotif      = trToggleNotif;
+  })();
+</script>
+
 {% endblock %}

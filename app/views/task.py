@@ -67,22 +67,161 @@ def task_form():
         task_suggestion_id=task_suggestion_id, # 提案ID（型をintで統一）
         task_names=task_names,                 # タスク名のリスト
     )
-    
+
+
 # -----------------------------------------------------
 # タスク一覧：担当者名 向山
+# URL：/task/task_list
 # -----------------------------------------------------
-
 @task_bp.route("/task_list")
 def task_list():
-    pass
+
+    user_id = 1
+    today   = date.today()
+
+    db = DatabaseManager()
+    db.connect()
+
+    sql = """
+    SELECT
+        t.task_id,
+        t.task_name,
+        t.motivation_id,
+        m.motivation_name,
+        t.deadline,
+        t.duration_min,
+        t.remaining_min,
+        t.created_date,
+        t.category_name
+    FROM t_tasks t
+    LEFT JOIN t_motivations m ON t.motivation_id = m.motivation_id
+    WHERE t.user_id = %s
+    ORDER BY t.deadline, t.task_name
+    """
+
+    db.cursor.execute(sql, (user_id,))
+    rows = db.cursor.fetchall()
+
+    tasks = []
+    for row in rows:
+        task = {
+            'id':              row['task_id'],
+            'title':           row['task_name'],
+            'motivation_id':   row['motivation_id'],
+            'motivation_name': row['motivation_name'],
+            'due_date':        row['deadline'].strftime('%Y/%m/%d') if row['deadline'] else '',
+            'duration_min':    row['duration_min'],
+            'remaining_min':   row['remaining_min'],
+            'created_date':    row['created_date'],
+            'category_name':   row['category_name'],
+            # 締切が今日以前なら「今日中」バッジを表示
+            'is_today': row['deadline'] is not None and row['deadline'] <= today,
+        }
+        tasks.append(task)
+
+    db.disconnect()
+
+    return render_template('task/task_list.html', tasks=tasks)
+
+
+# -----------------------------------------------------
+# タスク削除
+# URL：/task/delete/◯◯
+# -----------------------------------------------------
+@task_bp.route("/delete/<int:task_id>", methods=["POST"])
+def delete_task(task_id):
+
+    user_id = 1
+
+    db = DatabaseManager()
+    db.connect()
+
+    sql = """
+    DELETE FROM t_tasks
+    WHERE task_id = %s AND user_id = %s
+    """
+
+    db.cursor.execute(sql, (task_id, user_id))
+    db.connection.commit()
+    db.disconnect()
+
+    return redirect(url_for('task.task_list'))
+
 
 # -----------------------------------------------------
 # タスク作成：担当者名 向山
 # -----------------------------------------------------
 
-@task_bp.route("/task_create")
+@task_bp.route("/task_create", methods=["GET", "POST"])
 def task_create():
-    pass
+    # GET：タスク登録フォームを表示
+    if request.method == "GET":
+        return render_template("task/task_register.html", task=None)
+
+    # POST：フォームのデータを受け取ってDBに登録
+    user_id = get_current_user_id()
+
+    task_name             = request.form.get("title", "").strip()
+    category_name         = request.form.get("category", "").strip()
+    duration_min          = request.form.get("duration", type=int)
+    deadline              = request.form.get("date", "").strip()
+    motivation_id         = request.form.get("motivation", type=int) or 1
+    notification_enabled  = request.form.get("notification_enabled", type=int) or 1
+    notification_min      = request.form.get("notification_min", type=int) or 5
+
+    errors = []
+    if not task_name:
+        errors.append("タスク名を入力してください")
+    if duration_min is None or duration_min <= 0:
+        errors.append("予定時間を選択してください")
+    if not deadline:
+        errors.append("日付を入力してください")
+
+    if errors:
+        return render_template(
+            "task/task_register.html",
+            errors=errors,
+            task={
+                "title":                task_name,
+                "category":             category_name,
+                "duration":             duration_min,
+                "date":                 deadline,
+                "motivation":           motivation_id,
+                "notification_enabled": notification_enabled,
+                "notification_min":     notification_min,
+            },
+        )
+
+    db = DatabaseManager()
+    db.connect()
+
+    try:
+        sql = """
+            INSERT INTO t_tasks
+                (user_id, task_name, motivation_id, deadline,
+                 duration_min, remaining_min, created_date, category_name)
+            VALUES
+                (%s, %s, %s, %s, %s, %s, CURDATE(), %s)
+        """
+        db.cursor.execute(sql, (
+            user_id,
+            task_name,
+            motivation_id,
+            deadline      or None,
+            duration_min,
+            duration_min,
+            category_name or None,
+        ))
+        db.connection.commit()
+
+    except Exception as e:
+        db.connection.rollback()
+        raise e
+
+    finally:
+        db.disconnect()
+
+    return redirect(url_for("task.task_list"))
 
 # -------------------------------------------------------------------------------------------------------------------
 # タスク提案：担当者名 有馬
@@ -845,8 +984,6 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
 
                 # 選んだ1案だけ表示する画面へ戻す
                 return redirect(url_for("main.home"))
-                # # ◇ task/taskを表示させたい場合:
-                # return redirect(url_for("task.task_form"))
 
             # -- 評価更新
             # form から評価値(1~3)をintで受け取る(無ければNone)
@@ -1027,7 +1164,7 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
         if db.connection is not None: # DB接続が存在する（途中までDB操作している)場合:
             db.connection.rollback()  # 途中までの変更を取り消す
 
-        traceback.print_exc()           # どの行で落ちたかをコンソールに詳しく出す（デバッグ用）
+        traceback.print_exc()           # どの行で落ちたかをコンソールに詳しく出力（デバッグ用）
         return f"タスク提案エラー: {e}"  # ブラウザにエラーメッセージを返す
 
     # 最後に必ず実行 ----------------------------------------------------------------------------------------------------------------------
