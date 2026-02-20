@@ -1,9 +1,10 @@
-{% extends "base2.html" %} {% block title %}固定タスク登録{% endblock %} {%block
-content %}
+{% extends "base3.html" %} {% block title %}固定タスク登録{% endblock %} {%
+block content %}
+
 <div class="sched-header">
   <h1 class="sched-title">固定タスク登録</h1>
   <div class="sched-tab-container">
-    <button class="sched-tab">タスク登録</button>
+    <button class="sched-tab" id="schedTabTask">タスク登録</button>
     <button class="sched-tab sched-tab-active">固定タスク登録</button>
   </div>
 </div>
@@ -167,5 +168,14 @@ content %}
 <button type="submit" form="schedTaskForm" class="sched-submit-btn">
   登録
 </button>
+
+<script>
+  document
+    .getElementById("schedTabTask")
+    .addEventListener("click", function () {
+      window.location.href = "{{ url_for('task.task_create') }}";
+    });
+</script>
 <script src="{{ url_for('static', filename='js/register_schedule.js') }}"></script>
+
 {% endblock %}

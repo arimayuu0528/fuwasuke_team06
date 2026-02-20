@@ -549,14 +549,20 @@ input[type=radio]:checked + .mood-card {
     padding: 16px;
   }
 }
-.fixed-task-page {
+/* =====================================================
+     SCOPE: .sl-page  (schedule_list)
+     base3.html との衝突を防ぐため全セレクタを
+     .sl-page 配下 / sl- プレフィックスで限定
+  ===================================================== */
+.sl-page {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
   background-color: #f5f5f5;
-  padding-bottom: 80px;
+  min-height: 100vh;
+  padding-bottom: 140px;
 }
 
-/* Header */
-.fixed-task-page .header {
+/* ----- Header ----- */
+.sl-page .sl-header {
   background-color: #fff;
   padding: 20px 16px 0;
   position: sticky;
@@ -565,72 +571,116 @@ input[type=radio]:checked + .mood-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.fixed-task-page .header h1 {
-  font-size: 24px;
-  font-weight: 600;
+.sl-page .sl-header-top {
+  display: flex;
+  align-items: center;
   margin-bottom: 20px;
-  color: #333;
-  text-align: center;
+  position: relative;
 }
 
-/* Tabs */
-.fixed-task-page .tab-container {
+.sl-page .sl-back-btn {
+  background: transparent;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #333;
+  position: absolute;
+  left: 0;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.sl-page .sl-header-top h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  width: 100%;
+  margin: 0;
+}
+
+/* ----- Tabs — アンダーライン式 ----- */
+.sl-page .sl-tab-container {
   display: flex;
   gap: 8px;
   padding: 0 8px;
 }
 
-.fixed-task-page .tab {
+.sl-page .sl-tab {
   flex: 1;
   padding: 10px 20px;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
   font-size: 14px;
-  color: #999;
+  color: #999 !important;
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
+  font-family: inherit;
+  outline: none;
 }
 
-.fixed-task-page .tab.active {
-  color: #ff9f5a;
-  border-bottom-color: #ff9f5a;
+.sl-page .sl-tab.active {
+  color: #ff9f5a !important;
+  border-bottom: 3px solid #ff9f5a !important;
 }
 
-/* Task List */
-.fixed-task-page .task-list {
+/* ----- Task List ----- */
+.sl-page .sl-task-list {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Card */
-.fixed-task-page .task-card {
+/* ----- Card ----- */
+.sl-page .sl-task-card {
   background: #fff;
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s, transform 0.4s;
 }
 
-/* Header */
-.fixed-task-page .task-header {
+.sl-page .sl-task-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sl-page .sl-task-card.deleting {
+  animation: sl-fadeOutLeft 0.3s forwards;
+}
+
+@keyframes sl-fadeOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+/* Card header */
+.sl-page .sl-task-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 8px;
 }
 
-.fixed-task-page .task-title {
+.sl-page .sl-task-title {
   font-size: 16px;
   font-weight: 500;
   color: #333;
   flex: 1;
 }
 
-.fixed-task-page .delete-btn {
+.sl-page .sl-delete-btn {
   background: transparent;
   border: none;
   font-size: 20px;
@@ -642,21 +692,23 @@ input[type=radio]:checked + .mood-card {
   justify-content: center;
   color: #ccc;
   transition: color 0.2s;
+  flex-shrink: 0;
 }
 
-.fixed-task-page .delete-btn:hover {
+.sl-page .sl-delete-btn:hover {
   color: #ff6b6b;
 }
 
 /* Meta */
-.fixed-task-page .task-meta {
+.sl-page .sl-task-meta {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
-.fixed-task-page .task-category {
+.sl-page .sl-task-category {
   background: #ffe5d6;
   color: #ff9f5a;
   padding: 4px 12px;
@@ -665,7 +717,7 @@ input[type=radio]:checked + .mood-card {
   font-weight: 500;
 }
 
-.fixed-task-page .task-time {
+.sl-page .sl-task-time {
   color: #999;
   font-size: 14px;
   display: flex;
@@ -673,19 +725,49 @@ input[type=radio]:checked + .mood-card {
   gap: 4px;
 }
 
-.fixed-task-page .task-time::before {
+.sl-page .sl-task-time::before {
   content: "🕐";
   font-size: 16px;
 }
 
+.sl-page .sl-task-duration {
+  color: #555;
+  font-size: 14px;
+}
+
+/* Location */
+.sl-page .sl-task-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+/* Repeat badge */
+.sl-page .sl-task-repeat-info {
+  margin-bottom: 8px;
+}
+
+.sl-page .sl-repeat-badge {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #888;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* Comment */
-.fixed-task-page .comment-section {
+.sl-page .sl-comment-section {
   margin: 12px 0;
   border-top: 1px solid #f0f0f0;
   padding-top: 12px;
 }
 
-.fixed-task-page .comment-toggle {
+.sl-page .sl-comment-toggle {
   background: transparent;
   border: none;
   color: #999;
@@ -694,18 +776,20 @@ input[type=radio]:checked + .mood-card {
   display: flex;
   align-items: center;
   gap: 4px;
+  font-family: inherit;
 }
 
-.fixed-task-page .comment-toggle .arrow {
+.sl-page .sl-comment-toggle .sl-arrow {
   font-size: 10px;
   transition: transform 0.2s;
+  display: inline-block;
 }
 
-.fixed-task-page .comment-toggle.collapsed .arrow {
+.sl-page .sl-comment-toggle.collapsed .sl-arrow {
   transform: rotate(-90deg);
 }
 
-.fixed-task-page .comment-content {
+.sl-page .sl-comment-content {
   margin-top: 8px;
   padding: 8px 0;
   color: #ccc;
@@ -714,18 +798,18 @@ input[type=radio]:checked + .mood-card {
   border-top: 1px dashed #e0e0e0;
 }
 
-.fixed-task-page .comment-content.hidden {
+.sl-page .sl-comment-content.hidden {
   display: none;
 }
 
-/* Weekdays */
-.fixed-task-page .weekday-pills {
+/* Weekday pills */
+.sl-page .sl-weekday-pills {
   display: flex;
   gap: 8px;
   margin-top: 12px;
 }
 
-.fixed-task-page .weekday {
+.sl-page .sl-weekday {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -737,17 +821,33 @@ input[type=radio]:checked + .mood-card {
   background: #e8e8e8;
   color: #999;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-.fixed-task-page .weekday.active {
+.sl-page .sl-weekday.active {
   background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(255, 159, 90, 0.4);
   transform: scale(1.05);
 }
 
+/* Empty & Count */
+.sl-page .sl-empty-message {
+  text-align: center;
+  padding: 40px 16px;
+  color: #ff6b6b;
+  font-size: 14px;
+}
+
+.sl-page .sl-task-count {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  padding: 8px;
+}
+
 /* Add Button */
-.fixed-task-page .add-task-btn {
+.sl-page .sl-add-btn {
   position: fixed;
   bottom: 80px;
   left: 50%;
@@ -763,98 +863,68 @@ input[type=radio]:checked + .mood-card {
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(255, 159, 90, 0.3);
+  font-family: inherit;
+  z-index: 50;
 }
 
-.fixed-task-page .add-task-btn::before {
+.sl-page .sl-add-btn::before {
   content: "+";
   font-size: 24px;
-}
-
-/* Empty & Count */
-.fixed-task-page .empty-message {
-  text-align: center;
-  padding: 40px 16px;
-  color: #ff6b6b;
-  font-size: 14px;
-}
-
-.fixed-task-page .task-count {
-  text-align: center;
-  color: #999;
-  font-size: 12px;
-  padding: 8px;
-}
-
-/* Animation */
-@keyframes fixedTaskFadeOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-}
-.fixed-task-page .task-card.deleting {
-  animation: fixedTaskFadeOut 0.3s forwards;
+  margin-right: 4px;
 }
 
 /* Delete Modal */
-.delete-modal {
+.sl-delete-modal {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease-out;
 }
 
-.delete-modal.show {
+.sl-delete-modal.show {
   display: flex;
+  animation: sl-fadeIn 0.2s ease-out;
 }
 
-.delete-modal-content {
+.sl-delete-modal .sl-modal-content {
   background: #fff;
   border-radius: 20px;
   padding: 32px 24px 24px;
   max-width: 340px;
   width: calc(100% - 32px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.3s ease-out;
+  animation: sl-slideUp 0.3s ease-out;
   text-align: center;
 }
 
-.delete-modal-icon {
+.sl-delete-modal .sl-modal-icon {
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.delete-modal-title {
+.sl-delete-modal .sl-modal-title {
   font-size: 18px;
   font-weight: 600;
   color: #333;
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
 }
 
-.delete-modal-text {
+.sl-delete-modal .sl-modal-text {
   font-size: 14px;
   color: #999;
-  margin: 0 0 24px 0;
+  margin: 0 0 24px;
 }
 
-.delete-modal-buttons {
+.sl-delete-modal .sl-modal-btns {
   display: flex;
   gap: 12px;
 }
 
-.delete-modal-btn {
+.sl-delete-modal .sl-modal-btn {
   flex: 1;
   padding: 14px 20px;
   border: none;
@@ -862,35 +932,35 @@ input[type=radio]:checked + .mood-card {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
   font-family: inherit;
+  transition: all 0.2s;
 }
 
-.delete-cancel-btn {
+.sl-delete-modal .sl-cancel-btn {
   background: #f0f0f0;
   color: #666;
 }
 
-.delete-cancel-btn:hover {
+.sl-delete-modal .sl-cancel-btn:hover {
   background: #e0e0e0;
 }
 
-.delete-confirm-btn {
+.sl-delete-modal .sl-confirm-btn {
   background: linear-gradient(135deg, #ff8a80 0%, #ff6b6b 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
-.delete-confirm-btn:hover {
+.sl-delete-modal .sl-confirm-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
-.delete-confirm-btn:active {
+.sl-delete-modal .sl-confirm-btn:active {
   transform: translateY(0);
 }
 
-@keyframes fadeIn {
+@keyframes sl-fadeIn {
   from {
     opacity: 0;
   }
@@ -898,7 +968,7 @@ input[type=radio]:checked + .mood-card {
     opacity: 1;
   }
 }
-@keyframes slideUp {
+@keyframes sl-slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
