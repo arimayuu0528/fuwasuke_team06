@@ -235,7 +235,17 @@ INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, en
 INSERT INTO t_today_moods (user_id, mood_date, mood, mood_point) VALUES
 (1,'2026-01-27 08:00:00','普通',2),
 (2,'2026-01-27 08:30:00','元気',3),
-(3,'2026-01-27 09:00:00','悪い',1);
+(3,'2026-01-27 09:00:00','元気',1),
+(1,'2026-01-28 10:00:00','普通',2),
+(2,'2026-01-28 11:00:00','元気',3),
+(3,'2026-01-28 10:00:00','普通',2),
+(1,'2026-01-29 10:00:00','悪い',1),
+(2,'2026-01-29 11:00:00','悪い',1),
+(3,'2026-01-29 10:00:00','悪い',1),
+(1,'2026-01-30 10:00:00','元気',3),
+(2,'2026-01-30 11:00:00','普通',2),
+(3,'2026-01-30 10:00:00','元気',3);
+
 
 -- タスク作業ログ
 INSERT INTO t_task_work_logs (task_id, work_date, work_min, start_time, end_time) VALUES
@@ -250,11 +260,11 @@ INSERT INTO t_task_work_logs (task_id, work_date, work_min, start_time, end_time
 INSERT INTO t_task_suggestions
 (user_id, suggestion_date, mood, mood_point, coef_value, evaluation, evaluation_multiplier, target_task_level)
 VALUES
-(1,'2026-01-27','元気',3,1.10,4,1.20,3),
+(1,'2026-01-27','普通',2,1.10,4,1.20,3),
 (1,'2026-01-28','普通',2,0.95,3,1.00,2),
 (1,'2026-01-29','悪い',1,0.80,NULL,0.80,1),
 
-(2,'2026-01-27','普通',2,1.05,4,1.10,3),
+(2,'2026-01-27','元気',3,1.05,4,1.10,3),
 (2,'2026-01-28','元気',3,1.20,5,1.20,4),
 (2,'2026-01-29','悪い',1,0.85,2,0.80,1),
 
