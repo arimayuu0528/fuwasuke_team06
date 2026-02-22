@@ -549,10 +549,22 @@ def pick_plan_minutes(task_level: int, mood_point: int, remaining_min: int, minu
 # 今日の提案に対して｢どのタスクを何分やるか｣の詳細を作成してDBに保存する関数
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def build_and_insert_suggestion_details(
-    db: DatabaseManager,suggestion_id: int,user_id: int,mood_point: int,target_level: int,):
+    db: DatabaseManager,
+    suggestion_id: int,
+    user_id: int,
+    mood_point: int,
+    target_level: int,
+    avoid_task_ids: set[int] | None = None,
+    diversity_penalty: float = 0.0,
+) -> list[int]:
     today = date.today() # 今日の日付(例：2026-02-07)を作成
     free_minutes = calc_available_minutes(db, user_id) # 今日使える作業分数(関数calc_available_minutesを利用)
     minutes_left = int(free_minutes) # 今日残り作業予算
+
+    # 追加：前案で使ったタスクを「避けやすく」するための設定
+    avoid_task_ids = set(avoid_task_ids or [])
+    diversity_penalty = max(0.0, min(0.95, float(diversity_penalty or 0.0)))
+
     # ------------------------------------------------------------------------------------------------------------
     # remaining_min > 0　(完了しているタスクを候補から外す)
     task_sql = """
@@ -578,18 +590,24 @@ def build_and_insert_suggestion_details(
         else:                # 期限が存在する場合：
             days_left = (deadline - today).days # 期限 - 今日　で残り日数を .days で整数にする
         deadline_mul = calc_deadline_multiplier(days_left) # 締め切り補正倍率(関数calc_deadline_multiplierを利用)
-        task_level = int(task["task_level"])               # motivation_idが入る
+
+        task_id = int(task["task_id"])                   # ★追加（task_idを先に取り出す）
+        task_level = int(task["task_level"])             # motivation_idが入る
         base_priority = float(task_level) * float(deadline_mul) # タスクレベル × 締め切り補正倍率
+
+        # ★追加：前案で使ったタスクは優先点を下げて「別案」を出しやすくする
+        if diversity_penalty > 0.0 and task_id in avoid_task_ids:
+            base_priority *= (1.0 - diversity_penalty)
 
         # タスク提案候補をまとめて保存
         candidates.append(
             {
-                "task_id": int(task["task_id"]),                # タスクID
-                "task_level": task_level,                       # タスクレベル
-                "remaining_min": int(task["remaining_min"]),    # 今の残り分数
-                "days_left": days_left,                         # 期限までの残り日数
-                "deadline_mul": float(deadline_mul),            # 締め切り補正倍率
-                "base_priority": float(base_priority),          # 暫定の提案での優先点
+                "task_id": task_id,                           # タスクID
+                "task_level": task_level,                     # タスクレベル
+                "remaining_min": int(task["remaining_min"]),  # 今の残り分数
+                "days_left": days_left,                       # 期限までの残り日数
+                "deadline_mul": float(deadline_mul),          # 締め切り補正倍率
+                "base_priority": float(base_priority),        # 暫定の提案での優先点
             }
         )
 
@@ -609,15 +627,16 @@ def build_and_insert_suggestion_details(
         if sum_exec_level >= float(target_level) and len(picked) >= 1: # 提案した実施タスクレベルの合計(sum_exec_level)がtarget_levelに達した場合 ※最低1件は出す
             break               # break = 提案を打ち切り
 
-        # このタスクを｢今日何分やるか？｣を決める
         plan_min = pick_plan_minutes(
-            task_level=item["task_level"],          # タスクレベルごとの基本分数(20/30/60)
-            mood_point=mood_point,                  # 気分倍率(0.9/1.0/1.15)
-            remaining_min=item["remaining_min"],    # 残り分数を超えないよう制限
-            minutes_left=minutes_left,              # 今日の残り予算を超えないよう制限
+            item["task_level"],     # タスクレベル
+            mood_point,             # 気分点
+            item["remaining_min"],  # タスク残り分数
+            minutes_left,           # 今日残り作業予算
         )
-        if plan_min <= 0:                           # 提案が0未満の場合
-            continue                                # 採用しない
+
+        # 0分になったらスキップ
+        if int(plan_min) <= 0:
+            continue
 
         required_min = int(item["remaining_min"])   # 提案時点の残り分数
         exec_level = calc_exec_task_level(item["task_level"], plan_min, required_min) # 実施タスクレベル
@@ -640,14 +659,15 @@ def build_and_insert_suggestion_details(
 
     # 1件もタスクを採用できない場合
     if not picked:
-        return         # 終了
-    
-    # 暫定の提案での優先点が高い順に並び替え
+        return []  # ★変更：空リストで返す
+
+    # 暫定の提案での優先点が高い順に並び替え（※元コード通り残す）
     for i in range(len(candidates)):
         for j in range(i + 1, len(candidates)):
             if candidates[i]["base_priority"] < candidates[j]["base_priority"]:
                 # iの方が低いなら入れ替え
                 candidates[i], candidates[j] = candidates[j], candidates[i]
+
     # ---------------------------------------------------------------------------------------------------------------------------------------------------
     # insert_sqlに格納
     insert_sql = """
@@ -672,6 +692,9 @@ def build_and_insert_suggestion_details(
                 row["priority_score"],
             ),
         )
+
+    # ★追加：この案で採用した task_id を返す（次の案で“避ける”ため）
+    return [row["task_id"] for row in picked]
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # 〇分 → 〇時間〇分 に変換
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -930,8 +953,13 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 levels_sorted[2]: "多め案",
             }
 
+            used_task_ids: set[int] = set()
+
             # 3案をDBにINSERTして、詳細も作る
-            for target_level in levels_sorted:
+            for i, target_level in enumerate(levels_sorted):
+                # 2案目以降は、直前案と同じタスクに寄りすぎないよう優先点を下げる
+                diversity_penalty = 0.0 if i == 0 else (0.35 if i == 1 else 0.55)
+
                 db.cursor.execute(
                     """
                     INSERT INTO t_task_suggestions
@@ -944,13 +972,16 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 new_suggestion_id = db.cursor.lastrowid  # 直前INSERTのID
 
                 # 詳細（どのタスクを何分やるか）を作成して保存
-                build_and_insert_suggestion_details(
+                picked_ids = build_and_insert_suggestion_details(
                     db=db,
                     suggestion_id=new_suggestion_id,
                     user_id=user_id,
                     mood_point=mood_point,
                     target_level=target_level,
+                    avoid_task_ids=used_task_ids,
+                    diversity_penalty=diversity_penalty,
                 )
+                used_task_ids.update(picked_ids)
 
             # 3案作成をDBに確定
             db.connection.commit()
