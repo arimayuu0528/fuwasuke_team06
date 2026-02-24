@@ -60,7 +60,7 @@ def create_app():
             'auth.login_process',
             'auth.register',
             'auth.register_process',
-            'mood.register_mood_form',
+            # 'mood.register_mood_form',
             'mood.register_mood_process',
             'mood.register',
             'index',
@@ -83,10 +83,11 @@ def create_app():
             SELECT 1
             FROM t_today_moods
             WHERE user_id=%s
-            AND DATE(mood_date)=%s
+            AND mood_date >= CURDATE()
+            AND mood_date < CURDATE() + INTERVAL 1 DAY
             LIMIT 1
         """
-        mood = db.fetch_one(mood_sql, (user_id, today))
+        mood = db.fetch_one(mood_sql, (user_id,))
  
         # 未登録 → 気分登録画面へ
         if not mood:
@@ -116,7 +117,7 @@ def create_app():
         if endpoint in (
             "mood.register_mood_form",
             "task.task_form",
-            "index",
+            # "index",
         ):
             return redirect(url_for("main.home"))
  
