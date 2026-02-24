@@ -12,6 +12,11 @@ schedule_bp = Blueprint('schedule', __name__, url_prefix='/schedule')
 @schedule_bp.route('/', methods=['GET', 'POST'])
 def schedule_form():
 
+    # ログインチェック
+    user_id = session.get('user_id')
+    if user_id is None:
+        return redirect(url_for('auth.login'))
+
     tags = ['仕事', '休憩', '健康', '趣味']
 
     if request.method == 'POST':
@@ -23,8 +28,6 @@ def schedule_form():
         location = request.form.get('location', '')
         tag = request.form['tag']
         memo = request.form.get('memo', '')
-
-        user_id = 1
 
         fmt = "%H:%M"
         duration_min = (
@@ -65,7 +68,10 @@ def schedule_form():
 @schedule_bp.route('/list')
 def schedule_list():
 
-    user_id = 1
+    # ログインチェック
+    user_id = session.get('user_id')
+    if user_id is None:
+        return redirect(url_for('auth.login'))
 
     db = DatabaseManager()
     db.connect()
@@ -87,13 +93,12 @@ def schedule_list():
     ORDER BY start_time, title
     """
 
-
     db.cursor.execute(sql, (user_id,))
     rows = db.cursor.fetchall()
 
     tasks = []
     for row in rows:
-        task = {
+        tasks.append({
             'id': row['master_id'],
             'title': row['title'],
             'duration_min': row['duration_min'],
@@ -105,9 +110,7 @@ def schedule_list():
             'tag': row['tag'],
             'memo': row['memo'],
             'active_days': row['day_of_week'] if row['day_of_week'] else ''
-        }
-
-        tasks.append(task)
+        })
 
     db.disconnect()
 
@@ -121,7 +124,10 @@ def schedule_list():
 @schedule_bp.route('/delete/<int:task_id>', methods=['POST'])
 def delete_schedule(task_id):
 
-    user_id = 1
+    # ログインチェック
+    user_id = session.get('user_id')
+    if user_id is None:
+        return redirect(url_for('auth.login'))
 
     db = DatabaseManager()
     db.connect()
@@ -130,7 +136,6 @@ def delete_schedule(task_id):
     DELETE FROM t_fixed_schedule_masters
     WHERE master_id = %s AND user_id = %s
     """
-
 
     db.cursor.execute(sql, (task_id, user_id))
     db.connection.commit()

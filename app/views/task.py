@@ -123,8 +123,12 @@ def task_form():
 @task_bp.route("/task_list")
 def task_list():
 
-    user_id = 1
-    today   = date.today()
+    # ログインチェック
+    user_id = session.get('user_id')
+    if user_id is None:
+        return redirect(url_for('auth.login'))
+
+    today = date.today()
 
     db = DatabaseManager()
     db.connect()
@@ -151,7 +155,7 @@ def task_list():
 
     tasks = []
     for row in rows:
-        task = {
+        tasks.append({
             'id':              row['task_id'],
             'title':           row['task_name'],
             'motivation_id':   row['motivation_id'],
@@ -161,10 +165,9 @@ def task_list():
             'remaining_min':   row['remaining_min'],
             'created_date':    row['created_date'],
             'category_name':   row['category_name'],
-            # 締切が今日以前なら「今日中」バッジを表示
+            # 締切が今日以前なら「今日中」バッジ
             'is_today': row['deadline'] is not None and row['deadline'] <= today,
-        }
-        tasks.append(task)
+        })
 
     db.disconnect()
 
