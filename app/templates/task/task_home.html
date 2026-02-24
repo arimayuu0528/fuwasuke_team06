@@ -196,7 +196,7 @@
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
         const remain = total - completed;
  
-        $('#dynamicBar').stop().animate({ 'width': percent + '%' }, 300);
+        $('#dynamicBar').stop().animate({ 'width': percent + '%' }, 100);
         $('#percentText').text(percent + '%');
  
         if(isToday){
@@ -267,7 +267,7 @@
         $('#nextDate').on('click', function(){ displayDate.setDate(displayDate.getDate() + 1); refreshDateDisplay(); });
         $('#toggleTasks').on('click', function(){
             const $list = $('#task-list');
-            $list.slideToggle(300, function(){
+            $list.slideToggle(400, function(){
                 $('#toggleTasks').text($list.is(':hidden') ? 'すべて見る ＞' : '閉じる ＜');
             });
         });
