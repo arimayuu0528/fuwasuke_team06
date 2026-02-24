@@ -1,4 +1,12 @@
-{% extends "base2.html" %} {% block title %} {% endblock %} {% block content %}
+{% extends "base2.html" %}
+
+{% block header_content %}
+<div class="fuwasuke_log1">
+    <p><img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ロゴ"></p>
+</div>
+{% endblock %}
+
+{% block content %}
 
 <!-- JS読み込み -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -6,14 +14,22 @@
 
 <h2>直近1週間の気分遷移</h2>
 
-<canvas id="moodChart"></canvas>
+<div class="mood-chart-wrapper">
+    <canvas id="moodChart"></canvas>
+</div>
+
+
+
+
 
 <script>
     const moodDates = {{ dates | tojson }};
     const moodValues = {{ values | tojson }};
 </script>
 
+
 <script src="{{ url_for('static', filename='js/mood_graph.js') }}"></script>
 
-
 {% endblock %}
+
+
