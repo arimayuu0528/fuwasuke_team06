@@ -501,7 +501,6 @@ content %}
     </div>
   </div>
 </div>
-
 <script>
   (function () {
     let pendingId = null;
@@ -512,13 +511,15 @@ content %}
       if (!btn) return;
       e.preventDefault();
       e.stopPropagation();
-      pendingId = btn.getAttribute("data-task-id");
+
+      pendingId = btn.dataset.taskId;
       openModal();
     });
 
     function openModal() {
       const modal = document.getElementById("tlDeleteModal");
       modal.classList.add("show");
+
       modal.addEventListener("click", function outside(e) {
         if (e.target === modal) {
           closeModal();
@@ -530,27 +531,31 @@ content %}
     window.tlCloseModal = function () {
       closeModal();
     };
+
     function closeModal() {
       document.getElementById("tlDeleteModal").classList.remove("show");
       pendingId = null;
     }
 
+    /* 削除確定 */
     window.tlConfirmDelete = function () {
       if (!pendingId) return;
-      const card = document
-        .querySelector(`[data-task-id="${pendingId}"]`)
-        ?.closest(".tl-task-card");
+
+      fetch(`/task/delete/${pendingId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          location.reload(); // 成功 → 再読み込み
+        })
+        .catch(() => {
+          alert("削除に失敗しました");
+        });
+
       closeModal();
-      if (card) {
-        card.classList.add("deleting");
-        setTimeout(() => {
-          const form = document.createElement("form");
-          form.method = "POST";
-          form.action = "/task/delete/" + pendingId;
-          document.body.appendChild(form);
-          form.submit();
-        }, 300);
-      }
     };
 
     /* メモ開閉 */

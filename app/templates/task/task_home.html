@@ -30,20 +30,16 @@
     <div class="progress-card">
         <div class="progress-info">
             <span class="label">今日の達成度</span>
-            <span class="percent-text" id="percentText">{{ percent}}%</span>
+            <span class="percent-text" id="percentText">{{ percent | default(0) }}%</span>
         </div>
         <div class="progress-track">
-            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent}}%;"></div>
+            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent | default(0) }}%;"></div>
         </div>
        
         <p class="progress-hint">
             <span class="star">✦</span>
             <span id="remainHint">
-            {% if remain_count and remain_count > 0 %}
-                あと<span id="remainCount">{{ remain_count }}</span>つのタスクで目標達成です
-            {% else %}
-                今日のタスクはすべて達成です！
-            {% endif %}
+            読み込み中...
             </span>
         </p>
     </div>
@@ -144,7 +140,7 @@
 (function(){
     let displayDate = new Date();
     const dayLabels = ["日","月","火","水","木","金","土"];
-    const allTasks = {{ rec | tojson | safe }};
+    const allTasks = {{ rec | default([]) | tojson | safe }};
  
     function refreshDateDisplay(){
         const m = displayDate.getMonth() + 1;
@@ -264,6 +260,9 @@
  
     $(document).ready(function(){
         refreshDateDisplay();
+        // ★追加：最初からタスクを表示
+        $('#task-list').show();
+        $('#toggleTasks').text('閉じる ＜');
         $('#prevDate').on('click', function(){ displayDate.setDate(displayDate.getDate() - 1); refreshDateDisplay(); });
         $('#nextDate').on('click', function(){ displayDate.setDate(displayDate.getDate() + 1); refreshDateDisplay(); });
         $('#toggleTasks').on('click', function(){

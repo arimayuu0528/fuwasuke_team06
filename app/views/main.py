@@ -273,9 +273,10 @@ def get_db_connection():
 @main_bp.route("/mood_graph")
 def mood_graph():
     user_id = session.get("user_id")
- 
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+
+    db = DatabaseManager()
+    db.connect()
+
  
     # 直近7日分を取得
     query = """
@@ -285,12 +286,9 @@ def mood_graph():
         AND mood_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         ORDER BY d
     """
- 
-    cursor.execute(query, (user_id,))
-    results = cursor.fetchall()
- 
-    cursor.close()
-    conn.close()
+
+    results = db.fetch_all(query,(user_id,))
+
  
     # DB結果を辞書化
     mood_dict = {}

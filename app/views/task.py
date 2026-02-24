@@ -42,32 +42,78 @@ def task_form():
             details = fetch_suggestion_details(db, int(suggestion_id))
             # 取得した提案IDの詳細からtask_nameだけを抽出
             task_names = [row.get("task_name") for row in details if row.get("task_name")]
+            # ★追加：task_home.html(JS) 用の rec を作る
+            rec = []
+            for row in details:
+                task_id = row.get("task_id")       # s_detail.* に含まれる想定 :contentReference[oaicite:4]{index=4}
+                task_name = row.get("task_name")   # JOINして取れてる :contentReference[oaicite:5]{index=5}
+                plan_min = row.get("plan_min")     # s_detail.* に含まれる想定 :contentReference[oaicite:6]{index=6}
 
+                if not task_id or not task_name:
+                    continue
+
+                rec.append({
+                "id": int(task_id),
+                "name": task_name,
+                "time": f"{int(plan_min)}分" if plan_min is not None else "",
+                "is_fixed": False,
+                "repeat_type": "",
+                "day_of_week": "",
+                "done": False,
+                })
             return render_template(
                 "task/task_home.html",                  # 表示するHTML
                 task_suggestion_id=int(suggestion_id),  # 提案ID（型をintで統一）
                 task_names=task_names,                  # タスク名のリスト
+                rec=rec,
             )
         finally: # try内で成功/失敗しても必ず通る
             db.disconnect() # DB接続を必ず切断する
     # ----------------------------
     # POST（formから受け取って表示）
     # ----------------------------
-    # formのtask_suggestion_idをintで取得（hidden等を想定）
+    # POST（formから受け取って表示）
     task_suggestion_id = request.form.get("task_suggestion_id", type=int)
-    # 同名のtask_nameをリストで取得
-    task_names = request.form.getlist("task_name")  # 複数受け取り
-
-    # formから提案IDが取れない場合:
     if task_suggestion_id is None:
-        # セッションに残っているIDを拾う
-        task_suggestion_id = session.get("current_task_suggestion_id") or session.get("selected_task_suggestion_id")
+        task_suggestion_id = session.get("current_task_suggestion_id") or session.get("selected_task_suggestion_id")  # :contentReference[oaicite:10]{index=10}
 
-    return render_template(
-        "task/task_home.html",                 # 表示するHTML
-        task_suggestion_id=task_suggestion_id, # 提案ID（型をintで統一）
-        task_names=task_names,                 # タスク名のリスト
-    )
+    if task_suggestion_id is None:
+        return redirect(url_for("task.task_suggestion"))
+
+    db = DatabaseManager()
+    db.connect()
+    try:
+        details = fetch_suggestion_details(db, int(task_suggestion_id))  # :contentReference[oaicite:11]{index=11}
+
+        task_names = [row.get("task_name") for row in details if row.get("task_name")]
+
+        rec = []
+        for row in details:
+            task_id = row.get("task_id")
+            task_name = row.get("task_name")
+            plan_min = row.get("plan_min")
+            if not task_id or not task_name:
+                continue
+            rec = []
+            for i, name in enumerate(task_names):
+                rec.append({
+                    "id": i + 1,
+                    "name": name,
+                    "time": "",
+                    "is_fixed": False,
+                    "repeat_type": "",
+                    "day_of_week": "",
+                    "done": False,
+                })
+
+        return render_template(
+            "task/task_home.html",
+            task_suggestion_id=int(task_suggestion_id),
+            task_names=task_names,
+            rec=rec,   # ★必須 :contentReference[oaicite:12]{index=12}
+        )
+    finally:
+        db.disconnect()
 
 
 # -----------------------------------------------------
@@ -77,8 +123,12 @@ def task_form():
 @task_bp.route("/task_list")
 def task_list():
 
-    user_id = 1
-    today   = date.today()
+    # ログインチェック
+    user_id = session.get('user_id')
+    if user_id is None:
+        return redirect(url_for('auth.login'))
+
+    today = date.today()
 
     db = DatabaseManager()
     db.connect()
@@ -105,7 +155,7 @@ def task_list():
 
     tasks = []
     for row in rows:
-        task = {
+        tasks.append({
             'id':              row['task_id'],
             'title':           row['task_name'],
             'motivation_id':   row['motivation_id'],
@@ -115,10 +165,9 @@ def task_list():
             'remaining_min':   row['remaining_min'],
             'created_date':    row['created_date'],
             'category_name':   row['category_name'],
-            # 締切が今日以前なら「今日中」バッジを表示
+            # 締切が今日以前なら「今日中」バッジ
             'is_today': row['deadline'] is not None and row['deadline'] <= today,
-        }
-        tasks.append(task)
+        })
 
     db.disconnect()
 
@@ -1014,8 +1063,10 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 # 削除を確定
                 db.connection.commit()
 
+                # ★追加：開始中IDが残っているとそっちが優先されるのでクリア
+                session.pop("current_task_suggestion_id", None)
                 # 選んだ1案だけ表示する画面へ戻す
-                return redirect(url_for("main.home"))
+                return redirect(url_for("task.task_form"))
 
             # -- 評価更新
             # form から評価値(1~3)をintで受け取る(無ければNone)
