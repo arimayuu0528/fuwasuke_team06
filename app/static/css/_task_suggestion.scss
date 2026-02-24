@@ -296,3 +296,12 @@
   -webkit-overflow-scrolling: touch; 
   padding-right: 6px;            
 }
+
+.no_suggestion_msg{
+  text-align: center;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.05);
+  font-weight: 600;
+}

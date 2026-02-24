@@ -18,67 +18,79 @@
         <div class="section">
             <h1>今日の過ごし方を選ぼう</h1>
             <h2>あなたにぴったりのプランをご提案します</h2>
-            <div class="container">
-                <!-- 戻るボタン -->
-                <button type="button" class="slider_btn back_btn">◀</button>
-                <div class="track">
-                    {% for bundle in suggestion_bundles %}
-                        <div class="item {%if loop.first %} is-active {% endif %}">
-                            <!-- 合計時間 -->
-                            <p class="sum_time">合計：{{ bundle.total_plan_text }}</p>
 
-                            <!-- 提案タスク一覧 -->
-                            <ul class="task_list">
-                            {% for row in bundle.suggestion_list %}
-                                <li class="task">
-                                    <div class="task_name">
-                                        <span class="task_title">{{ row.task_name }}</span>
-                                        {% if row.deadline_tag %}
-                                            <div class="deadline_tag">{{ row.deadline_tag }}</div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="plan_min">{{ row.plan_min }}分</div>
-                                </li>
+            {# ===== 追加：提案タスクが1件でもあるか判定する ===== #}
+            {% set ns = namespace(has_tasks=false) %}
+            {% for bundle in suggestion_bundles %}
+                {% if bundle.suggestion_list and (bundle.suggestion_list|length) > 0 %}
+                    {% set ns.has_tasks = true %}
+                {% endif %}
+            {% endfor %}
 
-                            {% endfor %}
-                            </ul>
+            {# ===== 変更：提案が無いならメッセージ表示 ===== #}
+            {% if not ns.has_tasks %}
+                <p class="no_suggestion_msg">提案できるタスクがありません。</p>
 
-                    
-                            <!-- 決定ボタン押下：この案のタスク提案ID + タスク名 送信 -->
-                            <form method="post" action="{{ url_for('task.task_suggestion') }}" class="start_form">
-                                <input type="hidden" name="selected_suggestion_id" value="{{ bundle.suggestion.task_suggestion_id }}">
+            {% else %}
+                {# ===== ここから下は「提案がある時だけ表示」 ===== #}
+
+                <div class="container">
+                    <!-- 戻るボタン -->
+                    <button type="button" class="slider_btn back_btn">◀</button>
+
+                    <div class="track">
+                        {% for bundle in suggestion_bundles %}
+                            <div class="item {%if loop.first %} is-active {% endif %}">
+                                <!-- 合計時間 -->
+                                <p class="sum_time">合計：{{ bundle.total_plan_text }}</p>
+
+                                <!-- 提案タスク一覧 -->
+                                <ul class="task_list">
+                                {% for row in bundle.suggestion_list %}
+                                    <li class="task">
+                                        <div class="task_name">
+                                            <span class="task_title">{{ row.task_name }}</span>
+                                            {% if row.deadline_tag %}
+                                                <div class="deadline_tag">{{ row.deadline_tag }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="plan_min">{{ row.plan_min }}分</div>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+
+                                <!-- 決定ボタン押下：この案のタスク提案ID + タスク名 送信 -->
+                                <form method="post" action="{{ url_for('task.task_suggestion') }}" class="start_form">
+                                    <input type="hidden" name="selected_suggestion_id" value="{{ bundle.suggestion.task_suggestion_id }}">
 
                                     <!-- task_name を複数送る（Flask側で受け取れる -->
                                     {% for row in bundle.suggestion_list %}
                                         <input type="hidden" name="task_name" value="{{ row.task_name }}">
                                     {% endfor %}
-                            </form>
-                        </div>
-                    {% endfor %}
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- 進むボタン -->
+                    <button type="button" class="slider_btn next_btn">▶</button>
                 </div>
-                <!-- 進むボタン -->
-                <button type="button" class="slider_btn next_btn">▶</button>
-            </div>
 
-            
-            
-            
-            <!-- 決定ボタン -->
-            <button type="button" id="decideBtn" class="start">決定</button>
-            
+                <!-- 決定ボタン -->
+                <button type="button" id="decideBtn" class="start">決定</button>
 
-                    
-            <!-- ドットインジケータ -->
-            <div class="indicator_container">
-                <div class="indicator indicator1"></div>
-                <div class="indicator"></div>
-                <div class="indicator"></div>
-            </div>
+                <!-- ドットインジケータ -->
+                <div class="indicator_container">
+                    <div class="indicator indicator1"></div>
+                    <div class="indicator"></div>
+                    <div class="indicator"></div>
+                </div>
+
+                {# ===== 変更：提案がある時だけJS読み込み（JSエラー防止） ===== #}
+                <script src="{{ url_for('static', filename='js/task_suggestion.js') }}" defer></script>
+
+            {% endif %}
         </div>
     </div>
 </div>
-
-<!-- JS読み込み -->
-<script src="{{ url_for('static', filename='js/task_suggestion.js') }}" defer></script>
-
 {% endblock %}

@@ -1205,7 +1205,9 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 continue # この案は表示しない（次の案へ）
 
             # このタスク提案IDの「詳細（タスク一覧）」をDBから取得
-            details = fetch_suggestion_details(db, sid)  
+            details = fetch_suggestion_details(db, sid)
+            if not details:
+                continue
             attach_deadline_tags(details)                # deadline_tag を付与
             # details の plan_min 合計から「◯時間◯分」文字列を作る
             total_plan_text = calc_total_plan_text(details)
