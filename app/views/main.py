@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template,session,redirect,url_for,request
+from flask import Blueprint,render_template,session,redirect,url_for,request,jsonify
 from app.db import DatabaseManager
 
 from flask import render_template
@@ -19,80 +19,136 @@ main_bp = Blueprint('main',__name__,url_prefix='/main')
 # -----------------------------------------------------
 @main_bp.route("/home")
 def home():
-    # return render_template('main/home.html')
-  
-    current_user_id = 1
+    current_user_id = session.get("user_id")
     today = date.today()
-    
+ 
     rec = []
-    percent = 0
-    remain_count = 0
-    
     db = DatabaseManager()
     db.connect()
-    
+ 
     try:
-        # 1. プロパティからカーソルを直接取得（withは使わない）
-        cursor = db.cursor 
-        
-        # 2. 今日のタスク提案(Header)を取得
+        cursor = db.cursor
+ 
+        # --- 1. 固定予定マスターを全件取得して rec に追加 ---
+        sql_fixed_master = """
+            SELECT master_id, title, start_time, end_time, repeat_type, day_of_week
+            FROM t_fixed_schedule_masters
+            WHERE user_id = %s
+            ORDER BY start_time ASC
+        """
+        cursor.execute(sql_fixed_master, (current_user_id,))
+        fixed_masters_raw = cursor.fetchall()
+ 
+        for item in fixed_masters_raw:
+            # 時刻のフォーマット
+            s_time = item["start_time"].strftime("%H:%M") if hasattr(item["start_time"], "strftime") else str(item["start_time"])[:5]
+            e_time = item["end_time"].strftime("%H:%M") if hasattr(item["end_time"], "strftime") else str(item["end_time"])[:5]
+           
+            # 重要：JavaScriptで判別できるように全ての情報を一つの辞書にまとめる
+            rec.append({
+                "id": item["master_id"],
+                "name": item["title"],
+                "time": f"{s_time} - {e_time}",
+                "done": False, # 固定予定の初期値
+                "is_fixed": True, # 固定予定フラグ
+                "repeat_type": item["repeat_type"],
+                "day_of_week": item["day_of_week"] # "月火水" など
+            })
+ 
+        # --- 2. 今日の提案タスクを取得して rec に追加 ---
         sql_suggestion = """
-            SELECT task_suggestion_id 
-            FROM t_task_suggestions 
+            SELECT task_suggestion_id
+            FROM t_task_suggestions
             WHERE user_id = %s AND suggestion_date = %s
             LIMIT 1
         """
         cursor.execute(sql_suggestion, (current_user_id, today))
         suggestion = cursor.fetchone()
-
+        print(suggestion)
+        print("---")
         if suggestion:
-            # 3. 提案詳細(Detail)とタスク名を結合して取得
             sql_details = """
-                SELECT 
-                    t.task_name, 
-                    d.plan_min,
-                    d.actual_work_min
+                SELECT t.task_id, t.task_name, d.plan_min, d.actual_work_min
                 FROM t_task_suggestion_detail d
                 JOIN t_tasks t ON d.task_id = t.task_id
                 WHERE d.task_suggestion_id = %s
+                ORDER BY plan_min ASC
             """
-            cursor.execute(sql_details, (suggestion['task_suggestion_id'],))
+            cursor.execute(sql_details, (suggestion["task_suggestion_id"],))
             details = cursor.fetchall()
-
+            print(details)
             for row in details:
-                # actual_work_minがあれば完了(done)とみなす
-                is_done = True if row['actual_work_min'] and row['actual_work_min'] > 0 else False
+                is_done = bool(row.get("actual_work_min") and row["actual_work_min"] > 0)
                 rec.append({
-                    "name": row['task_name'],
+                    "id": row["task_id"],
+                    "name": row["task_name"],
                     "time": f"{row['plan_min']}分",
-                    "done": is_done
+                    "done": is_done,
+                    "is_fixed": False,
+                    "repeat_type": None,
+                    "day_of_week": None
                 })
-        
-        # カーソルを閉じる
-        cursor.close()
-
-        # 4. 達成度と残り数の計算
-        total_tasks = len(rec)
+ 
+        # 達成度計算（提案タスクのみで計算する場合）
+        proposal_tasks = [t for t in rec if not t["is_fixed"]]
+        total_tasks = len(proposal_tasks)
+        percent = 0
+        remain_count = 0
         if total_tasks > 0:
-            completed_tasks = len([t for t in rec if t["done"]])
+            completed_tasks = len([t for t in proposal_tasks if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
             remain_count = total_tasks - completed_tasks
-
+ 
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        # クラスの設計に合わせて disconnect または close を呼ぶ
-        if hasattr(db, 'disconnect'):
-            db.disconnect()
-        elif hasattr(db, 'close'):
-            db.close()
-
+        db.disconnect()
+    print(rec)
     return render_template(
-        'task/task_home.html', 
-        rec=rec, 
-        percent=percent, 
+        "task/task_home.html",
+        rec=rec, # これで固定と提案の両方がJSに渡る
+        percent=percent,
         remain_count=remain_count
     )
+@main_bp.route('/update_task_done', methods=['POST'])
+def update_task_done():
+    try:
+        data = request.get_json()
+        task_id = data.get('task_id')
+        is_fixed = data.get('is_fixed') # JSから送られる true/false
+        done = data.get('done')         # チェックが入れば True, 外れれば False
+        target_date = data.get('date')  # '2026-01-26' などの文字列
+ 
+        db = DatabaseManager()
+        db.connect()
+        cursor = db.cursor
+ 
+        if is_fixed:
+            # 【固定予定の場合】
+            # 固定予定の完了を管理するテーブルがあればここにUpdate文を書きます。
+            # 今回は一旦、何もせず成功を返します。
+            pass
+        else:
+            # 【通常タスクの場合】
+            # 完了(done=True)なら実績(actual_work_min)に計画時間をコピー、
+            # 未完了(done=False)なら0に戻すという処理例です。
+            sql = """
+                UPDATE t_task_suggestion_detail d
+                JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
+                SET d.actual_work_min = (CASE WHEN %s THEN d.plan_min ELSE 0 END)
+                WHERE d.task_id = %s AND s.suggestion_date = %s
+            """
+            cursor.execute(sql, (done, task_id, target_date))
+       
+        db.connection.commit()
+        db.disconnect()
+ 
+        return jsonify({"status": "success"})
+ 
+    except Exception as e:
+        print(f"DB Update Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+ 
 
 # -----------------------------------------------------
 # タスク・固定予定登録画面遷移ボタン処理　（エンドポイント：'/add_event')  担当者名：日髙
