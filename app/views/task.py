@@ -67,22 +67,161 @@ def task_form():
         task_suggestion_id=task_suggestion_id, # 提案ID（型をintで統一）
         task_names=task_names,                 # タスク名のリスト
     )
-    
+
+
 # -----------------------------------------------------
 # タスク一覧：担当者名 向山
+# URL：/task/task_list
 # -----------------------------------------------------
-
 @task_bp.route("/task_list")
 def task_list():
-    pass
+
+    user_id = 1
+    today   = date.today()
+
+    db = DatabaseManager()
+    db.connect()
+
+    sql = """
+    SELECT
+        t.task_id,
+        t.task_name,
+        t.motivation_id,
+        m.motivation_name,
+        t.deadline,
+        t.duration_min,
+        t.remaining_min,
+        t.created_date,
+        t.category_name
+    FROM t_tasks t
+    LEFT JOIN t_motivations m ON t.motivation_id = m.motivation_id
+    WHERE t.user_id = %s
+    ORDER BY t.deadline, t.task_name
+    """
+
+    db.cursor.execute(sql, (user_id,))
+    rows = db.cursor.fetchall()
+
+    tasks = []
+    for row in rows:
+        task = {
+            'id':              row['task_id'],
+            'title':           row['task_name'],
+            'motivation_id':   row['motivation_id'],
+            'motivation_name': row['motivation_name'],
+            'due_date':        row['deadline'].strftime('%Y/%m/%d') if row['deadline'] else '',
+            'duration_min':    row['duration_min'],
+            'remaining_min':   row['remaining_min'],
+            'created_date':    row['created_date'],
+            'category_name':   row['category_name'],
+            # 締切が今日以前なら「今日中」バッジを表示
+            'is_today': row['deadline'] is not None and row['deadline'] <= today,
+        }
+        tasks.append(task)
+
+    db.disconnect()
+
+    return render_template('task/task_list.html', tasks=tasks)
+
+
+# -----------------------------------------------------
+# タスク削除
+# URL：/task/delete/◯◯
+# -----------------------------------------------------
+@task_bp.route("/delete/<int:task_id>", methods=["POST"])
+def delete_task(task_id):
+
+    user_id = 1
+
+    db = DatabaseManager()
+    db.connect()
+
+    sql = """
+    DELETE FROM t_tasks
+    WHERE task_id = %s AND user_id = %s
+    """
+
+    db.cursor.execute(sql, (task_id, user_id))
+    db.connection.commit()
+    db.disconnect()
+
+    return redirect(url_for('task.task_list'))
+
 
 # -----------------------------------------------------
 # タスク作成：担当者名 向山
 # -----------------------------------------------------
 
-@task_bp.route("/task_create")
+@task_bp.route("/task_create", methods=["GET", "POST"])
 def task_create():
-    pass
+    # GET：タスク登録フォームを表示
+    if request.method == "GET":
+        return render_template("task/task_register.html", task=None)
+
+    # POST：フォームのデータを受け取ってDBに登録
+    user_id = get_current_user_id()
+
+    task_name             = request.form.get("title", "").strip()
+    category_name         = request.form.get("category", "").strip()
+    duration_min          = request.form.get("duration", type=int)
+    deadline              = request.form.get("date", "").strip()
+    motivation_id         = request.form.get("motivation", type=int) or 1
+    notification_enabled  = request.form.get("notification_enabled", type=int) or 1
+    notification_min      = request.form.get("notification_min", type=int) or 5
+
+    errors = []
+    if not task_name:
+        errors.append("タスク名を入力してください")
+    if duration_min is None or duration_min <= 0:
+        errors.append("予定時間を選択してください")
+    if not deadline:
+        errors.append("日付を入力してください")
+
+    if errors:
+        return render_template(
+            "task/task_register.html",
+            errors=errors,
+            task={
+                "title":                task_name,
+                "category":             category_name,
+                "duration":             duration_min,
+                "date":                 deadline,
+                "motivation":           motivation_id,
+                "notification_enabled": notification_enabled,
+                "notification_min":     notification_min,
+            },
+        )
+
+    db = DatabaseManager()
+    db.connect()
+
+    try:
+        sql = """
+            INSERT INTO t_tasks
+                (user_id, task_name, motivation_id, deadline,
+                 duration_min, remaining_min, created_date, category_name)
+            VALUES
+                (%s, %s, %s, %s, %s, %s, CURDATE(), %s)
+        """
+        db.cursor.execute(sql, (
+            user_id,
+            task_name,
+            motivation_id,
+            deadline      or None,
+            duration_min,
+            duration_min,
+            category_name or None,
+        ))
+        db.connection.commit()
+
+    except Exception as e:
+        db.connection.rollback()
+        raise e
+
+    finally:
+        db.disconnect()
+
+    return redirect(url_for("task.task_list"))
 
 # -------------------------------------------------------------------------------------------------------------------
 # タスク提案：担当者名 有馬
@@ -410,10 +549,22 @@ def pick_plan_minutes(task_level: int, mood_point: int, remaining_min: int, minu
 # 今日の提案に対して｢どのタスクを何分やるか｣の詳細を作成してDBに保存する関数
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def build_and_insert_suggestion_details(
-    db: DatabaseManager,suggestion_id: int,user_id: int,mood_point: int,target_level: int,):
+    db: DatabaseManager,
+    suggestion_id: int,
+    user_id: int,
+    mood_point: int,
+    target_level: int,
+    avoid_task_ids: set[int] | None = None,
+    diversity_penalty: float = 0.0,
+) -> list[int]:
     today = date.today() # 今日の日付(例：2026-02-07)を作成
     free_minutes = calc_available_minutes(db, user_id) # 今日使える作業分数(関数calc_available_minutesを利用)
     minutes_left = int(free_minutes) # 今日残り作業予算
+
+    # 追加：前案で使ったタスクを「避けやすく」するための設定
+    avoid_task_ids = set(avoid_task_ids or [])
+    diversity_penalty = max(0.0, min(0.95, float(diversity_penalty or 0.0)))
+
     # ------------------------------------------------------------------------------------------------------------
     # remaining_min > 0　(完了しているタスクを候補から外す)
     task_sql = """
@@ -439,18 +590,24 @@ def build_and_insert_suggestion_details(
         else:                # 期限が存在する場合：
             days_left = (deadline - today).days # 期限 - 今日　で残り日数を .days で整数にする
         deadline_mul = calc_deadline_multiplier(days_left) # 締め切り補正倍率(関数calc_deadline_multiplierを利用)
-        task_level = int(task["task_level"])               # motivation_idが入る
+
+        task_id = int(task["task_id"])                   # ★追加（task_idを先に取り出す）
+        task_level = int(task["task_level"])             # motivation_idが入る
         base_priority = float(task_level) * float(deadline_mul) # タスクレベル × 締め切り補正倍率
+
+        # ★追加：前案で使ったタスクは優先点を下げて「別案」を出しやすくする
+        if diversity_penalty > 0.0 and task_id in avoid_task_ids:
+            base_priority *= (1.0 - diversity_penalty)
 
         # タスク提案候補をまとめて保存
         candidates.append(
             {
-                "task_id": int(task["task_id"]),                # タスクID
-                "task_level": task_level,                       # タスクレベル
-                "remaining_min": int(task["remaining_min"]),    # 今の残り分数
-                "days_left": days_left,                         # 期限までの残り日数
-                "deadline_mul": float(deadline_mul),            # 締め切り補正倍率
-                "base_priority": float(base_priority),          # 暫定の提案での優先点
+                "task_id": task_id,                           # タスクID
+                "task_level": task_level,                     # タスクレベル
+                "remaining_min": int(task["remaining_min"]),  # 今の残り分数
+                "days_left": days_left,                       # 期限までの残り日数
+                "deadline_mul": float(deadline_mul),          # 締め切り補正倍率
+                "base_priority": float(base_priority),        # 暫定の提案での優先点
             }
         )
 
@@ -470,15 +627,16 @@ def build_and_insert_suggestion_details(
         if sum_exec_level >= float(target_level) and len(picked) >= 1: # 提案した実施タスクレベルの合計(sum_exec_level)がtarget_levelに達した場合 ※最低1件は出す
             break               # break = 提案を打ち切り
 
-        # このタスクを｢今日何分やるか？｣を決める
         plan_min = pick_plan_minutes(
-            task_level=item["task_level"],          # タスクレベルごとの基本分数(20/30/60)
-            mood_point=mood_point,                  # 気分倍率(0.9/1.0/1.15)
-            remaining_min=item["remaining_min"],    # 残り分数を超えないよう制限
-            minutes_left=minutes_left,              # 今日の残り予算を超えないよう制限
+            item["task_level"],     # タスクレベル
+            mood_point,             # 気分点
+            item["remaining_min"],  # タスク残り分数
+            minutes_left,           # 今日残り作業予算
         )
-        if plan_min <= 0:                           # 提案が0未満の場合
-            continue                                # 採用しない
+
+        # 0分になったらスキップ
+        if int(plan_min) <= 0:
+            continue
 
         required_min = int(item["remaining_min"])   # 提案時点の残り分数
         exec_level = calc_exec_task_level(item["task_level"], plan_min, required_min) # 実施タスクレベル
@@ -501,14 +659,15 @@ def build_and_insert_suggestion_details(
 
     # 1件もタスクを採用できない場合
     if not picked:
-        return         # 終了
-    
-    # 暫定の提案での優先点が高い順に並び替え
+        return []  # ★変更：空リストで返す
+
+    # 暫定の提案での優先点が高い順に並び替え（※元コード通り残す）
     for i in range(len(candidates)):
         for j in range(i + 1, len(candidates)):
             if candidates[i]["base_priority"] < candidates[j]["base_priority"]:
                 # iの方が低いなら入れ替え
                 candidates[i], candidates[j] = candidates[j], candidates[i]
+
     # ---------------------------------------------------------------------------------------------------------------------------------------------------
     # insert_sqlに格納
     insert_sql = """
@@ -533,6 +692,9 @@ def build_and_insert_suggestion_details(
                 row["priority_score"],
             ),
         )
+
+    # ★追加：この案で採用した task_id を返す（次の案で“避ける”ため）
+    return [row["task_id"] for row in picked]
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # 〇分 → 〇時間〇分 に変換
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -791,8 +953,13 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 levels_sorted[2]: "多め案",
             }
 
+            used_task_ids: set[int] = set()
+
             # 3案をDBにINSERTして、詳細も作る
-            for target_level in levels_sorted:
+            for i, target_level in enumerate(levels_sorted):
+                # 2案目以降は、直前案と同じタスクに寄りすぎないよう優先点を下げる
+                diversity_penalty = 0.0 if i == 0 else (0.35 if i == 1 else 0.55)
+
                 db.cursor.execute(
                     """
                     INSERT INTO t_task_suggestions
@@ -805,13 +972,16 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                 new_suggestion_id = db.cursor.lastrowid  # 直前INSERTのID
 
                 # 詳細（どのタスクを何分やるか）を作成して保存
-                build_and_insert_suggestion_details(
+                picked_ids = build_and_insert_suggestion_details(
                     db=db,
                     suggestion_id=new_suggestion_id,
                     user_id=user_id,
                     mood_point=mood_point,
                     target_level=target_level,
+                    avoid_task_ids=used_task_ids,
+                    diversity_penalty=diversity_penalty,
                 )
+                used_task_ids.update(picked_ids)
 
             # 3案作成をDBに確定
             db.connection.commit()
@@ -845,8 +1015,6 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
 
                 # 選んだ1案だけ表示する画面へ戻す
                 return redirect(url_for("main.home"))
-                # # ◇ task/taskを表示させたい場合:
-                # return redirect(url_for("task.task_form"))
 
             # -- 評価更新
             # form から評価値(1~3)をintで受け取る(無ければNone)
@@ -1027,7 +1195,7 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
         if db.connection is not None: # DB接続が存在する（途中までDB操作している)場合:
             db.connection.rollback()  # 途中までの変更を取り消す
 
-        traceback.print_exc()           # どの行で落ちたかをコンソールに詳しく出す（デバッグ用）
+        traceback.print_exc()           # どの行で落ちたかをコンソールに詳しく出力（デバッグ用）
         return f"タスク提案エラー: {e}"  # ブラウザにエラーメッセージを返す
 
     # 最後に必ず実行 ----------------------------------------------------------------------------------------------------------------------

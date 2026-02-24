@@ -29,19 +29,21 @@
     <div class="progress-card">
         <div class="progress-info">
             <span class="label">今日の達成度</span>
-            <span class="percent-text">{{ percent | default(75) }}%</span>
+            <span class="percent-text" id="percentText">{{ percent}}%</span>
         </div>
         <div class="progress-track">
-            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent | default(75) }}%;"></div>
+            <div class="progress-bar-fill" id="dynamicBar" style="width: {{ percent}}%;"></div>
         </div>
         
         <p class="progress-hint">
             <span class="star">✦</span> 
+            <span id="remainHint">
             {% if remain_count and remain_count > 0 %}
                 あと<span id="remainCount">{{ remain_count }}</span>つのタスクで目標達成です
             {% else %}
                 今日のタスクはすべて達成です！
             {% endif %}
+            </span>
         </p>
     </div>
 
@@ -54,27 +56,7 @@
         </div>
 
         <div id="task-list" class="task-container" style="display: none;">
-            {% for task in rec %}
-            <div class="task-card">
-                <div class="task-check">
-                    {% if task.done %}
-                        <i class="fa-solid fa-check done-icon"></i>
-                    {% else %}
-                        <span class="circle-icon">○</span>
-                    {% endif %}
-                </div>
-                <div class="task-body">
-                    <p class="task-title">{{ task.name }}</p>
-                    <p class="task-time">{{ task.time }}</p>
-                </div>
-                {% if task.done %}
-                    <div class="task-report">
-                        <a href="#" class="report-btn">レポート</a>
-                    </div>
-                {% endif %}
             </div>
-            {% endfor %}
-        </div>
     </div>
 </div>
 
@@ -82,14 +64,14 @@
     <div class="modal-content">
         <button class="modal-close-x" id="closeModal">×</button>
         
-        <div class="modal-header-row">
+        <div class="modal-header-row"id="evalHeader">
             <img src="../../static/image/bouhuwasuke.png" width="45" class="chara-img">
             <div class="modal-bubble">
-                <p>お疲れ様でした。<br>タスク案を評価して欲しいな。</p>
+                <p>お疲れ様でした。<br>タスク案を評価して<br>欲しいな。</p>
             </div>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body" id="evalStep1">
             <h3 class="eval-title">今回、提案したタスクに対して<br>最も近い評価を選んでください</h3>
             
             <div class="eval-options">
@@ -98,192 +80,202 @@
                 <button type="button" class="eval-choice" data-value="不満">不満</button>
             </div>
 
-            <button type="button" class="eval-submit-btn" id="submitEval">評価する</button>
+            <button type="button" class="eval-submit-btn" id="submitEval" disabled>評価する</button>
+        </div>
+
+        <div class="modal-body" id="evalStep2" style="display: none; text-align: center; padding: 10px 0 20px;">
+            <img src="../../static/image/ozigi.jpg" width="100" style="margin-bottom: 15px;">
+            <h3 style="font-size: 18px; color: #333; margin-bottom: 25px; font-weight: bold;">送信しました</h3>
+            <button type="button" class="action-btn" id="backHome" style="width: 160px; margin: 0 auto;">ホームに戻る</button>
         </div>
     </div>
 </div>
 
 <style>
-/* 全体レイアウト */
+/* 固定ラベル */
+.fixed-label { background: #f9dab5; color: #8a745d; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 6px; }
+
+/* 既存CSS */
 .container { padding: 20px; max-width: 400px; margin: 0 auto; padding-bottom: 100px; }
-
-/* 吹き出し（共通統一） */
-.header-msg-row, .modal-header-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.message-bubble, .modal-bubble {
-    background: #fffce7;
-    border: 2px solid #f9dab5;
-    border-radius: 18px;
-    padding: 10px 12px;
-    font-size: 12px !important;
-    color: #8a745d;
-    line-height: 1.4;
-    position: relative;
-    flex: 1;
-}
-
-.message-bubble::before,
-.modal-bubble::before {
-    content: "";
-    position: absolute;
-    left: -18px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 9px solid transparent;
-    border-right: 9px solid #f9dab5;
-}
-
-.message-bubble::after,
-.modal-bubble::after {
-    content: "";
-    position: absolute;
-    left: -16px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 8px solid transparent;
-    border-right: 8px solid #fffce7;
-}
-
-.modal-bubble p {
-    font-size: 12px !important;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* 日付セレクター */
+.header-msg-row, .modal-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.message-bubble, .modal-bubble { background: #fffce7; border: 2px solid #f9dab5; border-radius: 18px; padding: 10px 12px; font-size: 12px !important; color: #8a745d; line-height: 1.4; position: relative; flex: 1; }
+.message-bubble::before, .modal-bubble::before { content: ""; position: absolute; left: -18px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right: 9px solid #f9dab5; }
+.message-bubble::after, .modal-bubble::after { content: ""; position: absolute; left: -16px; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-right: 8px solid #fffce7; }
+.modal-bubble p { font-size: 12px !important; margin: 0; line-height: 1.4; }
 .date-selector { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 20px 0; }
 .date-display { font-size: 26px; font-weight: bold; color: #333; min-width: 180px; text-align: center; }
 .date-arrow { background: none; border: none; color: #f19710; font-size: 24px; cursor: pointer; }
-
-/* 達成度カード */
 .progress-card { background: #fff9f0; border-radius: 35px; padding: 25px; border: 1px solid #ffe8d0; margin-bottom: 30px; }
 .progress-info { display: flex; justify-content: space-between; margin-bottom: 10px; color: #f19710; font-weight: bold; }
 .progress-track { background: #e0e0e0; height: 14px; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
-.progress-bar-fill { background: #fbc02d; height: 100%; transition: width 0.8s ease; }
+.progress-bar-fill { background: #fbc02d; height: 100%; transition: width 0.3s ease; }
 .progress-hint { font-size: 13px; color: #666; }
 .star { color: #333; margin-right: 4px; }
-
-/* ボタン共通 */
 .action-btn { display: block; width: 80%; margin: 0 auto 30px; background: #f09540; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 0 #d47e2a; cursor: pointer; }
 .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d47e2a; }
-
-/* タスクリスト */
 .task-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; padding: 0 5px; }
 .task-header h3 { font-size: 18px; color: #333; }
 .toggle-link { color: #f19710; font-size: 14px; cursor: pointer; }
-
 .task-card { display: flex; align-items: center; background: white; border-radius: 40px; padding: 12px 20px; border: 1px solid #eee; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .task-check { margin-right: 15px; font-size: 18px; }
+.task-container {max-height: 250px;overflow-y: auto;padding-right: 5px;}
 .done-icon { color: #f19710; }
 .circle-icon { color: #ccc; }
 .task-body { flex: 1; }
 .task-title { font-weight: bold; font-size: 15px; color: #333; }
 .task-time { font-size: 12px; color: #999; }
-.report-btn { color: #f19710; font-size: 13px; text-decoration: none; font-weight: bold; }
-
-/* モーダル */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(2px);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 10000;
-}
-.modal-content {
-    background: white; width: 85%; max-width: 340px; border-radius: 30px;
-    padding: 20px 20px 30px; position: relative;
-    border: 2px solid #f09540; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-.modal-close-x {
-    position: absolute;
-    top: 5px;
-    right: 8px;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px;
-    min-height: 20px;
-    padding: 0 !important;
-    background: #f09540;
-    border: none;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-}
-
-.eval-title { font-size: 14px; color: #333; margin-bottom: 25px; line-height: 1.6; font-weight: bold; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+.modal-content { background: white; width: 85%; max-width: 340px; border-radius: 30px; padding: 20px 20px 30px; position: relative; border: 2px solid #f09540; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.modal-close-x { position: absolute; top: 5px; right: 8px; width: 20px !important; height: 20px !important; min-width: 20px; min-height: 20px; padding: 0 !important; background: #f09540; border: none; border-radius: 50% !important; display: flex !important; align-items: center; justify-content: center; box-sizing: border-box; z-index: 10; }
+.eval-title { font-size: 14px; color: #333; margin-bottom: 25px; line-height: 1.6; font-weight: bold; text-align: center; }
 .eval-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-.eval-choice {
-    background: #f2f2f2; border: 1px solid #eee; padding: 12px;
-    border-radius: 25px; font-size: 14px; color: #333; cursor: pointer; transition: 0.2s;
-}
-.eval-choice.selected {
-    background: #fff0d0; border-color: #f09540; font-weight: bold; color: #333;
-}
-.eval-submit-btn {
-    background: #f09540; color: white; border: none; width: 140px;
-    padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer;
-}
+.eval-choice { background: #f2f2f2; border: 1px solid #eee; padding: 12px; border-radius: 25px; font-size: 14px; color: #333; cursor: pointer; transition: 0.2s; }
+
+.eval-choice.selected { background-color: #f09540 !important; color: #fff !important; font-weight: bold !important; border-color: #f09540 !important; }
+.eval-choice.disabled { background-color: #ddd !important; color: #888 !important; border-color: #ccc !important; cursor: not-allowed !important; font-weight: normal !important; }
+
+/* 評価ボタンの状態 */
+.eval-submit-btn { background-color: #ddd !important; color: #fff; border: none; width: 140px; padding: 12px; border-radius: 25px; font-weight: bold; cursor: not-allowed; display: block; margin: 0 auto; }
+.eval-submit-btn.enabled { background-color: #f09540 !important; cursor: pointer; }
 </style>
 
 <script>
-(function() {
-    function initHome() {
-        let displayDate = new Date();
-        const dayLabels = ["日","月","火","水","木","金","土"];
+(function(){
+    let displayDate = new Date();
+    const dayLabels = ["日","月","火","水","木","金","土"];
+    const allTasks = {{ rec | tojson | safe }};
 
-        function refreshDateDisplay() {
-            const m = displayDate.getMonth() + 1;
-            const d = displayDate.getDate();
-            const w = dayLabels[displayDate.getDay()];
-            $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+    function refreshDateDisplay(){
+        const m = displayDate.getMonth() + 1;
+        const d = displayDate.getDate();
+        const wIndex = displayDate.getDay();
+        const w = dayLabels[wIndex];
+        $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+        renderTasksForDate(w);
+    }
+
+    function renderTasksForDate(currentWeek){
+        const $list = $('#task-list');
+        $list.empty();
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const viewingDate = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime();
+        const isToday = (today === viewingDate);
+
+        let displayTasks = [];
+        allTasks.forEach(task => {
+            if(task.is_fixed){
+                if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
+                    displayTasks.push(task);
+                }
+            } else if(isToday){
+                displayTasks.push(task);
+            }
+        });
+
+        displayTasks.forEach(task => {
+            let checkHtml = isToday ? 
+                `<input type="checkbox" class="task-checkbox" data-task-id="${task.id}" data-is-fixed="${task.is_fixed}" ${task.done ? "checked" : ""}>` : 
+                (task.done ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '');
+
+            const html = `
+            <div class="task-card">
+                <div class="task-check">${checkHtml}</div>
+                <div class="task-body">
+                    <p class="task-title">${task.name} ${task.is_fixed ? '<span class="fixed-label">固定</span>' : ''}</p>
+                    <p class="task-time">${task.time}</p>
+                </div>
+            </div>`;
+            $list.append(html);
+        });
+        updateProgress(isToday);
+        attachCheckboxHandler();
+    }
+
+    function updateProgress(isToday){
+        const checkboxes = $('.task-checkbox');
+        const total = checkboxes.length;
+        const completed = checkboxes.filter(':checked').length;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const remain = total - completed;
+
+        $('#dynamicBar').stop().animate({ 'width': percent + '%' }, 300);
+        $('#percentText').text(percent + '%');
+
+        if(isToday){
+            if(remain > 0) $('#remainHint').html(`あと<span id="remainCount">${remain}</span>つのタスクで目標達成です`);
+            else if(total > 0) $('#remainHint').text('今日のタスクはすべて達成です！');
+            else $('#remainHint').text('予定はありません');
+        } else {
+            $('#remainHint').text('この日の記録を表示中');
         }
+    }
+
+    function attachCheckboxHandler(){
+        $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function(){
+            const now = new Date();
+            const isToday = (new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime() === 
+                             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime());
+            updateProgress(isToday);
+            const taskId = $(this).data('task-id');
+            const isFixed = $(this).data('is-fixed');
+            const done = $(this).is(':checked');
+            const dateStr = displayDate.toISOString().split('T')[0];
+            $.ajax({
+                url: '/update_task_done',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({task_id: taskId, is_fixed: isFixed, done: done, date: dateStr}),
+            });
+        });
+    }
+
+    // 評価選択処理
+    $(document).on('click', '.eval-choice', function(){
+        const $clicked = $(this);
+        $('.eval-choice').removeClass('selected disabled');
+        $clicked.addClass('selected');
+        $('.eval-choice').not($clicked).addClass('disabled');
+        $('#submitEval').prop('disabled', false).addClass('enabled');
+    });
+
+    // 評価するボタン送信処理
+    $(document).on('click', '#submitEval', function(){
+        // 画面切り替え
+        $('#evalHeader').hide();
+        $('#evalStep1').hide();
+        $('#evalStep2').fadeIn(300);
+        $('#closeModal').hide(); // 送信後は×ボタンを隠す
+    });
+
+    // ホームに戻る処理
+    $(document).on('click', '#backHome', function(){
+        $('#evaluationModal').fadeOut(200, function(){
+            // 状態リセット
+            $('#evalHeader').show();
+            $('#evalStep1').show();
+            $('#evalStep2').hide();
+            $('#closeModal').show();
+            $('.eval-choice').removeClass('selected disabled');
+            $('#submitEval').prop('disabled', true).removeClass('enabled');
+        });
+    });
+
+    $(document).ready(function(){
         refreshDateDisplay();
-
-        $('#prevDate').off('click').on('click', function() {
-            displayDate.setDate(displayDate.getDate() - 1);
-            refreshDateDisplay();
-        });
-
-        $('#nextDate').off('click').on('click', function() {
-            displayDate.setDate(displayDate.getDate() + 1);
-            refreshDateDisplay();
-        });
-
-        $('#toggleTasks').off('click').on('click', function() {
+        $('#prevDate').on('click', function(){ displayDate.setDate(displayDate.getDate() - 1); refreshDateDisplay(); });
+        $('#nextDate').on('click', function(){ displayDate.setDate(displayDate.getDate() + 1); refreshDateDisplay(); });
+        $('#toggleTasks').on('click', function(){
             const $list = $('#task-list');
-            $list.slideToggle(300, function() {
-                const isHidden = $list.is(':hidden');
-                $('#toggleTasks').text(isHidden ? 'すべて見る ＞' : '閉じる ＜');
+            $list.slideToggle(300, function(){
+                $('#toggleTasks').text($list.is(':hidden') ? 'すべて見る ＞' : '閉じる ＜');
             });
         });
 
         const $modal = $('#evaluationModal');
-        $('#openEvalModal').off('click').on('click', function() { $modal.fadeIn(200); });
-        $('#closeModal').off('click').on('click', function() { $modal.fadeOut(200); });
-        $modal.off('click').on('click', function(e) { if(e.target===this){$modal.fadeOut(200);} });
-
-        $('.eval-choice').off('click').on('click', function() {
-            $('.eval-choice').removeClass('selected');
-            $(this).addClass('selected');
-        });
-
-        $('#submitEval').off('click').on('click', function() {
-            const selectedVal = $('.eval-choice.selected').data('value');
-            if(!selectedVal){ alert("評価を選んでね！"); return; }
-            alert(selectedVal + " で評価を送信しました！");
-            $modal.fadeOut(200);
-        });
-    }
-
-    document.addEventListener("turbo:load", initHome);
-    document.addEventListener("turbo:render", initHome);
+        $('#openEvalModal').on('click', function(){ $modal.fadeIn(200); });
+        $('#closeModal').on('click', function(){ $modal.fadeOut(200); });
+    });
 })();
 </script>
 {% endblock %}

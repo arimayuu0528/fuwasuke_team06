@@ -62,9 +62,23 @@ def create_app():
             'auth.login_form',
             'auth.login_process',
             'auth.register',
+<<<<<<< HEAD
             'auth.register_process',
+=======
+
+            # ★追加
+            "mood.register_mood_form",
+            "mood.register_mood_process",
+            "mood.register",
+
+            'mood.register',   # ← 修正
+            'schedule_list',
+
+            'auth.register_process', 
+
+>>>>>>> ffd9922b33d4dfad9f3061dd20b157e4927c2c40
             'index',
-        ):
+        )
             return
 
 
@@ -123,7 +137,17 @@ def create_app():
             "task.task_form",
             "index",
         ):
+<<<<<<< HEAD
             return redirect(url_for("main.home"))
+=======
+            return redirect(url_for("index"))
+
+
+        # 今日の気分が無い（未登録）の場合:
+        if not mood:
+            return redirect(url_for("mood.register"))
+
+>>>>>>> ffd9922b33d4dfad9f3061dd20b157e4927c2c40
 
             
 

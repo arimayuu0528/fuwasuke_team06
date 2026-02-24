@@ -1,53 +1,67 @@
-{% extends "base2.html" %} {% block title %} 固定タスク一覧{% endblock %} {%
+{% extends "base2.html" %} {% block title %}固定タスク一覧{% endblock %} {%
 block content %}
-<div class="fixed-task-page">
-  <div class="header">
-    <h1>固定タスク一覧</h1>
-    <div class="tab-container">
-      <button class="tab">タスク</button>
-      <button class="tab active">固定タスク</button>
+
+<div class="sl-page">
+  <!-- Header -->
+  <div class="sl-header">
+    <div class="sl-header-top">
+      <button class="sl-back-btn" onclick="history.back()">&#8249;</button>
+      <h1>固定タスク一覧</h1>
+    </div>
+    <div class="sl-tab-container">
+      <button
+        class="sl-tab"
+        onclick="location.href='{{ url_for('task.task_list') }}'"
+      >
+        タスク
+      </button>
+      <button class="sl-tab active">固定タスク</button>
     </div>
   </div>
 
-  <div class="task-list">
+  <!-- Task List -->
+  <div class="sl-task-list">
     {% for task in tasks %}
-    <div class="task-card">
-      <div class="task-header">
-        <div class="task-title">{{ task.title }}</div>
-        <button class="delete-btn" data-task-id="{{ task.id }}">🗑</button>
+    <div class="sl-task-card">
+      <div class="sl-task-header">
+        <div class="sl-task-title">{{ task.title }}</div>
+        <button class="sl-delete-btn" data-task-id="{{ task.id }}">🗑</button>
       </div>
 
-      <div class="task-meta">
-        <span class="task-category">{{ task.tag }}</span>
-        <span class="task-time">{{ task.start_time }}~{{ task.end_time }}</span>
-        <span class="task-duration">{{ task.duration_min }}分</span>
+      <div class="sl-task-meta">
+        <span class="sl-task-category">{{ task.tag }}</span>
+        <span class="sl-task-time"
+          >{{ task.start_time }}~{{ task.end_time }}</span
+        >
+        <span class="sl-task-duration">{{ task.duration_min }}分</span>
       </div>
 
       {% if task.location %}
-      <div class="task-location">
-        <span class="location-icon">📍</span>
-        <span>{{ task.location }}</span>
+      <div class="sl-task-location">
+        <span>📍</span><span>{{ task.location }}</span>
       </div>
       {% endif %}
 
-      <div class="task-repeat-info">
-        <span class="repeat-badge">{{ task.repeat_type }}</span>
+      <div class="sl-task-repeat-info">
+        <span class="sl-repeat-badge">{{ task.repeat_type }}</span>
       </div>
 
       {% if task.memo %}
-      <div class="comment-section">
-        <button class="comment-toggle" onclick="toggleComment(this)">
-          <span class="arrow">▼</span>
-          <span>メモ</span>
+      <div class="sl-comment-section">
+        <button
+          class="sl-comment-toggle collapsed"
+          onclick="slToggleComment(this)"
+        >
+          <span class="sl-arrow">▼</span><span>メモ</span>
         </button>
-        <div class="comment-content">{{ task.memo }}</div>
+        <div class="sl-comment-content hidden">{{ task.memo }}</div>
       </div>
       {% endif %}
 
-      <div class="weekday-pills">
+      <div class="sl-weekday-pills">
         {% for day in ['月', '火', '水', '木', '金', '土', '日'] %}
         <div
-          class="weekday {% if day in task.day_of_week %}active{% else %}inactive{% endif %}"
+          class="sl-weekday {% if day in task.day_of_week %}active{% endif %}"
         >
           {{ day }}
         </div>
@@ -57,243 +71,36 @@ block content %}
     {% endfor %}
   </div>
 
+  {% if tasks|length == 0 %}
+  <p class="sl-empty-message">タスクがありません</p>
+  {% endif %}
+
+  <p class="sl-task-count">件数：{{ tasks|length }}</p>
+
   <button
-    class="add-task-btn"
+    class="sl-add-btn"
     onclick="location.href='{{ url_for('schedule.schedule_form') }}'"
   >
     新しい固定タスクを作成
   </button>
-
-  {% if tasks|length == 0 %}
-  <p class="empty-message">タスクがありません</p>
-  {% endif %}
-
-  <p class="task-count">件数：{{ tasks|length }}</p>
 </div>
+<!-- /.sl-page -->
 
-<!-- カスタム削除確認モーダル -->
-<div id="deleteModal" class="delete-modal">
-  <div class="delete-modal-content">
-    <div class="delete-modal-icon">🗑️</div>
-    <h3 class="delete-modal-title">タスクを削除しますか？</h3>
-    <p class="delete-modal-text">この操作は取り消せません</p>
-    <div class="delete-modal-buttons">
-      <button
-        class="delete-modal-btn delete-cancel-btn"
-        onclick="closeDeleteModal()"
-      >
+<!-- Delete Modal -->
+<div id="slDeleteModal" class="sl-delete-modal">
+  <div class="sl-modal-content">
+    <div class="sl-modal-icon">🗑️</div>
+    <h3 class="sl-modal-title">タスクを削除しますか？</h3>
+    <p class="sl-modal-text">この操作は取り消せません</p>
+    <div class="sl-modal-btns">
+      <button class="sl-modal-btn sl-cancel-btn" onclick="slCloseModal()">
         キャンセル
       </button>
-      <button
-        class="delete-modal-btn delete-confirm-btn"
-        onclick="confirmDelete()"
-      >
+      <button class="sl-modal-btn sl-confirm-btn" onclick="slConfirmDelete()">
         削除する
       </button>
     </div>
   </div>
 </div>
-
-<script>
-  let pendingDeleteTaskId = null;
-
-  // DOMContentLoadedで削除ボタンにイベントリスナーを追加
-  document.addEventListener("DOMContentLoaded", function () {
-    const deleteButtons = document.querySelectorAll(".delete-btn");
-    deleteButtons.forEach((btn) => {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const taskId = this.getAttribute("data-task-id");
-        console.log("Delete task ID:", taskId);
-        pendingDeleteTaskId = taskId;
-        showDeleteModal();
-      });
-    });
-  });
-
-  function showDeleteModal() {
-    console.log("showDeleteModal - pendingDeleteTaskId:", pendingDeleteTaskId);
-    const modal = document.getElementById("deleteModal");
-    modal.classList.add("show");
-
-    modal.onclick = function (e) {
-      if (e.target === modal) {
-        closeDeleteModal();
-      }
-    };
-  }
-
-  function closeDeleteModal() {
-    const modal = document.getElementById("deleteModal");
-    modal.classList.remove("show");
-  }
-
-  function confirmDelete() {
-    console.log(
-      "confirmDelete called - pendingDeleteTaskId:",
-      pendingDeleteTaskId,
-    );
-
-    if (!pendingDeleteTaskId) {
-      console.error("No task ID to delete");
-      return;
-    }
-
-    const taskCard = document
-      .querySelector(`[data-task-id="${pendingDeleteTaskId}"]`)
-      ?.closest(".task-card");
-
-    closeDeleteModal();
-
-    if (taskCard) {
-      taskCard.classList.add("deleting");
-    }
-
-    setTimeout(
-      () => {
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/schedule/delete/" + pendingDeleteTaskId;
-        document.body.appendChild(form);
-        console.log("Submitting to:", form.action);
-        form.submit();
-      },
-      taskCard ? 300 : 0,
-    );
-  }
-
-  // Toggle comment visibility
-  function toggleComment(button) {
-    const commentContent = button.nextElementSibling;
-    if (commentContent.classList.contains("hidden")) {
-      commentContent.classList.remove("hidden");
-      button.classList.remove("collapsed");
-    } else {
-      commentContent.classList.add("hidden");
-      button.classList.add("collapsed");
-    }
-  }
-
-  // Initialize comments as collapsed on page load
-  document.addEventListener("DOMContentLoaded", function () {
-    const commentContents = document.querySelectorAll(".comment-content");
-    const commentToggles = document.querySelectorAll(".comment-toggle");
-
-    commentContents.forEach((content) => {
-      content.classList.add("hidden");
-    });
-
-    commentToggles.forEach((toggle) => {
-      toggle.classList.add("collapsed");
-    });
-
-    addRippleEffect();
-    document.documentElement.style.scrollBehavior = "smooth";
-  });
-
-  function addRippleEffect() {
-    const buttons = document.querySelectorAll(
-      ".add-task-btn, .tab, .weekday.active",
-    );
-    buttons.forEach((button) => {
-      button.addEventListener("click", function (e) {
-        const ripple = document.createElement("span");
-        ripple.classList.add("ripple");
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        ripple.style.width = ripple.style.height = size + "px";
-        ripple.style.left = x + "px";
-        ripple.style.top = y + "px";
-        this.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
-      });
-    });
-  }
-
-  function switchTab(tabElement) {
-    const tabs = document.querySelectorAll(".tab");
-    tabs.forEach((tab) => tab.classList.remove("active"));
-    tabElement.classList.add("active");
-    if (tabElement.textContent.trim() === "タスク") {
-      window.location.href = "/tasks";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const tabs = document.querySelectorAll(".tab");
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", function () {
-        switchTab(this);
-      });
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const touchElements = document.querySelectorAll(
-      ".task-card, .weekday, .delete-btn",
-    );
-    touchElements.forEach((element) => {
-      element.addEventListener("touchstart", function () {
-        this.style.opacity = "0.7";
-      });
-      element.addEventListener("touchend", function () {
-        this.style.opacity = "1";
-      });
-      element.addEventListener("touchcancel", function () {
-        this.style.opacity = "1";
-      });
-    });
-  });
-
-  function revealOnScroll() {
-    const taskCards = document.querySelectorAll(".task-card");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = "1";
-            entry.target.style.transform = "translateY(0)";
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-    taskCards.forEach((card) => {
-      card.style.opacity = "0";
-      card.style.transform = "translateY(20px)";
-      card.style.transition = "opacity 0.4s, transform 0.4s";
-      observer.observe(card);
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", revealOnScroll);
-
-  let pressTimer;
-  function setupLongPress() {
-    const deleteButtons = document.querySelectorAll(".delete-btn");
-    deleteButtons.forEach((btn) => {
-      btn.addEventListener("touchstart", function (e) {
-        pressTimer = setTimeout(() => {
-          if (navigator.vibrate) navigator.vibrate(50);
-          const taskCard = this.closest(".task-card");
-          taskCard.style.transform = "scale(0.98)";
-        }, 500);
-      });
-      btn.addEventListener("touchend", function () {
-        clearTimeout(pressTimer);
-        const taskCard = this.closest(".task-card");
-        taskCard.style.transform = "scale(1)";
-      });
-      btn.addEventListener("touchcancel", function () {
-        clearTimeout(pressTimer);
-        const taskCard = this.closest(".task-card");
-        taskCard.style.transform = "scale(1)";
-      });
-    });
-  }
-  document.addEventListener("DOMContentLoaded", setupLongPress);
-</script>
+<script src="{{ url_for('static', filename='js/schedule_list.js') }}"></script>
 {% endblock %}
