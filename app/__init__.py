@@ -62,9 +62,6 @@ def create_app():
             'auth.login_form',
             'auth.login_process',
             'auth.register',
-<<<<<<< HEAD
-            'auth.register_process',
-=======
 
             # ★追加
             "mood.register_mood_form",
@@ -76,70 +73,36 @@ def create_app():
 
             'auth.register_process', 
 
->>>>>>> ffd9922b33d4dfad9f3061dd20b157e4927c2c40
             'index',
-        )
+            'static'
+        ):
             return
 
 
-       
-        # 未ログイン
+        # セッションにuser_idが無い＝未ログイン
         if not session.get('user_id'):
+            # 未ログインはログイン画面へ強制送還
             return redirect(url_for('auth.login_form'))
-
-        user_id = session['user_id']
 
         db = DatabaseManager()
         db.connect()
 
         today = date.today()
-         # ===== 気分チェック =====
-        mood_sql = """
-            SELECT 1
-            FROM t_today_moods
-            WHERE user_id=%s
-            AND DATE(mood_date)=%s
-            LIMIT 1
+        sql = """
+        SELECT 1
+        FROM t_today_moods
+        WHERE user_id = %s
+        AND DATE(mood_date) = %s
+        LIMIT 1
         """
-        mood = db.fetch_one(mood_sql, (user_id, today))
-
-        # 未登録 → 気分登録画面へ
-        if not mood:
-            db.disconnect()
-            if endpoint not in (
-                "mood.register_mood_form",
-                "mood.register_mood_process",
-            ):
-                return redirect(url_for("mood.register_mood_form"))
-            return
-
-        # ===== タスク提案チェック =====
-        task_sql = """
-            SELECT task_suggestion_id
-            FROM t_task_suggestions
-            WHERE user_id=%s
-            AND suggestion_date=%s
-            LIMIT 1
-        """
-        task = db.fetch_one(task_sql, (user_id, today))
-
+        mood = db.fetch_one(sql, (session['user_id'], today))
         db.disconnect()
 
-        # 提案が無い → タスク選択へ
-        if not task:
-            if endpoint != "task.task_form":   # ←あなたの実際のエンドポイント
-                return redirect(url_for("task.task_form"))
-            return
-
-        # すべてOK → homeへ
-        if endpoint in (
+        if mood and endpoint in (
             "mood.register_mood_form",
-            "task.task_form",
-            "index",
+            "mood.register_mood_process",
+            "mood.register"
         ):
-<<<<<<< HEAD
-            return redirect(url_for("main.home"))
-=======
             return redirect(url_for("index"))
 
 
@@ -147,9 +110,7 @@ def create_app():
         if not mood:
             return redirect(url_for("mood.register"))
 
->>>>>>> ffd9922b33d4dfad9f3061dd20b157e4927c2c40
 
-            
 
         # =============================
         # ★追加：mood→main.home のときだけ行き先を分岐
