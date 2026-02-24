@@ -110,11 +110,7 @@ def create_app():
  
         db.disconnect()
  
-        # 提案が無い → タスク選択へ
-        if not task:
-            if endpoint != "task.task_form":
-                return redirect(url_for("task.task_form"))
-            return
+        
  
         # すべてOK → homeへ（特定エンドポイントから来た場合の保険）
         if endpoint in (
