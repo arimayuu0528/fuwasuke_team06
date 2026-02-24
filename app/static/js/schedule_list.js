@@ -7,13 +7,15 @@
     if (!btn) return;
     e.preventDefault();
     e.stopPropagation();
-    pendingId = btn.getAttribute("data-task-id");
+
+    pendingId = btn.dataset.taskId;
     openModal();
   });
 
   function openModal() {
     const modal = document.getElementById("slDeleteModal");
     modal.classList.add("show");
+
     modal.addEventListener("click", function outside(e) {
       if (e.target === modal) {
         closeModal();
@@ -31,22 +33,26 @@
     pendingId = null;
   }
 
+  /* 削除確定 */
   window.slConfirmDelete = function () {
     if (!pendingId) return;
-    const card = document
-      .querySelector(`[data-task-id="${pendingId}"]`)
-      ?.closest(".sl-task-card");
+
+    fetch(`/schedule/delete/${pendingId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        // 成功 → リロード
+        location.reload();
+      })
+      .catch(() => {
+        alert("削除に失敗しました");
+      });
+
     closeModal();
-    if (card) {
-      card.classList.add("deleting");
-      setTimeout(() => {
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/schedule/delete/" + pendingId;
-        document.body.appendChild(form);
-        form.submit();
-      }, 300);
-    }
   };
 
   /* メモ開閉 */
