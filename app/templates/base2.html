@@ -49,7 +49,7 @@
       </a>
       <a
         href="{{ url_for('main.mood_graph', user_id=1) }}"
-        class="icon {% if request.endpoint == 'main.mood_graph' %}active{% endif %}"
+        class="icon {% if request.endpoint == 'main.mood_graph' %}active{% endif %}" data-turbo="false"
       >
         <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
         <p>レポート</p>
