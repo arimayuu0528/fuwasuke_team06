@@ -146,6 +146,15 @@ CREATE TABLE t_task_suggestion_detail (
     FOREIGN KEY (task_suggestion_id) REFERENCES t_task_suggestions(task_suggestion_id),
     FOREIGN KEY (task_id) REFERENCES t_tasks(task_id)
 );
+CREATE TABLE t_fixed_schedule_logs (
+    log_id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    master_id INT NOT NULL,
+    target_date DATE NOT NULL,
+    done BOOLEAN NOT NULL,
+    PRIMARY KEY (log_id),
+    UNIQUE KEY unique_log (user_id, master_id, target_date)
+);
 
 -- 元SQLの「タスク提案評価」は内容が詳細と同じで重複していたため削除
 -- CREATE TABLE t_task_suggestion_reviews ... (削除)

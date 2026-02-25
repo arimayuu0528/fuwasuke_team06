@@ -1,4 +1,3 @@
-<!-- 0224 -->
 {% extends "base2.html" %}
  
 {% block title %}ホーム - ふわすけ{% endblock %}
@@ -17,7 +16,7 @@
     <div class="header-msg-row">
         <img src="../../static/image/bouhuwasuke.png" width="50" class="chara-img">
         <div class="message-bubble">
-            <p>今日はたくさんの予定があります。<br>しっかりとがんばりましょう。</p>
+            <p id="dailyMessage">今日はたくさんの予定があります。<br>しっかりとがんばりましょう。</p>
         </div>
     </div>
  
@@ -110,11 +109,14 @@
 .star { color: #333; margin-right: 4px; }
 .action-btn { display: block; width: 80%; margin: 0 auto 30px; background: #f09540; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 0 #d47e2a; cursor: pointer; }
 .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d47e2a; }
+.action-btn.disabled {background: #ccc !important;box-shadow: 0 4px 0 #aaa !important;cursor: not-allowed !important;pointer-events: none;}
 .task-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; padding: 0 5px; }
 .task-header h3 { font-size: 18px; color: #333; }
 .toggle-link { color: #f19710; font-size: 14px; cursor: pointer; }
 .task-card { display: flex; align-items: center; background: white; border-radius: 40px; padding: 12px 20px; border: 1px solid #eee; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .task-check { margin-right: 15px; font-size: 18px; }
+.task-checkbox {transition: transform 0.2s ease;}
+.task-checkbox:checked {transform: scale(1.3);}
 .task-container {max-height: 250px;overflow-y: auto;padding-right: 5px;}
 .done-icon { color: #f19710; }
 .circle-icon { color: #ccc; }
@@ -147,11 +149,42 @@
         const d = displayDate.getDate();
         const wIndex = displayDate.getDay();
         const w = dayLabels[wIndex];
+
         $('#currentDateDisplay').text(`${m}月${d}日(${w})`);
+
+        // ★ 今日判定
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const viewingDate = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime();
+        const isToday = (today === viewingDate);
+
+        const $evalBtn = $('#openEvalModal');
+
+        if(isToday){
+            $evalBtn.removeClass('disabled');
+        } else {
+            $evalBtn.addClass('disabled');
+        }
+        const $message = $('#dailyMessage');
+
+        if(isToday){
+            $message.html(`
+                今日はたくさんの予定があります。<br>
+                しっかりとがんばりましょう。
+            `);
+        } else {
+            $message.html(`
+                この日の記録を表示しています。
+            `);
+        }
+
         renderTasksForDate(w);
     }
  
     function renderTasksForDate(currentWeek){
+        const dateKey = displayDate.toISOString().split('T')[0];
+        const storageKey = "task_done_" + dateKey;
+        const storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
         const $list = $('#task-list');
         $list.empty();
         const now = new Date();
@@ -171,10 +204,23 @@
         });
  
         displayTasks.forEach(task => {
-            let checkHtml = isToday ?
-                `<input type="checkbox" class="task-checkbox" data-task-id="${task.id}" data-is-fixed="${task.is_fixed}" ${task.done ? "checked" : ""}>` :
-                (task.done ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '');
- 
+            let isChecked = task.done;
+
+            // localStorage に保存されていればそちらを優先
+            if (storedData[task.id] !== undefined) {
+                isChecked = storedData[task.id];
+            }
+
+            let checkHtml = isToday
+                ? `<input type="checkbox"
+                    class="task-checkbox"
+                    data-task-id="${task.id}"
+                    data-is-fixed="${task.is_fixed}"
+                    ${isChecked ? "checked" : ""}>`
+                : (isChecked
+                    ? '<span class="done-icon" style="color:#f19710;">✔</span>'
+                    : '');
+           
             const html = `
             <div class="task-card">
                 <div class="task-check">${checkHtml}</div>
@@ -206,24 +252,69 @@
         } else {
             $('#remainHint').text('この日の記録を表示中');
         }
+        // 🔥 達成率メッセージ制御
+        const $message = $('#dailyMessage');
+
+        if(isToday){
+
+            if(total === 0){
+                $message.html(`
+                    今日は予定がありません。<br>
+                    ゆっくり過ごしてくださいね。
+                `);
+            }
+            else if(percent === 100){
+                $message.html(`
+                    すべて達成です！✨<br>
+                    とってもよくがんばりましたね。
+                `);
+            }
+            else if(percent >= 50){
+                $message.html(`
+                    半分以上達成です！👏<br>
+                    この調子でいきましょう。
+                `);
+            }
+            else{
+                $message.html(`
+                    今日はたくさんの予定があります。<br>
+                    しっかりとがんばりましょう。
+                `);
+            }
+
+        }
     }
  
     function attachCheckboxHandler(){
+        // チェックボックス直接クリック
         $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function(){
-            const now = new Date();
-            const isToday = (new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime() ===
-                             new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime());
-            updateProgress(isToday);
             const taskId = $(this).data('task-id');
-            const isFixed = $(this).data('is-fixed');
             const done = $(this).is(':checked');
-            const dateStr = displayDate.toISOString().split('T')[0];
-            $.ajax({
-                url: '/update_task_done',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({task_id: taskId, is_fixed: isFixed, done: done, date: dateStr}),
-            });
+
+            const dateKey = displayDate.toISOString().split('T')[0];
+            const storageKey = "task_done_" + dateKey;
+
+            let storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            storedData[taskId] = done;
+            localStorage.setItem(storageKey, JSON.stringify(storedData));
+
+            const now = new Date();
+            const isToday = (
+                new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime() ===
+                new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+            );
+
+            updateProgress(isToday);
+        });
+
+        // task-cardクリックでチェック切替
+        $(document).off('click', '.task-card').on('click', '.task-card', function(e){
+            // チェックボックス自体をクリックした場合は処理をスキップ
+            if($(e.target).is('input[type="checkbox"]')) return;
+
+            const $checkbox = $(this).find('.task-checkbox');
+            if($checkbox.length === 0) return; // 今日じゃない場合はチェックボックスなし
+            $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
         });
     }
  
@@ -261,8 +352,8 @@
     $(document).ready(function(){
         refreshDateDisplay();
         // ★追加：最初からタスクを表示
-        $('#task-list').show();
-        $('#toggleTasks').text('閉じる ＜');
+        $('#task-list').hide();
+        $('#toggleTasks').text('すべて見る ＞');
         $('#prevDate').on('click', function(){ displayDate.setDate(displayDate.getDate() - 1); refreshDateDisplay(); });
         $('#nextDate').on('click', function(){ displayDate.setDate(displayDate.getDate() + 1); refreshDateDisplay(); });
         $('#toggleTasks').on('click', function(){
