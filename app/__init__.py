@@ -41,12 +41,13 @@ def create_app():
     def index():
         return render_template('auth/login.html')
    
-    # @app.before_request
-    # def check_user():
+
+   #----ログイン、気分登録・タスク選択チェック----
     @app.before_request
     def check_user():
         endpoint = request.endpoint
- 
+
+        #URLエラー時などの安全対策
         if endpoint is None:
             return
  
@@ -67,18 +68,21 @@ def create_app():
         ):
             return
  
-        # 未ログイン
+        # 未ログイン ログインしていなければログイン画面へ遷移
         if not session.get('user_id'):
             return redirect(url_for('auth.login_form'))
- 
+
+        #sessionで取得user_id取得
         user_id = session['user_id']
  
+        #データベース接続
         db = DatabaseManager()
         db.connect()
- 
+
+        #今日の日付を取得
         today = date.today()
  
-        # ===== 気分チェック =====
+        # ===== 今日の気分チェック =====
         mood_sql = """
             SELECT 1
             FROM t_today_moods
@@ -154,9 +158,8 @@ def create_app():
                     sid = int(sid)
                     session["selected_task_suggestion_id"] = sid
                     session["current_task_suggestion_id"] = sid
-                    return
- 
-                return redirect(url_for("task.task_suggestion"))
+                    
+                    return redirect(url_for("task.task_suggestion"))
                 # 未選択（3件など）→ タスク提案へ ※3案がある状態（複数案）ならタスク提案画面に送る
                 if cnt >= 2:
                     return redirect(url_for("task.task_suggestion"))
