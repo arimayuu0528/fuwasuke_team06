@@ -115,40 +115,60 @@ def update_task_done():
     try:
         data = request.get_json()
         task_id = data.get('task_id')
-        is_fixed = data.get('is_fixed') # JSから送られる true/false
-        done = data.get('done')         # チェックが入れば True, 外れれば False
-        target_date = data.get('date')  # '2026-01-26' などの文字列
- 
+        
+        # JSからくる値を確実にPythonのboolとして扱うための修正
+        is_fixed_val = data.get('is_fixed')
+        is_fixed = is_fixed_val in [True, "true", "True", 1] # 文字列でもTrueでもOKにする
+        
+        done = data.get('done')
+        target_date = data.get('date')
+        
         db = DatabaseManager()
         db.connect()
         cursor = db.cursor
- 
+
         if is_fixed:
-            # 【固定予定の場合】
-            # 固定予定の完了を管理するテーブルがあればここにUpdate文を書きます。
-            # 今回は一旦、何もせず成功を返します。
-            pass
+            user_id = session.get("user_id")
+            if done:
+                sql = """
+                    INSERT INTO t_fixed_schedule_logs (user_id, master_id, target_date, done)
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE done = VALUES(done)
+                """
+                # doneを確実に1(真)か0(偽)にして送る
+                cursor.execute(sql, (user_id, task_id, target_date, 1 if done else 0))
+            else:
+                sql = "DELETE FROM t_fixed_schedule_logs WHERE user_id=%s AND master_id=%s AND target_date=%s"
+                cursor.execute(sql, (user_id, task_id, target_date))
         else:
-            # 【通常タスクの場合】
-            # 完了(done=True)なら実績(actual_work_min)に計画時間をコピー、
-            # 未完了(done=False)なら0に戻すという処理例です。
-            sql = """
-                UPDATE t_task_suggestion_detail d
+            # (通常タスクの処理はそのまま)
+            if done:
+                sql = """
+                INSERT INTO t_task_suggestion_detail (task_suggestion_id, task_id, actual_work_min)
+                SELECT s.task_suggestion_id, t.task_id, t.duration_min
+                FROM t_tasks t
+                JOIN t_task_suggestions s ON s.user_id = t.user_id AND s.suggestion_date = %s
+                WHERE t.task_id = %s
+                ON DUPLICATE KEY UPDATE actual_work_min = VALUES(actual_work_min)
+                """
+                cursor.execute(sql, (target_date, task_id))
+            else:
+                sql = """
+                DELETE d FROM t_task_suggestion_detail d
                 JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
-                SET d.actual_work_min = (CASE WHEN %s THEN d.plan_min ELSE 0 END)
-                WHERE d.task_id = %s AND s.suggestion_date = %s
-            """
-            cursor.execute(sql, (done, task_id, target_date))
-       
+                WHERE d.task_id=%s AND s.suggestion_date=%s
+                """
+                cursor.execute(sql, (task_id, target_date))
+        
         db.connection.commit()
         db.disconnect()
- 
+
         return jsonify({"status": "success"})
- 
+
     except Exception as e:
+        # ここで出力されるエラー内容を教えてもらえると解決が早いです！
         print(f"DB Update Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
- 
  
  
  

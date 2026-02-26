@@ -80,7 +80,7 @@
         </div>
  
         <div class="modal-body" id="evalStep2" style="display: none; text-align: center; padding: 10px 0 20px;">
-            <img src="../../static/image/ozigi.jpg" width="100" style="margin-bottom: 15px;">
+            <img src="../../static/image/背景無お辞儀ふわすけ2.png" width="100" style="margin-bottom: 15px;">
             <h3 style="font-size: 18px; color: #333; margin-bottom: 25px; font-weight: bold;">送信しました</h3>
             <button type="button" class="action-btn" id="backHome" style="width: 160px; margin: 0 auto;">ホームに戻る</button>
         </div>
@@ -234,7 +234,53 @@
         updateProgress(isToday);
         attachCheckboxHandler();
     }
- 
+    let typingTimer = null;
+    let currentMessage = ""; 
+    let isTyping = false;
+    function typeWriter($el, html, speed = 50) {
+
+        // 余分な改行とインデント削除
+        let text = html
+            .replace(/\n/g, '')
+            .replace(/\s{2,}/g, '')
+            .trim();
+
+        // 同じメッセージなら実行しない
+        if (text === currentMessage) return;
+        currentMessage = text;
+
+        // 前のタイピング停止
+        if (typingTimer) {
+            clearTimeout(typingTimer);
+            typingTimer = null;
+        }
+
+        $el.html("");
+        isTyping = true;
+
+        let i = 0;
+
+        function typing() {
+
+            if (i >= text.length) {
+                isTyping = false;
+                return;
+            }
+
+            // <br> を検出したらまとめて追加
+            if (text.substring(i, i + 4) === "<br>") {
+                $el.append("<br>");
+                i += 4;
+            } else {
+                $el.append(text[i]);
+                i++;
+            }
+
+            typingTimer = setTimeout(typing, speed);
+        }
+
+        typing();
+    }
     function updateProgress(isToday){
         const checkboxes = $('.task-checkbox');
         const total = checkboxes.length;
@@ -255,28 +301,28 @@
         // 🔥 達成率メッセージ制御
         const $message = $('#dailyMessage');
 
-        if(isToday){
+        if (isToday) {
 
-            if(total === 0){
-                $message.html(`
+            if (total === 0) {
+                typeWriter($message, `
                     今日は予定がありません。<br>
                     ゆっくり過ごしてくださいね。
                 `);
-            }
-            else if(percent === 100){
-                $message.html(`
+
+            } else if (percent === 100) {
+                typeWriter($message, `
                     すべて達成です！✨<br>
                     とってもよくがんばりましたね。
                 `);
-            }
-            else if(percent >= 50){
-                $message.html(`
+
+            } else if (percent >= 50) {
+                typeWriter($message, `
                     半分以上達成です！👏<br>
                     この調子でいきましょう。
                 `);
-            }
-            else{
-                $message.html(`
+
+            } else {
+                typeWriter($message, `
                     今日はたくさんの予定があります。<br>
                     しっかりとがんばりましょう。
                 `);
@@ -286,18 +332,41 @@
     }
  
     function attachCheckboxHandler(){
-        // チェックボックス直接クリック
+        // チェックボックスの変更イベント
         $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function(){
             const taskId = $(this).data('task-id');
             const done = $(this).is(':checked');
-
+            const isFixed = $(this).data('is-fixed'); 
             const dateKey = displayDate.toISOString().split('T')[0];
             const storageKey = "task_done_" + dateKey;
 
+            // --- 1. localStorage に保存 (ここを復旧しました) ---
             let storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
             storedData[taskId] = done;
             localStorage.setItem(storageKey, JSON.stringify(storedData));
 
+            // --- 2. サーバーに送信 (fetch) ---
+            fetch("{{ url_for('main.update_task_done') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    task_id: taskId,
+                    is_fixed: isFixed,
+                    done: done,
+                    date: dateKey
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status !== "success"){
+                    console.error("DB update failed:", data.message);
+                }
+            })
+            .catch(err => console.error("Fetch error:", err));
+
+            // --- 3. 進捗表示の更新 ---
             const now = new Date();
             const isToday = (
                 new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime() ===
@@ -307,13 +376,12 @@
             updateProgress(isToday);
         });
 
-        // task-cardクリックでチェック切替
+        // タスクカード全体をクリックした時の処理
         $(document).off('click', '.task-card').on('click', '.task-card', function(e){
-            // チェックボックス自体をクリックした場合は処理をスキップ
             if($(e.target).is('input[type="checkbox"]')) return;
-
             const $checkbox = $(this).find('.task-checkbox');
-            if($checkbox.length === 0) return; // 今日じゃない場合はチェックボックスなし
+            if($checkbox.length === 0) return; 
+            
             $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
         });
     }
