@@ -1,12 +1,6 @@
 {% extends "base3.html" %} {% block title %}タスク一覧{% endblock %} {% block
 content %}
 <style>
-  /* =====================================================
-     SCOPE: .tl-page  (task_list)
-     base3.html との衝突を防ぐため全セレクタを
-     .tl-page 配下 / tl- プレフィックスで限定
-  ===================================================== */
-
   .tl-page {
     font-family:
       -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
@@ -16,7 +10,6 @@ content %}
     padding-bottom: 140px;
   }
 
-  /* Header */
   .tl-page .tl-header {
     background-color: #fff;
     padding: 20px 16px 0;
@@ -34,15 +27,20 @@ content %}
   }
 
   .tl-page .tl-back-btn {
-    background: transparent;
-    border: none;
-    font-size: 26px;
-    cursor: pointer;
-    color: #333;
     position: absolute;
     left: 0;
-    line-height: 1;
-    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    text-decoration: none;
+  }
+
+  .tl-page .tl-back-btn img {
+    width: 15px;
+    height: 15px;
+    object-fit: contain;
   }
 
   .tl-page .tl-header-top h1 {
@@ -54,7 +52,6 @@ content %}
     margin: 0;
   }
 
-  /* Tabs — アンダーライン式（最初のCSS準拠） */
   .tl-page .tl-tab-container {
     display: flex;
     gap: 8px;
@@ -81,7 +78,33 @@ content %}
     border-bottom: 3px solid #ff9f5a !important;
   }
 
-  /* Mascot Banner */
+  /* フィルターバー */
+  .tl-page .tl-filter-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px 12px;
+  }
+
+  .tl-page .tl-filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #e0e0e0;
+    background: #fff;
+    color: #999;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .tl-page .tl-filter-btn.active {
+    background: #ff9f5a;
+    border-color: #ff9f5a;
+    color: #fff;
+  }
+
   .tl-page .tl-mascot-banner {
     margin: 16px 16px 0;
     background: #fff8f4;
@@ -103,6 +126,7 @@ content %}
     align-items: center;
     justify-content: center;
     font-size: 30px;
+    overflow: hidden;
   }
 
   .tl-page .tl-mascot-text {
@@ -112,7 +136,6 @@ content %}
     font-weight: 500;
   }
 
-  /* Task List */
   .tl-page .tl-task-list {
     padding: 16px;
     display: flex;
@@ -120,7 +143,6 @@ content %}
     gap: 12px;
   }
 
-  /* Card */
   .tl-page .tl-task-card {
     background: #fff;
     border-radius: 16px;
@@ -137,6 +159,10 @@ content %}
   .tl-page .tl-task-card.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  .tl-page .tl-task-card.hidden-by-filter {
+    display: none;
   }
 
   .tl-page .tl-task-card.deleting {
@@ -172,7 +198,6 @@ content %}
     font-weight: 600;
     color: #333;
   }
-
   .tl-page .tl-task-duration {
     font-size: 14px;
     color: #555;
@@ -219,7 +244,25 @@ content %}
     font-size: 13px;
   }
 
-  /* Comment */
+  .tl-page .tl-task-deadline.expired {
+    color: #ff4444;
+    font-weight: 600;
+  }
+
+  .tl-page .tl-task-card.expired-card {
+    border-color: #ffdddd;
+    background: #fffafa;
+  }
+
+  .tl-page .tl-expired-badge {
+    background: #ff4444;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   .tl-page .tl-comment-section {
     margin-top: 12px;
     border-top: 1px solid #f0f0f0;
@@ -261,7 +304,6 @@ content %}
     display: none;
   }
 
-  /* Count */
   .tl-page .tl-task-count {
     text-align: center;
     color: #999;
@@ -269,7 +311,6 @@ content %}
     padding: 8px;
   }
 
-  /* Empty */
   .tl-page .tl-empty-message {
     text-align: center;
     padding: 40px 16px;
@@ -277,7 +318,18 @@ content %}
     font-size: 14px;
   }
 
-  /* Add Button */
+  .tl-page .tl-filter-empty {
+    display: none;
+    text-align: center;
+    padding: 32px 16px;
+    color: #bbb;
+    font-size: 14px;
+  }
+
+  .tl-page .tl-filter-empty.show {
+    display: block;
+  }
+
   .tl-page .tl-add-btn {
     position: fixed;
     bottom: 80px;
@@ -304,7 +356,6 @@ content %}
     margin-right: 4px;
   }
 
-  /* Delete Modal */
   .tl-delete-modal {
     display: none;
     position: fixed;
@@ -377,12 +428,10 @@ content %}
     color: #fff;
     box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
   }
-
   .tl-delete-modal .tl-confirm-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
   }
-
   .tl-delete-modal .tl-confirm-btn:active {
     transform: translateY(0);
   }
@@ -408,10 +457,14 @@ content %}
 </style>
 
 <div class="tl-page">
-  <!-- Header -->
   <div class="tl-header">
     <div class="tl-header-top">
-      <button class="tl-back-btn" onclick="history.back()">&#8249;</button>
+      <a href="/main/home" class="tl-back-btn">
+        <img
+          src="{{ url_for('static', filename='image/back.png') }}"
+          alt="戻る"
+        />
+      </a>
       <h1>タスク一覧</h1>
     </div>
     <div class="tl-tab-container">
@@ -423,20 +476,34 @@ content %}
         固定タスク
       </button>
     </div>
+    <div class="tl-filter-bar">
+      <button class="tl-filter-btn active" data-filter="all">すべて</button>
+      <button class="tl-filter-btn" data-filter="today">今日中</button>
+      <button class="tl-filter-btn" data-filter="other">今日中じゃない</button>
+      <button class="tl-filter-btn" data-filter="expired">締め切り</button>
+    </div>
   </div>
 
-  <!-- Mascot Banner -->
   <div class="tl-mascot-banner">
-    <div class="tl-mascot-icon"></div>
+    <div class="tl-mascot-icon">
+      <img
+        src="{{ url_for('static', filename='image/bouhuwasuke.png') }}"
+        alt="マスコット"
+        style="width: 44px; height: 44px; object-fit: contain"
+      />
+    </div>
     <div class="tl-mascot-text">
       今日までのタスクが{{ tasks|length }}つあるよ！<br />一緒に頑張ろう！
     </div>
   </div>
 
-  <!-- Task List -->
   <div class="tl-task-list">
     {% for task in tasks %}
-    <div class="tl-task-card">
+    <div
+      class="tl-task-card"
+      data-today="{{ 'true' if task.is_today else 'false' }}"
+      data-due="{{ task.due_date }}"
+    >
       <div class="tl-task-header">
         <div>
           <div class="tl-task-main">
@@ -468,6 +535,8 @@ content %}
       {% endif %}
     </div>
     {% endfor %}
+
+    <p class="tl-filter-empty">該当するタスクがありません</p>
   </div>
 
   {% if tasks|length == 0 %}
@@ -483,9 +552,7 @@ content %}
     新しいタスクを登録
   </button>
 </div>
-<!-- /.tl-page -->
 
-<!-- Delete Modal -->
 <div id="tlDeleteModal" class="tl-delete-modal">
   <div class="tl-modal-content">
     <div class="tl-modal-icon">🗑️</div>
@@ -501,17 +568,17 @@ content %}
     </div>
   </div>
 </div>
+
 <script>
   (function () {
     let pendingId = null;
+    let currentFilter = "all";
 
-    /* 削除ボタン — イベント委譲 */
     document.querySelector(".tl-page").addEventListener("click", function (e) {
       const btn = e.target.closest(".tl-delete-btn");
       if (!btn) return;
       e.preventDefault();
       e.stopPropagation();
-
       pendingId = btn.dataset.taskId;
       openModal();
     });
@@ -519,7 +586,6 @@ content %}
     function openModal() {
       const modal = document.getElementById("tlDeleteModal");
       modal.classList.add("show");
-
       modal.addEventListener("click", function outside(e) {
         if (e.target === modal) {
           closeModal();
@@ -537,28 +603,22 @@ content %}
       pendingId = null;
     }
 
-    /* 削除確定 */
     window.tlConfirmDelete = function () {
       if (!pendingId) return;
-
       fetch(`/task/delete/${pendingId}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       })
         .then((res) => {
           if (!res.ok) throw new Error();
-          location.reload(); // 成功 → 再読み込み
+          location.reload();
         })
         .catch(() => {
           alert("削除に失敗しました");
         });
-
       closeModal();
     };
 
-    /* メモ開閉 */
     window.tlToggleComment = function (btn) {
       const content = btn.nextElementSibling;
       const hidden = content.classList.contains("hidden");
@@ -566,8 +626,36 @@ content %}
       btn.classList.toggle("collapsed", !hidden);
     };
 
-    /* カード入場アニメーション */
-    document.addEventListener("DOMContentLoaded", function () {
+    function applyFilter(filter) {
+      currentFilter = filter;
+      const cards = document.querySelectorAll(".tl-task-card");
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const isToday = card.dataset.today === "true";
+        const isExpired = card.classList.contains("expired-card");
+        const show =
+          filter === "all" ||
+          (filter === "today" && isToday && !isExpired) ||
+          (filter === "other" && !isToday && !isExpired) ||
+          (filter === "expired" && isExpired);
+        card.classList.toggle("hidden-by-filter", !show);
+        if (show) visibleCount++;
+      });
+
+      const emptyMsg = document.querySelector(".tl-filter-empty");
+      if (emptyMsg) emptyMsg.classList.toggle("show", visibleCount === 0);
+
+      document.querySelectorAll(".tl-filter-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.filter === filter);
+      });
+    }
+
+    document.querySelectorAll(".tl-filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => applyFilter(btn.dataset.filter));
+    });
+
+    function tlInit() {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
@@ -576,13 +664,10 @@ content %}
         },
         { threshold: 0.05 },
       );
-
       document.querySelectorAll(".tl-task-card").forEach((card, i) => {
         card.style.transitionDelay = i * 0.07 + "s";
         observer.observe(card);
       });
-
-      /* タッチフィードバック */
       document
         .querySelectorAll(".tl-task-card, .tl-delete-btn")
         .forEach((el) => {
@@ -590,7 +675,44 @@ content %}
           el.addEventListener("touchend", () => (el.style.opacity = "1"));
           el.addEventListener("touchcancel", () => (el.style.opacity = "1"));
         });
-    });
+
+      // 期限切れ判定（日付をまたいだら赤に）
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      document.querySelectorAll(".tl-task-card").forEach((card) => {
+        const due = card.dataset.due;
+        if (!due) return;
+        const dueDate = new Date(due);
+        dueDate.setHours(0, 0, 0, 0);
+
+        if (dueDate < today) {
+          card.classList.add("expired-card");
+          const deadlineEl = card.querySelector(".tl-task-deadline");
+          if (deadlineEl) deadlineEl.classList.add("expired");
+
+          const todayBadge = card.querySelector(".tl-task-category");
+          if (todayBadge) {
+            todayBadge.textContent = "期限切れ";
+            todayBadge.classList.add("tl-expired-badge");
+            todayBadge.classList.remove("tl-task-category");
+          } else {
+            const meta = card.querySelector(".tl-task-meta");
+            if (meta) {
+              const badge = document.createElement("span");
+              badge.className = "tl-expired-badge";
+              badge.textContent = "期限切れ";
+              meta.prepend(badge);
+            }
+          }
+        }
+      });
+
+      applyFilter(currentFilter);
+    }
+
+    document.addEventListener("DOMContentLoaded", tlInit);
+    document.addEventListener("turbo:load", tlInit);
   })();
 </script>
 {% endblock %}

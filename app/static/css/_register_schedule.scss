@@ -10,6 +10,25 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.sched-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  text-decoration: none;
+  z-index: 101;
+}
+
+.sched-back-btn img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
 .sched-header .sched-title {
   font-size: 24px;
   font-weight: 600;
@@ -46,7 +65,7 @@
 
 /* Form Container */
 .sched-form-container {
-  padding: 20px 16px;
+  padding: 20px 16px 160px; /* bottom: 固定ボタンと被らないよう余白を確保 */
 }
 
 /* Form Section */
@@ -148,16 +167,15 @@
   transform: translateY(-50%);
   font-size: 18px;
   pointer-events: none;
-  margin-top: 12px; /* Adjust for label */
+  margin-top: 12px;
 }
 
-/* Weekday Selector */
 /* Weekday Selector */
 .sched-weekday-selector {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  justify-content: center; /* 追加：中央揃え */
+  justify-content: center;
 }
 
 .sched-weekday-btn {
@@ -174,9 +192,9 @@
   font-family: inherit;
   position: relative;
   overflow: hidden;
-  display: flex; /* 追加 */
-  align-items: center; /* 追加：垂直方向中央 */
-  justify-content: center; /* 追加：水平方向中央 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sched-weekday-btn.sched-weekday-active {
@@ -195,12 +213,11 @@
 }
 
 /* Category Selector */
-/* Category Selector */
 .sched-category-selector {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  justify-content: center; /* 追加：中央揃え */
+  justify-content: center;
 }
 
 .sched-category-btn {
@@ -214,9 +231,9 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  display: flex; /* 追加 */
-  align-items: center; /* 追加：垂直方向中央 */
-  justify-content: center; /* 追加：水平方向中央 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sched-category-btn.sched-category-active {
@@ -484,4 +501,11 @@
   color: #999;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.sched-info-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
 }

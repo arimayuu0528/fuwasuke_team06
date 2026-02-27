@@ -551,8 +551,6 @@ input[type=radio]:checked + .mood-card {
 }
 /* =====================================================
      SCOPE: .sl-page  (schedule_list)
-     base3.html との衝突を防ぐため全セレクタを
-     .sl-page 配下 / sl- プレフィックスで限定
   ===================================================== */
 .sl-page {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, sans-serif;
@@ -579,15 +577,21 @@ input[type=radio]:checked + .mood-card {
 }
 
 .sl-page .sl-back-btn {
-  background: transparent;
-  border: none;
-  font-size: 26px;
-  cursor: pointer;
-  color: #333;
   position: absolute;
   left: 0;
-  line-height: 1;
-  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  text-decoration: none;
+}
+
+.sl-page .sl-back-btn img {
+  width: 15px;
+  height: 15px;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 
 .sl-page .sl-header-top h1 {
@@ -599,7 +603,7 @@ input[type=radio]:checked + .mood-card {
   margin: 0;
 }
 
-/* ----- Tabs — アンダーライン式 ----- */
+/* ----- Tabs ----- */
 .sl-page .sl-tab-container {
   display: flex;
   gap: 8px;
@@ -624,6 +628,249 @@ input[type=radio]:checked + .mood-card {
 .sl-page .sl-tab.active {
   color: #ff9f5a !important;
   border-bottom: 3px solid #ff9f5a !important;
+}
+
+/* ----- フィルターチップ行 ----- */
+.sl-page .sl-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* ドロップダウンがはみ出せるように overflow-y は visible */
+  overflow-y: visible;
+}
+
+.sl-page .sl-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* チップラッパー（dropdown の基準） */
+.sl-page .sl-chip-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* チップボタン本体 */
+.sl-page .sl-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.sl-page .sl-chip-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+  color: #bbb;
+}
+
+.sl-page .sl-chip-wrap.open .sl-chip-arrow {
+  transform: rotate(180deg);
+}
+
+/* アクティブ状態（何か選ばれている） */
+.sl-page .sl-chip.has-filter {
+  border-color: #ff9f5a;
+  color: #ff9f5a;
+  background: #fff8f3;
+}
+
+.sl-page .sl-chip.has-filter .sl-chip-arrow {
+  color: #ff9f5a;
+}
+
+/* ドロップダウンパネル（共通） */
+.sl-page .sl-chip-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f0f0f0;
+  padding: 8px;
+  z-index: 9999;
+  min-width: 120px;
+  /* デフォルトは非表示 */
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* open 時に表示（通常リスト） */
+.sl-page .sl-chip-wrap.open .sl-chip-dropdown {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  animation: sl-dropIn 0.15s ease-out forwards;
+}
+
+/* 曜日ドロップダウン（横並び） — 上書きで flex に */
+.sl-page .sl-chip-dropdown--days {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  min-width: 210px;
+}
+
+.sl-page .sl-chip-wrap.open .sl-chip-dropdown--days {
+  display: flex !important; /* block より優先 */
+  opacity: 1;
+  pointer-events: auto;
+  animation: sl-dropIn 0.15s ease-out forwards;
+}
+
+@keyframes sl-dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ドロップダウン内の選択肢 */
+.sl-page .sl-chip-opt {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  font-family: inherit;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.sl-page .sl-chip-opt:hover {
+  background: #f5f5f5;
+}
+
+.sl-page .sl-chip-opt.selected {
+  color: #ff9f5a;
+  background: #fff8f3;
+}
+
+.sl-page .sl-chip-opt.selected::before {
+  content: "✓ ";
+  font-weight: 700;
+}
+
+/* 曜日ボタン */
+.sl-page .sl-chip-opt--day {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid #e0e0e0;
+  font-size: 13px;
+  text-align: center;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.sl-page .sl-chip-opt--day:hover {
+  background: #f5f5f5;
+}
+
+.sl-page .sl-chip-opt--day.selected {
+  background: linear-gradient(135deg, #ffb380, #ff9f5a);
+  color: #fff;
+  border-color: #ff9f5a;
+}
+
+/* selected::before を曜日では打ち消す */
+.sl-page .sl-chip-opt--day.selected::before {
+  content: "";
+}
+
+/* リセットボタン */
+.sl-page .sl-chip-reset {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  color: #bbb;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.sl-page .sl-chip-reset:hover {
+  color: #999;
+}
+
+/* アクティブフィルタータグ表示 */
+.sl-page .sl-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 10px;
+  min-height: 0;
+}
+
+.sl-page .sl-active-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #fff0e8;
+  color: #ff9f5a;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sl-page .sl-active-tag button {
+  background: none;
+  border: none;
+  color: #ffb380;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* ----- 該当なし ----- */
+.sl-page .sl-filter-empty {
+  display: none;
+  text-align: center;
+  padding: 32px 16px;
+  color: #bbb;
+  font-size: 14px;
+}
+
+.sl-page .sl-filter-empty.show {
+  display: block;
 }
 
 /* ----- Task List ----- */
@@ -651,6 +898,10 @@ input[type=radio]:checked + .mood-card {
   transform: translateY(0);
 }
 
+.sl-page .sl-task-card.hidden-by-filter {
+  display: none;
+}
+
 .sl-page .sl-task-card.deleting {
   animation: sl-fadeOutLeft 0.3s forwards;
 }
@@ -665,7 +916,6 @@ input[type=radio]:checked + .mood-card {
     transform: translateX(-20px);
   }
 }
-/* Card header */
 .sl-page .sl-task-header {
   display: flex;
   justify-content: space-between;
@@ -699,7 +949,6 @@ input[type=radio]:checked + .mood-card {
   color: #ff6b6b;
 }
 
-/* Meta */
 .sl-page .sl-task-meta {
   display: flex;
   align-items: center;
@@ -735,7 +984,6 @@ input[type=radio]:checked + .mood-card {
   font-size: 14px;
 }
 
-/* Location */
 .sl-page .sl-task-location {
   display: flex;
   align-items: center;
@@ -745,7 +993,6 @@ input[type=radio]:checked + .mood-card {
   margin-bottom: 8px;
 }
 
-/* Repeat badge */
 .sl-page .sl-task-repeat-info {
   margin-bottom: 8px;
 }
@@ -760,7 +1007,6 @@ input[type=radio]:checked + .mood-card {
   font-weight: 500;
 }
 
-/* Comment */
 .sl-page .sl-comment-section {
   margin: 12px 0;
   border-top: 1px solid #f0f0f0;
@@ -802,7 +1048,6 @@ input[type=radio]:checked + .mood-card {
   display: none;
 }
 
-/* Weekday pills */
 .sl-page .sl-weekday-pills {
   display: flex;
   gap: 8px;
@@ -831,7 +1076,6 @@ input[type=radio]:checked + .mood-card {
   transform: scale(1.05);
 }
 
-/* Empty & Count */
 .sl-page .sl-empty-message {
   text-align: center;
   padding: 40px 16px;
@@ -846,7 +1090,6 @@ input[type=radio]:checked + .mood-card {
   padding: 8px;
 }
 
-/* Add Button */
 .sl-page .sl-add-btn {
   position: fixed;
   bottom: 80px;
@@ -989,6 +1232,26 @@ input[type=radio]:checked + .mood-card {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.sched-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  text-decoration: none;
+  z-index: 101;
+}
+
+.sched-back-btn img {
+  width: 15px;
+  height: 15px;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
 .sched-header .sched-title {
   font-size: 24px;
   font-weight: 600;
@@ -1025,7 +1288,7 @@ input[type=radio]:checked + .mood-card {
 
 /* Form Container */
 .sched-form-container {
-  padding: 20px 16px;
+  padding: 20px 16px 160px; /* bottom: 固定ボタンと被らないよう余白を確保 */
 }
 
 /* Form Section */
@@ -1132,16 +1395,15 @@ input[type=radio]:checked + .mood-card {
   transform: translateY(-50%);
   font-size: 18px;
   pointer-events: none;
-  margin-top: 12px; /* Adjust for label */
+  margin-top: 12px;
 }
 
-/* Weekday Selector */
 /* Weekday Selector */
 .sched-weekday-selector {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  justify-content: center; /* 追加：中央揃え */
+  justify-content: center;
 }
 
 .sched-weekday-btn {
@@ -1158,9 +1420,9 @@ input[type=radio]:checked + .mood-card {
   font-family: inherit;
   position: relative;
   overflow: hidden;
-  display: flex; /* 追加 */
-  align-items: center; /* 追加：垂直方向中央 */
-  justify-content: center; /* 追加：水平方向中央 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sched-weekday-btn.sched-weekday-active {
@@ -1179,12 +1441,11 @@ input[type=radio]:checked + .mood-card {
 }
 
 /* Category Selector */
-/* Category Selector */
 .sched-category-selector {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  justify-content: center; /* 追加：中央揃え */
+  justify-content: center;
 }
 
 .sched-category-btn {
@@ -1198,9 +1459,9 @@ input[type=radio]:checked + .mood-card {
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  display: flex; /* 追加 */
-  align-items: center; /* 追加：垂直方向中央 */
-  justify-content: center; /* 追加：水平方向中央 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sched-category-btn.sched-category-active {
@@ -1469,6 +1730,14 @@ input[type=radio]:checked + .mood-card {
   color: #999;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.sched-info-icon {
+  width: 36px;
+  height: 36px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  flex-shrink: 0;
 }
 
 .calendar-fixed-header {

@@ -181,7 +181,9 @@ def task_list():
 @task_bp.route("/delete/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
 
-    user_id = 1
+    user_id = session.get("user_id")  # ← ここを変更
+    if not user_id:
+        return redirect(url_for('auth.login'))  # 未ログインならログインページへ
 
     db = DatabaseManager()
     db.connect()
@@ -196,7 +198,6 @@ def delete_task(task_id):
     db.disconnect()
 
     return redirect(url_for('task.task_list'))
-
 
 # -----------------------------------------------------
 # タスク作成：担当者名 向山

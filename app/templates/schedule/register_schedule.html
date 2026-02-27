@@ -2,6 +2,9 @@
 block content %}
 
 <div class="sched-header">
+  <a href="/main/home" class="sched-back-btn">
+    <img src="{{ url_for('static', filename='image/back.png') }}" alt="戻る" />
+  </a>
   <h1 class="sched-title">固定タスク登録</h1>
   <div class="sched-tab-container">
     <button class="sched-tab" id="schedTabTask">タスク登録</button>
@@ -157,9 +160,13 @@ block content %}
     </div>
 
     <div class="sched-info-box">
-      <span class="sched-info-icon">💡</span>
+      <img
+        src="{{ url_for('static', filename='image/huwasuke.png') }}"
+        class="sched-info-icon"
+        alt=""
+      />
       <p class="sched-info-text">
-        固定タスクは毎週決まった時間にカレンダーに追加されるよ
+        固定タスクは毎週決まった時間にカレンダーに追加されるよん♪
       </p>
     </div>
   </form>
