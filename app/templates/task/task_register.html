@@ -2,6 +2,9 @@
 content %}
 
 <div class="tr-header">
+  <a href="/main/home" class="tr-back-btn">
+    <img src="{{ url_for('static', filename='image/back.png') }}" alt="戻る" />
+  </a>
   <h1 class="tr-title">タスク作成</h1>
   <div class="tr-tab-container">
     <button class="tr-tab tr-tab-active">タスク登録</button>
@@ -82,7 +85,6 @@ content %}
               value="{{ task.date if task else '' }}"
               required
             />
-            <span>📅</span>
           </div>
         </div>
       </div>
@@ -123,11 +125,17 @@ content %}
 
     <!-- 通知 -->
     <div class="tr-form-section">
-      <div class="tr-notif-box" onclick="trToggleNotif()">
-        <span class="tr-notif-icon">🔔</span>
-        <div class="tr-notif-texts">
-          <div class="tr-notif-title">通知を受け取る</div>
-          <div class="tr-notif-sub" id="trNotifSub">5分前に通知します</div>
+      <div class="tr-notif-box" id="trNotifBox" onclick="trToggleNotif()">
+        <div class="tr-notif-left">
+          <div class="tr-notif-icon-wrap" id="trNotifIconWrap">🔔</div>
+          <div class="tr-notif-texts">
+            <div class="tr-notif-title">通知を受け取る</div>
+            <div class="tr-notif-sub" id="trNotifSub">5分前に通知します</div>
+          </div>
+        </div>
+        <!-- トグルスイッチ -->
+        <div class="tr-toggle" id="trToggle">
+          <div class="tr-toggle-thumb" id="trToggleThumb"></div>
         </div>
       </div>
       <input
@@ -143,10 +151,10 @@ content %}
         value="{{ task.notification_min if task else 5 }}"
       />
     </div>
+
+    <button type="submit" class="tr-submit-btn">登録</button>
   </form>
 </div>
-
-<button type="submit" form="trTaskForm" class="tr-submit-btn">登録</button>
 
 <style>
   .tr-header {
@@ -156,6 +164,21 @@ content %}
     top: 0;
     z-index: 100;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .tr-back-btn {
+    position: absolute;
+    top: 20px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+  }
+  .tr-back-btn img {
+    width: 15px;
+    height: 15px;
+    object-fit: contain;
   }
   .tr-header .tr-title {
     font-size: 24px;
@@ -189,7 +212,7 @@ content %}
     border-bottom-color: #ff9f5a;
   }
   .tr-form-container {
-    padding: 20px 16px;
+    padding: 20px 16px 32px;
   }
   .tr-form-section {
     margin-bottom: 24px;
@@ -368,41 +391,95 @@ content %}
   .tr-motivation-btn.tr-motivation-active .tr-motivation-label {
     color: #ff9f5a;
   }
+
+  /* ── 通知ボックス ── */
   .tr-notif-box {
     display: flex;
-    gap: 12px;
+    justify-content: space-between;
     align-items: center;
     padding: 16px;
     background: #fff8f3;
-    border-radius: 12px;
-    border: 1px solid #ffe5d6;
+    border-radius: 16px;
+    border: 1.5px solid #ffe5d6;
     cursor: pointer;
-    transition: background 0.2s;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+    user-select: none;
   }
   .tr-notif-box:hover {
     background: #fff0e8;
   }
-  .tr-notif-icon {
+  .tr-notif-box.tr-notif-off {
+    background: #f7f7f7;
+    border-color: #e0e0e0;
+  }
+  .tr-notif-left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .tr-notif-icon-wrap {
     font-size: 22px;
     flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .tr-notif-box.tr-notif-off .tr-notif-icon-wrap {
+    opacity: 0.35;
   }
   .tr-notif-title {
     font-size: 15px;
     font-weight: 600;
     color: #333;
+    transition: color 0.2s;
+  }
+  .tr-notif-box.tr-notif-off .tr-notif-title {
+    color: #aaa;
   }
   .tr-notif-sub {
     font-size: 12px;
-    color: #999;
+    color: #ff9f5a;
+    font-weight: 500;
     margin-top: 2px;
+    transition: color 0.2s;
   }
+  .tr-notif-box.tr-notif-off .tr-notif-sub {
+    color: #bbb;
+  }
+
+  /* ── トグルスイッチ ── */
+  .tr-toggle {
+    width: 50px;
+    height: 28px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffb380, #ff9f5a);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .tr-toggle.tr-toggle-off {
+    background: #ddd;
+  }
+  .tr-toggle-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 3px;
+    left: 25px; /* ON: 右側 */
+    transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+  .tr-toggle.tr-toggle-off .tr-toggle-thumb {
+    left: 3px; /* OFF: 左側 */
+  }
+
   .tr-submit-btn {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 400px;
+    display: block;
+    width: calc(100% - 0px);
+    margin-top: 12px;
     padding: 16px;
     background: linear-gradient(135deg, #ffb380 0%, #ff9f5a 100%);
     color: #fff;
@@ -418,11 +495,11 @@ content %}
     overflow: hidden;
   }
   .tr-submit-btn:hover {
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(255, 159, 90, 0.4);
   }
   .tr-submit-btn:active {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
   .tr-submit-btn:disabled {
     background: #ccc;
@@ -497,6 +574,20 @@ content %}
       flex-direction: column;
     }
   }
+  /* タブ文字ズレ修正 */
+  .tr-tab-container {
+    align-items: center;
+  }
+
+  .tr-tab {
+    height: 44px; /* 高さ固定 */
+    display: flex;
+    align-items: center; /* 縦中央 */
+    justify-content: center; /* 横中央 */
+    padding: 0 16px; /* 上下paddingを消す */
+    line-height: 1;
+    text-align: center; /* ← left を上書き */
+  }
 </style>
 
 <script>
@@ -523,11 +614,32 @@ content %}
 
     /* ── 通知トグル ── */
     let trNotifOn = {{ task.notification_enabled if task else 1 }};
+
+    function trApplyNotifState() {
+      const box    = document.getElementById('trNotifBox');
+      const toggle = document.getElementById('trToggle');
+      const sub    = document.getElementById('trNotifSub');
+
+      if (trNotifOn) {
+        box.classList.remove('tr-notif-off');
+        toggle.classList.remove('tr-toggle-off');
+        sub.textContent = '5分前に通知します';
+      } else {
+        box.classList.add('tr-notif-off');
+        toggle.classList.add('tr-toggle-off');
+        sub.textContent = '通知オフ';
+      }
+      document.getElementById('trNotification').value = trNotifOn;
+    }
+
     function trToggleNotif() {
       trNotifOn = trNotifOn ? 0 : 1;
-      document.getElementById('trNotification').value = trNotifOn;
-      document.getElementById('trNotifSub').textContent = trNotifOn ? '5分前に通知します' : '通知オフ';
+      trApplyNotifState();
+      if (navigator.vibrate) navigator.vibrate(8);
     }
+
+    /* 初期状態を適用 */
+    trApplyNotifState();
 
     /* ── フォーム送信 ── */
     document.getElementById('trTaskForm').addEventListener('submit', function (e) {
