@@ -440,6 +440,7 @@ def fetch_suggestion_details(db: DatabaseManager, suggestion_id: int): #【定�
         FROM t_task_suggestion_detail s_detail
         JOIN t_tasks ta ON s_detail.task_id = ta.task_id
         WHERE s_detail.task_suggestion_id = %s
+        AND ta.is_completed = FALSE
         ORDER BY s_detail.priority_score DESC, s_detail.plan_min DESC;
     """
     # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -183,44 +183,58 @@
  
     function renderTasksForDate(currentWeek){
         const dateKey = displayDate.toISOString().split('T')[0];
+        
+        // --- 【追加】localStorageから今日の一時保存データを読み込む ---
         const storageKey = "task_done_" + dateKey;
         const storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        
         const $list = $('#task-list');
         $list.empty();
+
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         const viewingDate = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime();
         const isToday = (today === viewingDate);
- 
+
         let displayTasks = [];
+        let seenIds = new Set();
+        all_tasks_loop:
         allTasks.forEach(task => {
             if(task.is_fixed){
                 if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
                     displayTasks.push(task);
                 }
-            } else if(isToday){
-                displayTasks.push(task);
+            } else {
+                // 日付が一致し、かつ、まだリストに追加されていないIDのみ許可
+                if (task.suggestion_date === dateKey && !seenIds.has(task.id)) {
+                    displayTasks.push(task);
+                    seenIds.add(task.id); // IDを記録
+                }
             }
         });
- 
+
         displayTasks.forEach(task => {
+            // 基本はDBの完了状態(task.done)を使う
             let isChecked = task.done;
 
-            // localStorage に保存されていればそちらを優先
-            if (storedData[task.id] !== undefined) {
+            // --- 【追加】もしlocalStorageに一時保存があれば、それを優先して表示に反映する ---
+            if (isToday && storedData[task.id] !== undefined) {
                 isChecked = storedData[task.id];
             }
 
-            let checkHtml = isToday
-                ? `<input type="checkbox"
+            let checkHtml = "";
+            if (isToday) {
+                // 今日の場合は操作できるチェックボックス
+                checkHtml = `<input type="checkbox"
                     class="task-checkbox"
                     data-task-id="${task.id}"
                     data-is-fixed="${task.is_fixed}"
-                    ${isChecked ? "checked" : ""}>`
-                : (isChecked
-                    ? '<span class="done-icon" style="color:#f19710;">✔</span>'
-                    : '');
-           
+                    ${isChecked ? "checked" : ""}>`;
+            } else {
+                // 過去・未来の場合は、表示のみ（isCheckedがTrueなら✔、Falseなら空）
+                checkHtml = isChecked ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '';
+            }
+            
             const html = `
             <div class="task-card">
                 <div class="task-check">${checkHtml}</div>
@@ -231,8 +245,12 @@
             </div>`;
             $list.append(html);
         });
+
         updateProgress(isToday);
-        attachCheckboxHandler();
+        
+        if (isToday) {
+            attachCheckboxHandler();
+        }
     }
     let typingTimer = null;
     let currentMessage = ""; 
@@ -339,8 +357,6 @@
             const isFixed = $(this).data('is-fixed'); 
             const dateKey = displayDate.toISOString().split('T')[0];
             const storageKey = "task_done_" + dateKey;
-
-            // --- 1. localStorage に保存 (ここを復旧しました) ---
             let storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
             storedData[taskId] = done;
             localStorage.setItem(storageKey, JSON.stringify(storedData));
@@ -397,6 +413,39 @@
  
     // 評価するボタン送信処理
     $(document).on('click', '#submitEval', function(){
+        const selectedEval = $('.eval-choice.selected').data('value');
+        const dateKey = displayDate.toISOString().split('T')[0];
+        
+        // 達成済みのタスクIDを集める（checkboxがチェックされているもの）
+        let completedIds = [];
+        $('.task-checkbox:checked').each(function(){
+            completedIds.push($(this).data('task-id'));
+        });
+
+        // サーバーへ送信
+        fetch("{{ url_for('main.save_evaluation') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                date: dateKey,
+                evaluation: selectedEval,
+                mood: selectedEval, // 気分も一旦評価と同じ値を入れる（必要なら選択肢を増やす）
+                completed_task_ids: completedIds
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success"){
+                // 成功したら画面を切り替える
+                $('#evalHeader').hide();
+                $('#evalStep1').hide();
+                $('#evalStep2').fadeIn(300);
+                $('#closeModal').hide();
+            } else {
+                alert("保存に失敗しました。");
+            }
+        })
+        .catch(err => console.error("Fetch error:", err));
         // 画面切り替え
         $('#evalHeader').hide();
         $('#evalStep1').hide();
