@@ -159,7 +159,7 @@ def create_app():
                     session["selected_task_suggestion_id"] = sid
                     session["current_task_suggestion_id"] = sid
                     
-                    return redirect(url_for("task.task_suggestion"))
+                    return 
                 # 未選択（3件など）→ タスク提案へ ※3案がある状態（複数案）ならタスク提案画面に送る
                 if cnt >= 2:
                     return redirect(url_for("task.task_suggestion"))
