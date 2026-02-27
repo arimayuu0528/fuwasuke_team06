@@ -669,3 +669,136 @@
     transform: translateY(0);
   }
 }
+/* =====================================================
+   F12 / 画面幅縮小時のはみ出し対策（追記用）
+   ===================================================== */
+
+/* チップ行：均等配置 + はみ出し防止 */
+.sl-page .sl-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0 10px;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  justify-content: space-between;
+}
+
+.sl-page .sl-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* チップを均等に伸ばす */
+.sl-page .sl-chip-wrap {
+  position: relative;
+  flex: 1;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.sl-page .sl-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 8px;
+  border-radius: 20px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* リセットボタンも均等に */
+.sl-page .sl-chip-reset {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  color: #bbb;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 右端のチップは右揃えで開く（画面外はみ出し防止） */
+.sl-page .sl-chip-wrap:nth-last-child(-n + 2) .sl-chip-dropdown {
+  left: auto;
+  right: 0;
+}
+/* 曜日ドロップダウン：縦並び */
+.sl-page .sl-chip-dropdown--days {
+  display: none;
+  flex-direction: column; /* 縦並び */
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 8px;
+  min-width: 80px; /* 横幅はコンパクトに */
+}
+
+.sl-page .sl-chip-wrap.open .sl-chip-dropdown--days {
+  display: flex !important;
+}
+
+/* 曜日ボタン：縦並び用に横長に */
+.sl-page .sl-chip-opt--day {
+  width: 100%;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px; /* 丸から角丸に */
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sl-page .sl-chip-opt--day.selected {
+  background: linear-gradient(135deg, #ffb380, #ff9f5a);
+  color: #fff;
+  border-color: transparent;
+}
+
+.sl-page .sl-chip-opt--day.selected::before {
+  content: "";
+}
+
+/* カード内曜日ピル：均等配置 */
+.sl-page .sl-weekday-pills {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+  justify-content: space-between; /* 均等配置 */
+}
+
+.sl-page .sl-weekday {
+  flex: 1; /* 均等に伸びる */
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  background: #e8e8e8;
+  color: #999;
+  transition: all 0.3s ease;
+}

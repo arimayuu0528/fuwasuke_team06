@@ -509,3 +509,16 @@
   object-fit: contain;
   flex-shrink: 0;
 }
+/* =====================================================
+   schedule form：横はみ出し対策（追記用）
+   ===================================================== */
+
+/* fixed 送信ボタンの width + padding 問題を解消 */
+.sched-submit-btn {
+  box-sizing: border-box;
+}
+
+/* flex 内テキストが勝手に広がるのを防ぐ（保険） */
+.sched-form-container * {
+  min-width: 0;
+}

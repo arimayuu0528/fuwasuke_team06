@@ -454,6 +454,31 @@ content %}
       transform: translateY(0);
     }
   }
+  /* =====================================================
+   task list：固定ボタンの横はみ出し修正
+   ===================================================== */
+
+  .tl-page .tl-add-btn {
+    box-sizing: border-box;
+  }
+
+  /* flex要素の横はみ出し保険 */
+  .tl-page * {
+    min-width: 0;
+  }
+  /* フィルターボタンの文字ズレ修正 */
+  .tl-page .tl-filter-bar {
+    align-items: center; /* ボタンを縦中央に */
+  }
+
+  .tl-page .tl-filter-btn {
+    height: 36px; /* 高さを固定 */
+    display: flex; /* 中央寄せ */
+    align-items: center; /* 縦中央 */
+    justify-content: center; /* 横中央 */
+    line-height: 1; /* 文字のズレ防止 */
+    padding: 0 16px; /* 上下paddingを消す */
+  }
 </style>
 
 <div class="tl-page">

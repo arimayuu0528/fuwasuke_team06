@@ -20,8 +20,13 @@
       isDays ? "flex" : "block",
       "important",
     );
-    dropdown.style.setProperty("flex-wrap", isDays ? "wrap" : "", "important");
-    dropdown.style.setProperty("gap", isDays ? "6px" : "", "important");
+    dropdown.style.setProperty(
+      "flex-direction",
+      isDays ? "column" : "",
+      "important",
+    );
+    dropdown.style.setProperty("flex-wrap", "nowrap", "important");
+    dropdown.style.setProperty("gap", isDays ? "2px" : "", "important");
     dropdown.style.setProperty("position", "absolute", "important");
     dropdown.style.setProperty("top", "calc(100% + 8px)", "important");
     dropdown.style.setProperty("left", "0", "important");
@@ -33,34 +38,36 @@
       "important",
     );
     dropdown.style.setProperty("border", "1px solid #f0f0f0", "important");
-    dropdown.style.setProperty("padding", isDays ? "10px" : "8px", "important");
+    dropdown.style.setProperty("padding", "8px", "important");
     dropdown.style.setProperty("z-index", "9999", "important");
     dropdown.style.setProperty(
       "min-width",
-      isDays ? "210px" : "120px",
+      isDays ? "80px" : "120px",
       "important",
     );
+    dropdown.style.setProperty("width", isDays ? "80px" : "auto", "important"); // ← 幅を固定
     dropdown.style.setProperty("opacity", "1", "important");
     dropdown.style.setProperty("visibility", "visible", "important");
     dropdown.style.setProperty("pointer-events", "auto", "important");
 
-    // 子要素のボタンも強制的にスタイルを当てる
+    // 子要素のボタンスタイル
     dropdown.querySelectorAll(".sl-chip-opt").forEach((opt) => {
       if (opt.classList.contains("sl-chip-opt--day")) {
         opt.style.setProperty("display", "flex", "important");
-        opt.style.setProperty("width", "36px", "important");
+        opt.style.setProperty("width", "100%", "important");
         opt.style.setProperty("height", "36px", "important");
         opt.style.setProperty("align-items", "center", "important");
         opt.style.setProperty("justify-content", "center", "important");
-        opt.style.setProperty("border-radius", "50%", "important");
-        opt.style.setProperty("border", "1.5px solid #e0e0e0", "important");
+        opt.style.setProperty("border-radius", "8px", "important");
+        opt.style.setProperty("border", "none", "important");
         opt.style.setProperty("font-size", "13px", "important");
         opt.style.setProperty("cursor", "pointer", "important");
+        opt.style.setProperty("padding", "0", "important");
         opt.style.setProperty(
           "background",
           opt.classList.contains("selected")
             ? "linear-gradient(135deg,#ffb380,#ff9f5a)"
-            : "#fff",
+            : "transparent",
           "important",
         );
         opt.style.setProperty(
@@ -100,7 +107,6 @@
     const arrow = wrap.querySelector(".sl-chip-arrow");
     if (arrow) arrow.style.transform = "rotate(180deg)";
   }
-
   function closeDropdown(wrap) {
     const dropdown = wrap.querySelector(".sl-chip-dropdown");
     if (!dropdown) return;

@@ -574,6 +574,20 @@ content %}
       flex-direction: column;
     }
   }
+  /* タブ文字ズレ修正 */
+  .tr-tab-container {
+    align-items: center;
+  }
+
+  .tr-tab {
+    height: 44px; /* 高さ固定 */
+    display: flex;
+    align-items: center; /* 縦中央 */
+    justify-content: center; /* 横中央 */
+    padding: 0 16px; /* 上下paddingを消す */
+    line-height: 1;
+    text-align: center; /* ← left を上書き */
+  }
 </style>
 
 <script>
