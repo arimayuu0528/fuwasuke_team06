@@ -1196,6 +1196,10 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
         today_ids = [row["task_suggestion_id"] for row in suggestions_today]
         if selected_id not in today_ids: # selected_id が今日の提案ID一覧に無い（削除済み/不正/古い）場合:
             selected_id = None # 選択状態を「未選択」に戻す
+        # ★追加：今日の提案が複数残っているなら「未選択」扱いに戻す（= 3案表示する）
+        if len(today_ids) >= 2:
+            session.pop("selected_task_suggestion_id", None)
+            selected_id = None 
 
         # 表示用：各案の「ヘッダ + 詳細 + 合計時間」をまとめる
         # テンプレに渡す「表示用まとまり（案ごと）」を入れるリスト

@@ -1,0 +1,257 @@
+/* ---------------------------------------------
+    画面全体（このページだけ）:
+    下の固定フッター(.menu)に被らないように下余白を確保
+    ※ 84px はフッターの高さ想定。違ったらここだけ調整。
+--------------------------------------------- */
+.mood-graph-page{
+    --footer-h: 90px;
+    overflow-x: hidden;
+    position: relative;
+    left: -3vw;
+
+  /* 左右に余白 + 下にフッター分の余白 + iPhoneの安全領域 */
+    padding: 0 16px calc(var(--footer-h) + env(safe-area-inset-bottom) + 12px);
+}
+.mood-graph-header{
+    h1{
+        position: relative;
+        left:30vw;
+        top: 0.7rem;
+        font-size:20px;
+        font-weight: 500;
+        color: #000;
+    }
+}
+/* -----------------------------
+    レイアウト：中央寄せ＆横幅制限
+----------------------------- */
+.mood-graph-header,
+.mood-chart-card {
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+/* -----------------------------
+    ヘッダー（タイトル＋ページング）
+----------------------------- */
+.mood-graph-header {
+    margin: 14px auto 12px;
+    padding: 0 6px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+.mood-sub-title{
+    display: flex;
+    justify-content: space-between;
+    h2{
+        position: relative;
+        left :8vw;
+    }
+    h3{
+        color: #f29a27;
+        background-color: #fff2de;
+        padding: 3px 12px;
+        border-radius: 50px;
+        position: relative;
+        right: 10vw;
+    }   
+}
+.mood-graph-title{
+    margin-bottom: 0.5rem;
+    h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    }
+}   
+
+.mood-graph-range{
+    margin:0;
+    font-size:18px;
+    font-weight: 400;
+    color: #292929;
+    opacity:.75;
+    flex:1;
+    text-align:center; /* 中央寄せ */
+}
+
+/* -----------------------------
+    週範囲バー（◀ 期間 ▶）
+----------------------------- */
+.mood-graph-range-bar{
+    padding: 10px;
+    width: 100%;
+    display:flex;
+    align-items:center;
+
+    gap: 12px;
+
+    position: relative;
+    left: 11vw;
+
+    margin-bottom: 3vh;
+    margin-top: 6px;
+}
+/* 上下の線だけ、画面幅いっぱいに引く */
+.mood-graph-range-bar::before,
+.mood-graph-range-bar::after{
+    content: "";
+    position: absolute;
+
+/* 画面のど真ん中基準で 100vw を引く（中央寄せレイアウトでも全幅になる） */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+
+  pointer-events: none; /* 線がクリックを邪魔しないように */
+}
+
+.mood-graph-range-bar::before{
+    top: 0;
+    border-top: 1px solid #dbdbdb;
+}
+
+.mood-graph-range-bar::after{
+    bottom: 0;
+    border-bottom: 1px solid #dbdbdb;
+}
+.range-btn{
+    width:34px;
+    height:34px;
+    flex: 0 0 34px;           
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:rgba(0,0,0,.8);
+
+    img{
+        display:block;
+        position: static;    
+    }
+}
+
+/* 無効状態 */
+.range-btn.is-disabled{
+    opacity:.35;
+    pointer-events:none;
+}
+/* -----------------------------
+    カード（グラフ本体）
+----------------------------- */
+.mood-chart-card {
+    width: 92vw;
+    position: relative;
+    top: -1vh;
+    left: 1vw;
+    padding: 7px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fff;
+
+  /* “カード感” */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Chart.js描画領域：ここが高さを持つ */
+.mood-chart-wrapper {
+    height: 320px; /* グラフが見えなくなるので必須 */
+    position: relative;
+}
+
+/* canvasは親要素にぴったり */
+#moodChart {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* 補足文 */
+.mood-chart-note {
+    margin: 10px 2px 0;
+    font-size: 12px;
+    opacity: 0.65;
+}
+/* -----------------------------
+    レポート
+----------------------------- */
+.week-review{
+    position: relative;
+    top: 1rem;
+    
+    h2{
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        position: relative;
+        left: 2rem;
+    }
+    .week-review-card{
+        width:92vw;
+        border-radius: 16px;
+        border: 1px solid #ffe9c9;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        padding: 1rem;
+        background-color: #FFF5E6;
+        position: relative;
+        left:2vw;
+        .week-review-title{
+            display: flex;
+            .week-review-character{
+                width: 50px;
+                height: 50px;
+                display: block;
+                margin-bottom: 6px;
+                margin-right: 10px;
+            }
+            .week-review-left-title{
+                span{
+                    font-size: 16px;
+                    color: #f29a27;
+                    font-weight: 500;
+                }
+                .week-review-status{
+                    font-size: 20px;
+                    font-weight: 500;
+                    margin-bottom: 1rem;
+                }
+            }
+        }
+        .week-review-message{
+            line-height: 1.3;
+            margin-bottom: 0.7rem;
+        }
+        .week-review-reasons{
+            margin-bottom: 0.7rem;
+        }
+    }
+}
+/* -----------------------------
+    スマホ最適化
+----------------------------- */
+@media (max-width: 560px) {
+    .mood-graph-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .mood-graph-pager {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pager-btn {
+        width: 48%;
+        padding: 9px 10px;
+        font-size: 12.5px;
+    }
+
+    .mood-chart-wrapper {
+        height: 300px;
+    }
+}

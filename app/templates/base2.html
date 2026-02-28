@@ -48,8 +48,8 @@
         <p>カレンダー</p>
       </a>
       <a
-        href="{{ url_for('main.mood_graph') }}"
-        class="icon {% if request.endpoint == 'main.mood_graph' %}active{% endif %}" data-turbo="false"
+        href="{{ url_for('mood.graph') }}"
+        class="icon {% if request.endpoint == 'mood.graph' %}active{% endif %}" data-turbo="false"
       >
         <p><i class="fa-solid fa-square-poll-vertical report_icon"></i></p>
         <p>レポート</p>

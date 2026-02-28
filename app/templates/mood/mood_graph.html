@@ -1,35 +1,140 @@
 {% extends "base2.html" %}
 
+{# ------------------------------------------------------------
+    header_content：ヘッダーのロゴ（既存と同じ形）
+------------------------------------------------------------ #}
 {% block header_content %}
-<div class="fuwasuke_log1">
-    <p><img src="{{url_for('static',filename='image/ふわすけ1.png')}}" alt="ロゴ"></p>
+<div class="mood-graph-header">
+    <h1>今週のレポート</h1>
 </div>
 {% endblock %}
 
 {% block content %}
 
-<!-- JS読み込み -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{# ------------------------------------------------------------
+    CSS：グラフページ専用（見た目はCSSに寄せる）
+    例：static/css/mood_graph.css を作って読み込む
+------------------------------------------------------------ #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+{# ------------------------------------------------------------
+    Chart.js 本体（CDN）
+    ※JS(mood_graph.js)が Chart を使うため必須
+------------------------------------------------------------ #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{# ------------------------------------------------------------
+    タイトル：mood.py から start_label / end_label を受け取って表示
+    mood.py 側で
+    start_label=start_date.strftime("%Y/%m/%d")
+    end_label=end_date.strftime("%Y/%m/%d")
+    を渡している想定
+------------------------------------------------------------ #}
+<div class="mood-graph-page">
+    <div class="mood-graph-header">
+        <div class="mood-graph-title">
+
+            {# ------------------------------------------------------------
+            週ページング（◀ / ▶）
+            mood.py 側は week を 0〜1 に丸めているので
+                week=0 … 今週（直近7日）
+                week=1 … 前の週（さらに7日過去）
+            になる前提でUIを作る
+            ------------------------------------------------------------ #}
+
+            {% set w = week | default(0) %}
+
+            <div class="mood-graph-range-bar">
+            {# ◀ 前の週へ：今週(w=0)のときだけ押せる → week=1へ #}
+            {% if w < 1 %}
+                <a class="range-btn" href="{{ url_for('mood.graph', week=w+1) }}" data-turbo-frame="_top">
+                    <img src="{{ url_for('static', filename='image/back.png') }}" alt="前の週へ" width="5px" class="week-back-btn">
+                </a>
+            {% else %}
+                <span class="range-btn is-disabled"><img src="{{ url_for('static', filename='image/back.png') }}" alt="前の週へ" width="5px"class="week-back-btn"></span>
+            {% endif %}
+
+            {# 中央：日付範囲 #}
+            <p class="mood-graph-range">
+                {{ start_label }} - {{ end_label }}
+            </p>
+
+            {# ▶ 次の週へ：前週(w=1)のときだけ押せる → week=0へ戻る #}
+            {% if w > 0 %}
+                <a class="range-btn" href="{{ url_for('mood.graph', week=w-1) }}" data-turbo-frame="_top">
+                    <img src="{{ url_for('static', filename='image/next.png') }}" alt="次の週へ" width="5px" class="week-next-btn">
+                </a>
+            {% else %}
+                <span class="range-btn is-disabled"><img src="{{ url_for('static', filename='image/next.png') }}" alt="次の週へ" width="5px" class="week-next-btn"></span>
+            {% endif %}
+
+        </div>
+        <div class="mood-sub-title">
+                <h2>気分の推移</h2>
+                <h3>weekly trend</h3>
+        </div>
+    </div>
 
 
-<h2>直近1週間の気分遷移</h2>
+    {# ------------------------------------------------------------
+        グラフ本体：canvasだけ置く（描画は mood_graph.js の役割）
+    ------------------------------------------------------------ #}
+    <div class="mood-chart-card">
+        <div class="mood-chart-wrapper">
+            <canvas
+                id="moodChart"
+                data-dates='{{ dates | tojson }}'
+                data-values='{{ values | tojson }}'
+            ></canvas>
+        </div>
 
-<div class="mood-chart-wrapper">
-    <canvas id="moodChart"></canvas>
+        <p class="mood-chart-note">
+            ※未入力の日はグラフが途切れます
+        </p>
+    </div>
+
+    {# ------------------------------------------------------------
+        振り返り
+    ------------------------------------------------------------ #}
+    <div class="week-review">
+        <h2>{{ review.heading }}</h2>
+
+        <div class="week-review-card">
+            <div class="week-review-title">
+                {% if review.character_img %}
+                    <img class="week-review-character"
+                    src="{{ url_for('static', filename=review.character_img) }}"
+                    alt="{{ review.character_alt }}">
+                {% endif %}
+
+                <div class="week-review-left-title">
+                    <span>Review the week.</span>
+                    {# 判定ラベル（絶好調/好調/しんどかった…/記録なし） #}
+                    {% if review.status %}
+                        <p class="week-review-status">{{ review.status }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {# メイン文章（今週未確定なら「日曜に表示」など） #}
+            <p class="week-review-message">{{ review.message }}</p>
+
+            {# 理由（点数は出さず、なぜそう判定したかを文章で） #}
+            {% if review.reasons %}
+                <ul class="week-review-reasons">
+                    {% for r in review.reasons %}
+                        <li>{{ r }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+    </div>
 </div>
 
 
-
-
-
-<script>
-    const moodDates = {{ dates | tojson }};
-    const moodValues = {{ values | tojson }};
-</script>
-
-
+{# ------------------------------------------------------------
+    描画JS：実ファイル（static/js/mood_graph.js）
+------------------------------------------------------------ #}
 <script src="{{ url_for('static', filename='js/mood_graph.js') }}"></script>
 
 {% endblock %}
-
-
