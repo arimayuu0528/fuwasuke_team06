@@ -89,7 +89,7 @@ def _build_week_review(week: int, today, end_date, mood_points: list[int]) -> di
     
     # 画面に出す理由文のリスト
     reasons = [
-        f"この週は {total}日分の気分記録がありました。",
+        f"週に {total}日分の気分記録がありました。",
     ]
     # 「どれが多かったか」を文章にする
     if good >= normal and good >= bad:  # 気分＝元気 が 最多の場合:
@@ -111,12 +111,12 @@ def _build_week_review(week: int, today, end_date, mood_points: list[int]) -> di
 
     if avg >= 2.34:
         status = "絶好調！な一週間" # 見出し用ラベル
-        message = "週全体として気分が高めでした。良い流れを来週も少しだけ続けられると最高です。" # 説明文
+        message = "週全体として気分が高めでした。　　　　良い流れを来週も続けられると最高！" # 説明文
         character_img = IMG_GENKI  # 絶好調：「元気」キャラ画像
         character_alt = "絶好調（元気）" # # キャラ画像の代替テキスト(alt)
     elif avg >= 1.67:
         status = "好調な一週間"     # 見出し用ラベル
-        message = """大きく崩れずに過ごせた週でした。　　　　　調子が良い日に無理しすぎないのがコツ。""" # 説明文
+        message = """大きく崩れずに過ごせた週でした。　　　　　調子が良い時、無理しすぎないのがコツ""" # 説明文
         character_img = IMG_FUTU   # 好調：「普通」キャラ画像
         character_alt = "好調（普通）"
     else:
