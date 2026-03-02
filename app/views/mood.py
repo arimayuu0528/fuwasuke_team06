@@ -48,7 +48,7 @@ def _build_week_review(week: int, today, end_date, mood_points: list[int]) -> di
             "heading": heading, # 週ごとのタイトル
             "ready": False,     # まだ確定した週次レポートを表示しない
             "status": None,     # 判定結果無し状態：(絶好調/好調/不調：無し)
-            "message": "今週(7日分)の振り返りは日曜日表示予定。", # ユーザーに説明するための文章
+            "message": "今週の振り返りは日曜日表示予定。", # ユーザーに説明するための文章
             "reasons": ["週の集計が揃うと確定表示します。"], # ユーザーに説明するための文章
             "character_img": IMG_FUTU, # 集計中 :「普通」キャラ画像
             "character_alt": "集計中", # キャラ画像の代替テキスト(alt)
