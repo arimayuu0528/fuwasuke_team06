@@ -117,10 +117,10 @@ CREATE TABLE t_task_suggestions (
     mood VARCHAR(4) NOT NULL,
     mood_point INT NOT NULL,
 
-    coef_value FLOAT NOT NULL,                     -- 係数（直近7日など）
-    evaluation INT NULL,                           -- 評価（1〜5）※未評価 NULL可
-    evaluation_multiplier FLOAT NOT NULL,          -- 評価補正倍率（例：0.8/1.0/1.2）
-    target_task_level INT NOT NULL,                -- 今日の目標タスクレベル
+    coef_value FLOAT NOT NULL,                           -- 係数（直近7日など）
+    evaluation INT NULL,                                 -- 評価（1〜5）※未評価 NULL可
+    evaluation_multiplier FLOAT NOT NULL DEFAULT 1.0,    -- 評価補正倍率（例：0.8/1.0/1.2）
+    target_task_level INT NOT NULL,                      -- 今日の目標タスクレベル
 
     PRIMARY KEY (task_suggestion_id),
     FOREIGN KEY (user_id) REFERENCES t_users(user_id)
@@ -167,6 +167,61 @@ CREATE TABLE t_task_evaluation_logs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY (user_id, target_date) -- 1人1日1回（2回目はUPDATE対象にするため）
 );
+-- ================================================================================================
+-- ★追加：
+-- - t_task_evaluation_logs に評価ログが1行追加されたら
+-- - t_task_suggestionsの該当する提案(同じuser_id & 同じ日付)に評価値と倍率をコピーして更新する
+---------------------------------------------------------------------------------------------------
+-- - t_task_evaluation_logs の既存ログが更新されたら
+-- - t_task_suggestionsの該当する提案(同じuser_id & 同じ日付)も更新して常に一致させる
+---------------------------------------------------------------------------------------------------
+-- - ※ task.py の INSERT/UPDATEは今のままでOK（DB側で自動反映）
+-- ================================================================================================
+DELIMITER // -- 命令の区切り文字を ; から // に変更 ※途中の ; でSQL文完了だと認識させないため
+
+CREATE TRIGGER trg_eval_logs_to_suggestions_ai -- トリガ名 trg_eval_logs_to_suggestions_ai
+AFTER INSERT ON t_task_evaluation_logs -- t_task_evaluation_logs に INSERT された後に、このトリガを実行する
+FOR EACH ROW -- 行ごとに1回ずつトリガを実行する
+BEGIN -- UPDATEをまとめるブロック
+    UPDATE t_task_suggestions
+        SET evaluation = CASE NEW.evaluation_score -- NEW ＝「今INSERT/UPDATEされたログのその行」を表す変数
+                            WHEN '不満' THEN 1     -- 条件分岐
+                            WHEN 'ふつう' THEN 2
+                            WHEN '満足' THEN 3
+                            ELSE NULL
+                        END,
+            evaluation_multiplier = CASE NEW.evaluation_score -- NEW ＝「今INSERT/UPDATEされたログのその行」を表す変数
+                                        WHEN '不満' THEN 0.8 -- 条件分岐
+                                        WHEN 'ふつう' THEN 1.0
+                                        WHEN '満足' THEN 1.2
+                                        ELSE 1.0
+                                END
+    WHERE user_id = NEW.user_id -- t_task_suggestionsの中から 同じユーザー(user_id)同じ日付(suggestion_date)の行を探す
+        AND suggestion_date = NEW.target_date;
+END//
+
+CREATE TRIGGER trg_eval_logs_to_suggestions_au-- トリガ名 trg_eval_logs_to_suggestions_au
+AFTER UPDATE ON t_task_evaluation_logs -- t_task_evaluation_logs に UPDATE された後に、このトリガを実行する
+FOR EACH ROW -- 行ごとに1回ずつトリガを実行する
+BEGIN-- UPDATEをまとめるブロック
+    UPDATE t_task_suggestions
+        SET evaluation = CASE NEW.evaluation_score -- NEW ＝「今INSERT/UPDATEされたログのその行」を表す変数
+                            WHEN '不満' THEN 1 -- 条件分岐
+                            WHEN 'ふつう' THEN 2
+                            WHEN '満足' THEN 3
+                            ELSE NULL
+                        END,
+            evaluation_multiplier = CASE NEW.evaluation_score -- NEW ＝「今INSERT/UPDATEされたログのその行」を表す変数
+                                        WHEN '不満' THEN 0.8 -- 条件分岐
+                                        WHEN 'ふつう' THEN 1.0
+                                        WHEN '満足' THEN 1.2
+                                        ELSE 1.0
+                                    END
+    WHERE user_id = NEW.user_id -- t_task_suggestionsの中から 同じユーザー(user_id)同じ日付(suggestion_date)の行を探す
+        AND suggestion_date = NEW.target_date;
+END//
+
+DELIMITER ; -- 命令の区切り文字を // から ; に戻す
 
 -- 元SQLの「タスク提案評価」は内容が詳細と同じで重複していたため削除
 -- CREATE TABLE t_task_suggestion_reviews ... (削除)
@@ -318,23 +373,22 @@ INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, en
 -- 今日の気分
 -- mood 元気(3) 普通(2) 悪い(1)
 INSERT INTO t_today_moods (user_id, mood_date, mood, mood_point) VALUES
+(1,'2026-01-23 10:00:00','元気',3),
+(2,'2026-01-24 11:00:00','普通',2),
+(3,'2026-01-25 10:00:00','元気',3),
+(1,'2026-01-26 08:00:00','普通',2),
 (1,'2026-01-27 08:00:00','普通',2),
 (2,'2026-01-27 08:30:00','元気',3),
-(3,'2026-01-27 09:00:00','元気',1),
+(3,'2026-01-27 09:00:00','元気',3),
 (1,'2026-01-28 10:00:00','普通',2),
 (2,'2026-01-28 11:00:00','元気',3),
 (3,'2026-01-28 10:00:00','普通',2),
 (1,'2026-01-29 10:00:00','悪い',1),
 (2,'2026-01-29 11:00:00','悪い',1),
 (3,'2026-01-29 10:00:00','悪い',1),
-(1,'2026-01-23 10:00:00','元気',3),
-(2,'2026-01-24 11:00:00','普通',2),
-(3,'2026-01-25 10:00:00','元気',3),
-(1,'2026-01-26 08:00:00','普通',2),
-(1,'2026-01-27 08:00:00','元気',3),
-(1,'2026-01-28 08:00:00','普通',2),
-(1,'2026-01-29 08:00:00','普通',2),
 (1,'2026-01-30 08:00:00','悪い',1),
+(2,'2026-01-30 08:00:00','普通',2),
+(3,'2026-01-30 08:00:00','元気',3),
 (1,'2026-01-31 08:00:00','悪い',1),
 (1,'2026-02-01 08:00:00','悪い',1),
 (1,'2026-02-02 08:00:00','普通',2),
@@ -363,7 +417,8 @@ INSERT INTO t_today_moods (user_id, mood_date, mood, mood_point) VALUES
 (1,'2026-02-25 08:00:00','悪い',1),
 (1,'2026-02-26 08:00:00','元気',3),
 (1,'2026-02-27 08:00:00','普通',2),
-(1,'2026-02-28 08:00:00','普通',2);
+(1,'2026-02-28 08:00:00','普通',2),
+(1,'2026-03-01 08:00:00','元気',3);
 
 
 -- タスク作業ログ
@@ -380,39 +435,39 @@ INSERT INTO t_task_work_logs (task_id, work_date, work_min, start_time, end_time
 INSERT INTO t_task_suggestions
 (user_id, suggestion_date, mood, mood_point, coef_value, evaluation, evaluation_multiplier, target_task_level)
 VALUES
-(1,'2026-01-27','普通',2,1.10,4,1.20,3),
-(1,'2026-01-28','普通',2,0.95,3,1.00,2),
-(1,'2026-01-29','悪い',1,0.80,NULL,0.80,1),
+(1,'2026-01-27','普通',2,1.10,3,1.2,3),
+(1,'2026-01-28','普通',2,0.95,2,1.0,2),
+(1,'2026-01-29','悪い',1,0.80,NULL,1.0,1),
 
-(2,'2026-01-27','元気',3,1.05,4,1.10,3),
-(2,'2026-01-28','元気',3,1.20,5,1.20,4),
-(2,'2026-01-29','悪い',1,0.85,2,0.80,1),
+(2,'2026-01-27','元気',3,1.05,3,1.2,3),
+(2,'2026-01-28','元気',3,1.20,3,1.2,4),
+(2,'2026-01-29','悪い',1,0.85,1,0.80,1),
 
-(3,'2026-01-27','元気',3,1.15,4,1.20,3),
-(3,'2026-01-28','普通',2,1.00,3,1.00,2),
-(3,'2026-01-29','悪い',1,0.75,NULL,0.80,1),
+(3,'2026-01-27','元気',3,1.15,3,1.2,3),
+(3,'2026-01-28','普通',2,1.00,1,0.8,2),
+(3,'2026-01-29','悪い',1,0.75,NULL,1.0,1),
 
-(1,'2026-01-30','元気',3,1.10,4,1.20,3),
-(2,'2026-01-30','普通',2,1.00,3,1.00,2),
-(3,'2026-01-30','元気',3,1.20,5,1.20,4);
+(1,'2026-01-30','悪い',1,1.10,3,1.2,3),
+(2,'2026-01-30','普通',2,1.00,2,1.0,2),
+(3,'2026-01-30','元気',3,1.20,3,1.2,4);
 -- タスク提案詳細
 INSERT INTO t_task_suggestion_detail
 (task_suggestion_id, task_id, plan_min, remaining_min_at_suggest, days_left, deadline_multiplier, exec_task_level, priority_score, actual_work_min)
 VALUES
-(4, 1, 30, 25, 5, 1.10, 2.5, 60.0, NULL),
-(4, 2, 20, 40, 6, 1.05, 2.0, 48.0, NULL),
+(4, 1, 30, 25, 5, 1.2, 2.5, 60.0, NULL),
+(4, 2, 20, 40, 6, 1.2, 2.0, 48.0, NULL),
 
-(5, 3, 25, 50, 8, 1.00, 2.2, 55.0, NULL),
-(5, 4, 40, 120, 20, 0.95, 1.8, 45.0, NULL),
+(5, 3, 25, 50, 8, 1.1, 2.2, 55.0, NULL),
+(5, 4, 40, 120, 2, 1.3, 1.8, 45.0, NULL),
 
-(6, 5, 15, 30, 7, 1.10, 1.5, 35.0, NULL),
+(6, 5, 15, 30, 7, 1.2, 1.5, 35.0, NULL),
 
-(7, 6, 40, 80, 3, 1.20, 3.0, 70.0, NULL),
-(7, 7, 15, 30, 1, 1.30, 2.8, 65.0, NULL),
+(7, 6, 40, 80, 3, 1.2, 3.0, 70.0, NULL),
+(7, 7, 15, 30, 1, 1.3, 2.8, 65.0, NULL),
 
-(8, 8, 20, 20, 2, 1.10, 2.0, 50.0, NULL),
+(8, 8, 20, 20, 2, 1.3, 2.0, 50.0, NULL),
 
-(9, 9, 30, 45, 10, 0.90, 1.6, 40.0, NULL),
+(9, 9, 30, 45, 1, 1.3, 1.6, 40.0, NULL),
 
-(10, 10, 25, 60, 4, 1.15, 2.7, 68.0, NULL),
-(11, 11, 20, 30, 6, 1.05, 2.1, 52.0, NULL);
+(10, 10, 25, 60, 4, 1.2, 2.7, 68.0, NULL),
+(11, 11, 20, 30, 6, 1.2, 2.1, 52.0, NULL);
