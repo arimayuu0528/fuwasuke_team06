@@ -10,8 +10,6 @@
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mood_graph.css') }}">
-
 
 {# ------------------------------------------------------------
     CSS：グラフページ専用（見た目はCSSに寄せる）
@@ -78,7 +76,17 @@
     </div>
 
 
-<h2 class="h2">直近1週間の気分遷移</h2>
+    {# ------------------------------------------------------------
+        グラフ本体：canvasだけ置く（描画は mood_graph.js の役割）
+    ------------------------------------------------------------ #}
+    <div class="mood-chart-card">
+        <div class="mood-chart-wrapper">
+            <canvas
+                id="moodChart"
+                data-dates='{{ dates | tojson }}'
+                data-values='{{ values | tojson }}'
+            ></canvas>
+        </div>
 
         <p class="mood-chart-note">
             ※未入力の日はグラフが途切れます
