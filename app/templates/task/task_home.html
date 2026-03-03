@@ -61,7 +61,7 @@
         <button class="modal-close-x" id="closeModal">×</button>
        
         <div class="modal-header-row"id="evalHeader">
-            <img src="../../static/image/bouhuwasuke.png" width="45" class="chara-img">
+            <img id="randomImg" width="45" class="chara-img">
             <div class="modal-bubble">
                 <p>お疲れ様でした。<br>タスク案を評価して<br>欲しいな。</p>
             </div>
@@ -159,8 +159,13 @@
         const isToday = (today === viewingDate);
 
         const $evalBtn = $('#openEvalModal');
+        const selectedDateStr = displayDate.toISOString().split('T')[0];
+        const hasProposals = allTasks.some(t => 
+            !t.is_fixed && t.suggestion_date === selectedDateStr
+        );
 
-        if(isToday){
+        // ★ 両方の条件を満たすときだけ有効にする
+        if(isToday && hasProposals){
             $evalBtn.removeClass('disabled');
         } else {
             $evalBtn.addClass('disabled');
@@ -180,11 +185,19 @@
 
         renderTasksForDate(w);
     }
+    const images = [
+        "../../static/image/bouhuwasuke.png",
+        "../../static/image/huwasuke.png",
+        "../../static/image/okamahuwasuke.png"
+    ];
+
+    const img = document.getElementById("randomImg");
+    img.src = images[Math.floor(Math.random() * images.length)];
  
     function renderTasksForDate(currentWeek){
         const dateKey = displayDate.toISOString().split('T')[0];
         
-        // --- 【追加】localStorageから今日の一時保存データを読み込む ---
+        // localStorageからその日の保存データを読み込む
         const storageKey = "task_done_" + dateKey;
         const storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
         
@@ -197,41 +210,46 @@
         const isToday = (today === viewingDate);
 
         let displayTasks = [];
-        let seenIds = new Set();
-        all_tasks_loop:
+        
+        // 1. 表示すべきタスクの抽出
         allTasks.forEach(task => {
             if(task.is_fixed){
+                // 固定タスク：毎日、または該当する曜日の場合に表示
                 if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
                     displayTasks.push(task);
                 }
             } else {
-                // 日付が一致し、かつ、まだリストに追加されていないIDのみ許可
-                if (task.suggestion_date === dateKey && !seenIds.has(task.id)) {
+                // 提案タスク：日付が一致する場合に表示
+                // ※重複排除が必要な場合は ID + Date で判定するが、基本は日付一致でOK
+                if (task.suggestion_date === dateKey) {
                     displayTasks.push(task);
-                    seenIds.add(task.id); // IDを記録
                 }
             }
         });
 
+        // 2. HTMLの生成と表示
         displayTasks.forEach(task => {
-            // 基本はDBの完了状態(task.done)を使う
+            // 固定か提案かを区別するためのユニークなキー（ID重複対策）
+            const taskUniqueKey = (task.is_fixed ? "f_" : "s_") + task.id;
+            
+            // デフォルトはDBの値、今日であればlocalStorageの値を優先
             let isChecked = task.done;
-
-            // --- 【追加】もしlocalStorageに一時保存があれば、それを優先して表示に反映する ---
-            if (isToday && storedData[task.id] !== undefined) {
-                isChecked = storedData[task.id];
+            if (isToday && storedData[taskUniqueKey] !== undefined) {
+                isChecked = storedData[taskUniqueKey];
             }
 
             let checkHtml = "";
             if (isToday) {
-                // 今日の場合は操作できるチェックボックス
+                // 今日の場合は操作可能なチェックボックス
+                // data-storage-key を持たせてJSで判別できるようにする
                 checkHtml = `<input type="checkbox"
                     class="task-checkbox"
                     data-task-id="${task.id}"
                     data-is-fixed="${task.is_fixed}"
+                    data-storage-key="${taskUniqueKey}"
                     ${isChecked ? "checked" : ""}>`;
             } else {
-                // 過去・未来の場合は、表示のみ（isCheckedがTrueなら✔、Falseなら空）
+                // 過去・未来の場合は表示のみ
                 checkHtml = isChecked ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '';
             }
             
@@ -246,46 +264,74 @@
             $list.append(html);
         });
 
+        // 3. 進捗バーとメッセージの更新
         updateProgress(isToday);
         
+        // 4. イベントハンドラの再設定（今日の場合のみ）
         if (isToday) {
             attachCheckboxHandler();
         }
     }
+    // タイピングとアニメーションを管理するグローバル変数
     let typingTimer = null;
-    let currentMessage = ""; 
+    let mouthTimer = null;
+    let currentMessage = "";
     let isTyping = false;
-    function typeWriter($el, html, speed = 50) {
+    let mouthOpen = false;
 
-        // 余分な改行とインデント削除
+    /**
+    * テキストを一文字ずつ表示し、その間キャラクターをパクパクさせる
+    * @param {jQuery} $el - メッセージを表示する要素
+    * @param {string} html - 表示したいHTML文字列
+    * @param {number} speed - タイピング速度(ms)
+    */
+    function typeWriter($el, html, speed = 50) {
+        // 1. 前準備：余分な改行や空白を詰める
         let text = html
             .replace(/\n/g, '')
             .replace(/\s{2,}/g, '')
             .trim();
 
-        // 同じメッセージなら実行しない
+        // 同じメッセージが連続で呼ばれた場合は無視
         if (text === currentMessage) return;
         currentMessage = text;
 
-        // 前のタイピング停止
-        if (typingTimer) {
-            clearTimeout(typingTimer);
-            typingTimer = null;
-        }
-
-        $el.html("");
+        // 2. 実行中のタイマーをリセット（二重動作防止）
+        if (typingTimer) clearTimeout(typingTimer);
+        if (mouthTimer) clearInterval(mouthTimer);
+        
+        $el.html(""); // 表示エリアをクリア
         isTyping = true;
 
+        // 3. パクパクアニメーション（200ms間隔で画像を交互に切り替え）
+        mouthTimer = setInterval(function() {
+            // ヘッダー内のキャラクター画像（chara-imgクラス）を取得
+            const $img = $('.header-msg-row .chara-img');
+            
+            if (mouthOpen) {
+                // 口を閉じる
+                $img.attr('src', '../../static/image/bouhuwasuke.png');
+            } else {
+                // 口を開ける
+                $img.attr('src', '../../static/image/kutipaku.png');
+            }
+            mouthOpen = !mouthOpen;
+        }, 200);
+
+        // 4. タイピング実行
         let i = 0;
-
         function typing() {
-
             if (i >= text.length) {
+                // --- 終了処理 ---
                 isTyping = false;
+                clearInterval(mouthTimer); // アニメーション停止
+                mouthTimer = null;
+                // 最後に必ず「口を閉じた」画像に戻す
+                $('.header-msg-row .chara-img').attr('src', '../../static/image/bouhuwasuke.png');
                 return;
             }
 
-            // <br> を検出したらまとめて追加
+            // HTMLタグ（<br>など）の処理
             if (text.substring(i, i + 4) === "<br>") {
                 $el.append("<br>");
                 i += 4;
@@ -335,7 +381,7 @@
 
             } else if (percent >= 50) {
                 typeWriter($message, `
-                    半分以上達成です！👏<br>
+                    半分以上達成です！<br>
                     この調子でいきましょう。
                 `);
 
@@ -352,14 +398,19 @@
     function attachCheckboxHandler(){
         // チェックボックスの変更イベント
         $(document).off('change', '.task-checkbox').on('change', '.task-checkbox', function(){
-            const taskId = $(this).data('task-id');
-            const done = $(this).is(':checked');
-            const isFixed = $(this).data('is-fixed'); 
+            const $this = $(this);
+            const taskId = $this.data('task-id');
+            const storageKeySuffix = $this.data('storage-key'); // 修正：f_123 のようなキー
+            const done = $this.is(':checked');
+            const isFixed = $this.data('is-fixed'); 
+            
             const dateKey = displayDate.toISOString().split('T')[0];
             const storageKey = "task_done_" + dateKey;
+            
             let storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
-            storedData[taskId] = done;
-            localStorage.setItem(storageKey, JSON.stringify(storedData));
+            // 修正：単なるtaskIdではなく、識別用キーで保存
+            storedData[storageKeySuffix] = done; 
+            localStorage.setItem(storageKey, JSON.stringify(storedData))
 
             // --- 2. サーバーに送信 (fetch) ---
             fetch("{{ url_for('main.update_task_done') }}", {

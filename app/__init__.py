@@ -134,6 +134,24 @@ def create_app():
  
                 db2 = DatabaseManager()
                 db2.connect()
+
+                # ===== そのユーザーが登録しているタスク数を確認 =====
+                task_cnt = 0
+                row_tasks = db2.fetch_one(
+                    "SELECT COUNT(*) AS task_cnt FROM t_tasks WHERE user_id=%s;",
+                    (session["user_id"],),
+                )
+                if row_tasks is None:
+                    task_cnt = 0
+                elif isinstance(row_tasks, dict):
+                    task_cnt = int(row_tasks.get("task_cnt", 0) or 0)
+                else:
+                    task_cnt = int(row_tasks[0] or 0)
+
+                # ===== 今日の提案数（ヘッダ件数）を確認 =====
+                cnt = 0
+                sid = None
+
                 sql2 = """
                     SELECT COUNT(*) AS cnt, MAX(task_suggestion_id) AS sid
                     FROM t_task_suggestions
@@ -150,7 +168,14 @@ def create_app():
                 else:
                     cnt = int(row2[0]) if len(row2) > 0 and row2[0] is not None else 0
                     sid = row2[1] if len(row2) > 1 else None
- 
+                
+                # ★ここが要望の分岐：タスク未登録なら task_suggestion へ行かない
+                if task_cnt == 0:
+                    # 変なセッションが残っていたら念のため消す
+                    session.pop("selected_task_suggestion_id", None)
+                    session.pop("current_task_suggestion_id", None)
+                    return  # None を返して main.home を表示
+                
                 if cnt >= 2:
                     return redirect(url_for("task.task_suggestion"))
  
