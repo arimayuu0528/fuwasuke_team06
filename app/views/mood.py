@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, Response
 from datetime import datetime, timedelta
 from app.db import DatabaseManager
 
@@ -141,7 +141,7 @@ def _build_week_review(week: int, today, end_date, mood_points: list[int]) -> di
 # --------------------------------------------------------------------------
 # sessionにuser_idが入っていなければログイン画面に飛ばす関数
 # --------------------------------------------------------------------------
-def _require_login_user_id() -> int:
+def _require_login_user_id() -> int | Response:
     # sessionからuser_idを取得
     user_id = session.get("user_id")
     # user_idが無い場合:(セッション切れ/未ログイン)
@@ -174,14 +174,7 @@ def register():
 
     # POSTの場合:(登録処理)
     if request.method == "POST":
-        mood_value = request.form.get("mood")
-
-        mood_point_dict = {
-            "genki": 3,
-            "futu": 2,
-            "warui": 1
-        }
-        mood_point = mood_point_dict.get(mood_value, 3)
+        mood = request.form.get("mood")
 
         # mood(元気/普通/悪い)から点数(3/2/1)を取得
         mood_point = MOOD_POINT_MAP[mood]
