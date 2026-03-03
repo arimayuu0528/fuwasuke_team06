@@ -46,7 +46,7 @@ CREATE TABLE t_tasks (
     FOREIGN KEY (motivation_id) REFERENCES t_motivations(motivation_id)
 );
 
--- 固定予定マスター
+-- 固定予定マスタ
 CREATE TABLE t_fixed_schedule_masters (
     master_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE t_fixed_schedule_masters (
     tag VARCHAR(30) NOT NULL,
     memo VARCHAR(100) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_cancelled TINYINT(1) NOT NULL DEFAULT 0,
+    is_cancelled BOOLEAN NOT NULL DEFAULT FALSE, -- 0: ✕キャンセル(false), 1: ◎キャンセル(true)
     PRIMARY KEY (master_id),
     FOREIGN KEY (user_id) REFERENCES t_users(user_id)
 );
@@ -72,7 +72,7 @@ CREATE TABLE t_fixed_schedule_instances (
     schedule_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    is_cancelled BOOLEAN NOT NULL,
+    is_cancelled BOOLEAN NOT NULL DEFAULT FALSE, -- 0: ✕キャンセル(false), 1: ◎キャンセル(true),
     PRIMARY KEY (instance_id),
     FOREIGN KEY (master_id) REFERENCES t_fixed_schedule_masters(master_id)
 );
