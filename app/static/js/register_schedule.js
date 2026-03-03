@@ -49,6 +49,7 @@ function initSchedPage() {
   schedSetupFormSubmission();
   schedCalculateDuration();
   schedSetupCharacterCounter();
+  schedSetupTitleMemoLimit();
   schedSetupAutoSave();
 }
 
@@ -638,4 +639,52 @@ function schedSetupCharacterCounter() {
     textarea.addEventListener("input", updateCounter);
     updateCounter();
   }
+}
+// ==============================
+// 追加：タイトル50 / メモ100
+// 既存機能を変えずに「上から被せる」だけ
+// ==============================
+function schedSetupTitleMemoLimit() {
+  // 対象
+  const targets = [
+    { selector: 'input[name="title"]', max: 50 },
+    { selector: 'textarea[name="memo"]', max: 100 },
+    { selector: 'input[name="location"]', max: 50 },
+  ];
+
+  targets.forEach(({ selector, max }) => {
+    const field = document.querySelector(selector);
+    if (!field) return;
+
+    // 既存のカウンターがある場合：それを使う（無ければ作る）
+    let counter = field.parentElement.querySelector(".sched-character-counter");
+    if (!counter) {
+      counter = document.createElement("div");
+      counter.className = "sched-character-counter";
+      counter.style.cssText =
+        "text-align:right; font-size:12px; color:#999; margin-top:4px;";
+      field.parentElement.appendChild(counter);
+    }
+
+    // 更新関数
+    const update = () => {
+      // 超えたらカット（JSだけで制御）
+      if (field.value.length > max) {
+        field.value = field.value.slice(0, max);
+        if (typeof schedShowToast === "function") {
+          schedShowToast(`${max}文字までです`, "warning");
+        }
+      }
+
+      const len = field.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.style.color = len > max * 0.9 ? "#ff6b6b" : "#999";
+    };
+
+    // 入力のたびにチェック
+    field.addEventListener("input", update);
+
+    // 初期描画も合わせる
+    update();
+  });
 }
