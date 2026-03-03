@@ -647,9 +647,9 @@ function schedSetupCharacterCounter() {
 function schedSetupTitleMemoLimit() {
   // 対象
   const targets = [
-    { selector: 'input[name="title"]', max: 50 },
-    { selector: 'textarea[name="memo"]', max: 100 },
-    { selector: 'input[name="location"]', max: 50 },
+    { selector: 'input[name="title"]', max: 30 },
+    { selector: 'textarea[name="memo"]', max: 50 },
+    { selector: 'input[name="location"]', max: 30 },
   ];
 
   targets.forEach(({ selector, max }) => {
