@@ -7,12 +7,14 @@
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mood_graph.css') }}">
+
 
 <!-- JS読み込み -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<h2>直近1週間の気分遷移</h2>
+<h2 class="h2">直近1週間の気分遷移</h2>
 
 <div class="mood-chart-wrapper">
     <canvas id="moodChart"></canvas>

@@ -1,11 +1,7 @@
-.mood-chart-wrapper {
-  width: 95%;
-  height: 100px;
-  margin: 20px auto;
-  position: relative;
+h2{
+  padding-top: 20px !important;
+  color: #FFC547 !important;
 }
-
-#moodChart {
-  width: 100% !important;
-  height: 100% !important;
+body {
+  background: pink !important;
 }

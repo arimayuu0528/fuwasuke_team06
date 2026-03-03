@@ -46,7 +46,7 @@ document.addEventListener("turbo:load", function () {
             scales: {
                 y: {
                     min: 0.99,
-                    max: 3.2,
+                    max: 3.5,
                     ticks: { stepSize: 1, display: false },
                     grid: { display: false, drawBorder: false } // 縦軸線と目盛り線非表示
                 },

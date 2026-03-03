@@ -268,8 +268,7 @@ def get_db_connection():
         password="",
         database="huwasuke_db"
     )
-   
- 
+
 @main_bp.route("/mood_graph")
 def mood_graph():
     user_id = session.get("user_id")

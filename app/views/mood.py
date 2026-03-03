@@ -31,8 +31,8 @@ def register():
         mood_value = request.form.get("mood")
 
         mood_point_dict = {
-            "genki": 5,
-            "futu": 3,
+            "genki": 3,
+            "futu": 2,
             "warui": 1
         }
         mood_point = mood_point_dict.get(mood_value, 3)
