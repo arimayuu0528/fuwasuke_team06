@@ -3,7 +3,41 @@ function initSchedPage() {
   schedClearDraft();
 
   // 2. フォーム初期化
-  schedInitializeForm();
+  function schedInitializeForm() {
+    schedUpdateDayOfWeekInput();
+
+    // ↓ 修正：タグのセクションだけを対象にする
+    const tagSection = document
+      .getElementById("schedTag")
+      .closest(".sched-form-section");
+    const activeTag = tagSection.querySelector(
+      ".sched-category-btn.sched-category-active",
+    );
+    if (activeTag) {
+      document.getElementById("schedTag").value = activeTag.textContent.trim();
+    }
+
+    // 繰り返しタイプも同様に修正
+    const repeatSection = document
+      .getElementById("schedRepeatType")
+      .closest(".sched-form-section");
+    const activeRepeat = repeatSection.querySelector(
+      ".sched-category-btn.sched-category-active",
+    );
+    if (activeRepeat) {
+      document.getElementById("schedRepeatType").value =
+        activeRepeat.textContent.trim();
+    }
+
+    const taskNameInput = document.querySelector(
+      '.sched-form-input[name="title"]',
+    );
+    if (taskNameInput && !taskNameInput.value) {
+      setTimeout(() => {
+        taskNameInput.focus();
+      }, 300);
+    }
+  }
 
   // 3. 各種セットアップ
   schedSetupFormValidation();

@@ -2,34 +2,35 @@
 %}
 
 <div class="mood-container">
-  <h2 class="mood-title">今日の気分はどうですか？</h2>
-  <p class="mood-subtitle">ふわすけに今の気持ちを教えてね</p>
+    <h2 class="mood-title">今日の気分はどうですか？</h2>
+    <p class="mood-subtitle">ふわすけに今の気持ちを教えてね</p>
 
-  <form class="mood-form" method="post" action="{{ url_for('mood.register') }}">
-      <input type="radio" id="genki" name="mood" value="genki" checked>
-      <label for="genki" class="mood-card">
-      <div class="icon-circle">
-          <img src="../../static/image/gennki.png" alt="元気"> </div>
-      <span class="mood-text">元気</span>
-      </label>
+    <form class="mood-form" method="post" action="{{ url_for('mood.register') }}">
+        <input type="radio" id="genki" name="mood" value="元気" checked>
+        <label for="genki" class="mood-card">
+            <div class="icon-circle">
+                <img src="../../static/image/gennki.png" alt="元気">
+            </div>
+                <span class="mood-text">元気</span>
+        </label>
+        
+        <input type="radio" id="futu" name="mood" value="普通">
+        <label for="futu" class="mood-card">
+            <div class="icon-circle">
+                <img src="../../static/image/futu.png" alt="普通">
+            </div>
+                <span class="mood-text">普通</span>
+        </label>
 
-      <input type="radio" id="futu" name="mood" value="futu">
-      <label for="futu" class="mood-card">
-      <div class="icon-circle">
-          <img src="../../static/image/futu.png" alt="普通">
-      </div>
-      <span class="mood-text">普通</span>
-      </label>
+        <input type="radio" id="warui" name="mood" value="悪い">
+        <label for="warui" class="mood-card">
+            <div class="icon-circle">
+                <img src="../../static/image/warui.png" alt="悪い">
+            </div>
+            <span class="mood-text">悪い</span>
+        </label>
 
-      <input type="radio" id="warui" name="mood" value="warui">
-      <label for="warui" class="mood-card">
-      <div class="icon-circle">
-          <img src="../../static/image/warui.png" alt="悪い">
-      </div>
-      <span class="mood-text">悪い</span>
-      </label>
-
-      <button type="submit" class="decide-button">決定</button>
-  </form>
+        <button type="submit" class="decide-button">決定</button>
+    </form>
 </div>
 {% endblock %}

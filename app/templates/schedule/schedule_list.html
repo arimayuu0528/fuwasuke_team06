@@ -1,11 +1,15 @@
-{% extends "base2.html" %} {% block title %}固定タスク一覧{% endblock %} {%
+{% extends "base3.html" %} {% block title %}固定タスク一覧{% endblock %} {%
 block content %}
 
 <div class="sl-page">
-  <!-- Header -->
   <div class="sl-header">
     <div class="sl-header-top">
-      <button class="sl-back-btn" onclick="history.back()">&#8249;</button>
+      <a href="/main/home" class="sl-back-btn">
+        <img
+          src="{{ url_for('static', filename='image/back.png') }}"
+          alt="戻る"
+        />
+      </a>
       <h1>固定タスク一覧</h1>
     </div>
     <div class="sl-tab-container">
@@ -17,17 +21,103 @@ block content %}
       </button>
       <button class="sl-tab active">固定タスク</button>
     </div>
+
+    <!-- フィルターチップ行 -->
+    <div class="sl-filter-chips">
+      <!-- 繰り返し -->
+      <div class="sl-chip-wrap" data-group="repeat">
+        <button class="sl-chip" data-group="repeat">
+          <span class="sl-chip-label">繰り返し</span>
+          <span class="sl-chip-arrow">▾</span>
+        </button>
+        <div class="sl-chip-dropdown">
+          <button class="sl-chip-opt" data-group="repeat" data-value="毎日">
+            毎日
+          </button>
+          <button class="sl-chip-opt" data-group="repeat" data-value="毎週">
+            毎週
+          </button>
+        </div>
+      </div>
+
+      <!-- 時間帯 -->
+      <div class="sl-chip-wrap" data-group="time">
+        <button class="sl-chip" data-group="time">
+          <span class="sl-chip-label">時間帯</span>
+          <span class="sl-chip-arrow">▾</span>
+        </button>
+        <div class="sl-chip-dropdown">
+          <button class="sl-chip-opt" data-group="time" data-value="am">
+            午前
+          </button>
+          <button class="sl-chip-opt" data-group="time" data-value="pm">
+            午後
+          </button>
+        </div>
+      </div>
+
+      <!-- タグ -->
+      <div class="sl-chip-wrap" data-group="tag">
+        <button class="sl-chip" data-group="tag">
+          <span class="sl-chip-label">タグ</span>
+          <span class="sl-chip-arrow">▾</span>
+        </button>
+        <div class="sl-chip-dropdown">
+          <button class="sl-chip-opt" data-group="tag" data-value="仕事">
+            仕事
+          </button>
+          <button class="sl-chip-opt" data-group="tag" data-value="休憩">
+            休憩
+          </button>
+          <button class="sl-chip-opt" data-group="tag" data-value="健康">
+            健康
+          </button>
+          <button class="sl-chip-opt" data-group="tag" data-value="趣味">
+            趣味
+          </button>
+        </div>
+      </div>
+
+      <!-- 曜日 -->
+      <div class="sl-chip-wrap" data-group="day">
+        <button class="sl-chip" data-group="day">
+          <span class="sl-chip-label">曜日</span>
+          <span class="sl-chip-arrow">▾</span>
+        </button>
+        <div class="sl-chip-dropdown sl-chip-dropdown--days">
+          {% for day in ['月', '火', '水', '木', '金', '土', '日'] %}
+          <button
+            class="sl-chip-opt sl-chip-opt--day"
+            data-group="day"
+            data-value="{{ day }}"
+          >
+            {{ day }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- リセット -->
+      <button class="sl-chip-reset" id="slFilterReset">リセット</button>
+    </div>
+
+    <!-- アクティブフィルター表示 -->
+    <div class="sl-active-filters" id="slActiveFilters"></div>
   </div>
 
-  <!-- Task List -->
   <div class="sl-task-list">
     {% for task in tasks %}
-    <div class="sl-task-card">
+    <div
+      class="sl-task-card"
+      data-repeat="{{ task.repeat_type }}"
+      data-start="{{ task.start_time }}"
+      data-days="{{ task.day_of_week }}"
+      data-tag="{{ task.tag }}"
+    >
       <div class="sl-task-header">
         <div class="sl-task-title">{{ task.title }}</div>
         <button class="sl-delete-btn" data-task-id="{{ task.id }}">🗑</button>
       </div>
-
       <div class="sl-task-meta">
         <span class="sl-task-category">{{ task.tag }}</span>
         <span class="sl-task-time"
@@ -35,17 +125,14 @@ block content %}
         >
         <span class="sl-task-duration">{{ task.duration_min }}分</span>
       </div>
-
       {% if task.location %}
       <div class="sl-task-location">
         <span>📍</span><span>{{ task.location }}</span>
       </div>
       {% endif %}
-
       <div class="sl-task-repeat-info">
         <span class="sl-repeat-badge">{{ task.repeat_type }}</span>
       </div>
-
       {% if task.memo %}
       <div class="sl-comment-section">
         <button
@@ -57,7 +144,6 @@ block content %}
         <div class="sl-comment-content hidden">{{ task.memo }}</div>
       </div>
       {% endif %}
-
       <div class="sl-weekday-pills">
         {% for day in ['月', '火', '水', '木', '金', '土', '日'] %}
         <div
@@ -69,12 +155,12 @@ block content %}
       </div>
     </div>
     {% endfor %}
+    <p class="sl-filter-empty" id="slFilterEmpty">該当するタスクがありません</p>
   </div>
 
   {% if tasks|length == 0 %}
   <p class="sl-empty-message">タスクがありません</p>
   {% endif %}
-
   <p class="sl-task-count">件数：{{ tasks|length }}</p>
 
   <button
@@ -84,9 +170,7 @@ block content %}
     新しい固定タスクを作成
   </button>
 </div>
-<!-- /.sl-page -->
 
-<!-- Delete Modal -->
 <div id="slDeleteModal" class="sl-delete-modal">
   <div class="sl-modal-content">
     <div class="sl-modal-icon">🗑️</div>

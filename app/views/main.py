@@ -29,7 +29,7 @@ def home():
     try:
         cursor = db.cursor
  
-        # --- 1. 固定予定マスターを全件取得して rec に追加 ---
+        # --- 1. 固定予定マスターを全件取得 (変更なし) ---
         sql_fixed_master = """
             SELECT master_id, title, start_time, end_time, repeat_type, day_of_week
             FROM t_fixed_schedule_masters
@@ -40,62 +40,59 @@ def home():
         fixed_masters_raw = cursor.fetchall()
  
         for item in fixed_masters_raw:
-            # 時刻のフォーマット
             s_time = item["start_time"].strftime("%H:%M") if hasattr(item["start_time"], "strftime") else str(item["start_time"])[:5]
             e_time = item["end_time"].strftime("%H:%M") if hasattr(item["end_time"], "strftime") else str(item["end_time"])[:5]
-           
-            # 重要：JavaScriptで判別できるように全ての情報を一つの辞書にまとめる
             rec.append({
                 "id": item["master_id"],
                 "name": item["title"],
                 "time": f"{s_time} - {e_time}",
-                "done": False, # 固定予定の初期値
-                "is_fixed": True, # 固定予定フラグ
+                "done": False, 
+                "is_fixed": True, 
                 "repeat_type": item["repeat_type"],
-                "day_of_week": item["day_of_week"] # "月火水" など
+                "day_of_week": item["day_of_week"]
             })
  
-        # --- 2. 今日の提案タスクを取得して rec に追加 ---
-        sql_suggestion = """
-            SELECT task_suggestion_id
-            FROM t_task_suggestions
-            WHERE user_id = %s AND suggestion_date = %s
-            LIMIT 1
+        sql_all_details = """
+            SELECT 
+                s.suggestion_date, 
+                t.task_id, 
+                t.task_name, 
+                d.plan_min, 
+                t.is_completed  -- actual_work_minではなく、t_tasksのフラグを見る
+            FROM t_task_suggestion_detail d
+            JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
+            JOIN t_tasks t ON d.task_id = t.task_id
+            WHERE s.user_id = %s
+            GROUP BY s.suggestion_date, t.task_id  -- 日付とタスクIDでグルーピングして重複排除
+            ORDER BY s.suggestion_date DESC, d.plan_min ASC
         """
-        cursor.execute(sql_suggestion, (current_user_id, today))
-        suggestion = cursor.fetchone()
-        print(suggestion)
-        print("---")
-        if suggestion:
-            sql_details = """
-                SELECT t.task_id, t.task_name, d.plan_min, d.actual_work_min
-                FROM t_task_suggestion_detail d
-                JOIN t_tasks t ON d.task_id = t.task_id
-                WHERE d.task_suggestion_id = %s
-                ORDER BY plan_min ASC
-            """
-            cursor.execute(sql_details, (suggestion["task_suggestion_id"],))
-            details = cursor.fetchall()
-            print(details)
-            for row in details:
-                is_done = bool(row.get("actual_work_min") and row["actual_work_min"] > 0)
-                rec.append({
-                    "id": row["task_id"],
-                    "name": row["task_name"],
-                    "time": f"{row['plan_min']}分",
-                    "done": is_done,
-                    "is_fixed": False,
-                    "repeat_type": None,
-                    "day_of_week": None
-                })
+        cursor.execute(sql_all_details, (current_user_id,))
+        all_details = cursor.fetchall()
+
+        for row in all_details:
+            # done の判定を t_tasks.is_completed (0 or 1) に合わせる
+            is_done = bool(row["is_completed"])
+            
+            rec.append({
+                "id": row["task_id"],
+                "name": row["task_name"],
+                "time": f"{row['plan_min']}分",
+                "done": is_done,
+                "is_fixed": False,
+                "suggestion_date": str(row["suggestion_date"]), 
+                "repeat_type": None,
+                "day_of_week": None
+            })
  
-        # 達成度計算（提案タスクのみで計算する場合）
-        proposal_tasks = [t for t in rec if not t["is_fixed"]]
-        total_tasks = len(proposal_tasks)
+        # 達成度計算（ここは「今日」の分だけで計算するようにフィルタリング）
+        today_str = str(today)
+        proposal_tasks_today = [t for t in rec if not t["is_fixed"] and t.get("suggestion_date") == today_str]
+        
+        total_tasks = len(proposal_tasks_today)
         percent = 0
         remain_count = 0
         if total_tasks > 0:
-            completed_tasks = len([t for t in proposal_tasks if t["done"]])
+            completed_tasks = len([t for t in proposal_tasks_today if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
             remain_count = total_tasks - completed_tasks
  
@@ -103,10 +100,10 @@ def home():
         print(f"Error: {e}")
     finally:
         db.disconnect()
-    print(rec)
+        
     return render_template(
         "task/task_home.html",
-        rec=rec, # これで固定と提案の両方がJSに渡る
+        rec=rec, 
         percent=percent,
         remain_count=remain_count
     )
@@ -115,41 +112,96 @@ def update_task_done():
     try:
         data = request.get_json()
         task_id = data.get('task_id')
-        is_fixed = data.get('is_fixed') # JSから送られる true/false
-        done = data.get('done')         # チェックが入れば True, 外れれば False
-        target_date = data.get('date')  # '2026-01-26' などの文字列
- 
+        
+        # JSからくる値を確実にPythonのboolとして扱うための修正
+        is_fixed_val = data.get('is_fixed')
+        is_fixed = is_fixed_val in [True, "true", "True", 1] # 文字列でもTrueでもOKにする
+        
+        done = data.get('done')
+        target_date = data.get('date')
+        
         db = DatabaseManager()
         db.connect()
         cursor = db.cursor
- 
+
         if is_fixed:
-            # 【固定予定の場合】
-            # 固定予定の完了を管理するテーブルがあればここにUpdate文を書きます。
-            # 今回は一旦、何もせず成功を返します。
-            pass
+            user_id = session.get("user_id")
+            if done:
+                sql = """
+                    INSERT INTO t_fixed_schedule_logs (user_id, master_id, target_date, done)
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE done = VALUES(done)
+                """
+                # doneを確実に1(真)か0(偽)にして送る
+                cursor.execute(sql, (user_id, task_id, target_date, 1 if done else 0))
+            else:
+                sql = "DELETE FROM t_fixed_schedule_logs WHERE user_id=%s AND master_id=%s AND target_date=%s"
+                cursor.execute(sql, (user_id, task_id, target_date))
         else:
-            # 【通常タスクの場合】
-            # 完了(done=True)なら実績(actual_work_min)に計画時間をコピー、
-            # 未完了(done=False)なら0に戻すという処理例です。
-            sql = """
-                UPDATE t_task_suggestion_detail d
+            # (通常タスクの処理はそのまま)
+            if done:
+                sql = """
+                INSERT INTO t_task_suggestion_detail (task_suggestion_id, task_id, actual_work_min)
+                SELECT s.task_suggestion_id, t.task_id, t.duration_min
+                FROM t_tasks t
+                JOIN t_task_suggestions s ON s.user_id = t.user_id AND s.suggestion_date = %s
+                WHERE t.task_id = %s
+                ON DUPLICATE KEY UPDATE actual_work_min = VALUES(actual_work_min)
+                """
+                cursor.execute(sql, (target_date, task_id))
+                sql_task = "UPDATE t_tasks SET is_completed = TRUE WHERE task_id = %s"
+                cursor.execute(sql_task, (task_id,))
+            else:
+                sql = """
+                DELETE d FROM t_task_suggestion_detail d
                 JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
-                SET d.actual_work_min = (CASE WHEN %s THEN d.plan_min ELSE 0 END)
-                WHERE d.task_id = %s AND s.suggestion_date = %s
-            """
-            cursor.execute(sql, (done, task_id, target_date))
-       
+                WHERE d.task_id=%s AND s.suggestion_date=%s
+                """
+                cursor.execute(sql, (task_id, target_date))
+                sql_task = "UPDATE t_tasks SET is_completed = FALSE WHERE task_id = %s"
+                cursor.execute(sql_task, (task_id,))
         db.connection.commit()
         db.disconnect()
- 
+
         return jsonify({"status": "success"})
- 
+
     except Exception as e:
         print(f"DB Update Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
- 
- 
+@main_bp.route('/save_evaluation', methods=['POST'])
+def save_evaluation():
+    try:
+        data = request.get_json()
+        user_id = session.get("user_id")
+        target_date = data.get('date')
+        mood = data.get('mood')  # 気分（必要ならJSから送る、今回は評価と合わせてもOK）
+        evaluation = data.get('evaluation')
+        
+        # 達成したタスクIDをリストからカンマ区切りの文字列に変換
+        completed_task_ids = ",".join(map(str, data.get('completed_task_ids', [])))
+
+        db = DatabaseManager()
+        db.connect()
+        cursor = db.cursor
+
+        sql = """
+            INSERT INTO t_task_evaluation_logs 
+                (user_id, target_date, mood, evaluation_score, completed_task_ids)
+            VALUES (%s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE 
+                mood = VALUES(mood),
+                evaluation_score = VALUES(evaluation_score),
+                completed_task_ids = VALUES(completed_task_ids)
+        """
+        cursor.execute(sql, (user_id, target_date, mood, evaluation, completed_task_ids))
+        
+        db.connection.commit()
+        db.disconnect()
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        print(f"Evaluation Save Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
  
  
 # -----------------------------------------------------
