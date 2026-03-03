@@ -63,7 +63,7 @@ def _build_week_review(week: int, today, end_date, mood_points: list[int]) -> di
             "ready": True,              # 週次レポートを表示
             "status": "記録なし",        # 気分記録なし
             "message": "この週は気分の記録がありませんでした。", # ユーザーに説明するための文章
-            "reasons": ["1日だけでも記録できると、週の傾向として振り返りが作れます。"], # ユーザーに説明するための文章
+            "reasons": ["1日だけでも記録できると、　　　　　　　週の傾向として振り返りが作れます。"], # ユーザーに説明するための文章
             "character_img": IMG_FUTU,  # 記録なし：「普通」キャラ画像
             "character_alt": "記録なし", # キャラ画像の代替テキスト(alt)
         }
