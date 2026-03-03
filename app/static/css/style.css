@@ -2639,7 +2639,13 @@ input[type=radio]:checked + .mood-card {
   padding: 12px 0;
   min-width: 100px;
   /* transitionなどは既存のbutton設定が引き継がれます */
+}/*# sourceMappingURL=style.css.map */
+
+.h2{
+  padding-top: 20px !important;
+  color: #FFC547
 }
+
 
 /* ---------------------------------------------
     画面全体（このページだけ）:

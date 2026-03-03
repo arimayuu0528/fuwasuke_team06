@@ -153,6 +153,18 @@ function safeJsonParse(text, fallback) {
                 borderWidth: 0,
             }),
             },
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    min: 0.99,
+                    max: 3.5,
+                    ticks: { stepSize: 1, display: false },
+                    grid: { display: false, drawBorder: false } // 縦軸線と目盛り線非表示
+                },
+                x: {
+                    grid: { display: false, drawBorder: false } // 横軸線非表示
+                }
+            }
         },
     },
 

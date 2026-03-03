@@ -174,15 +174,14 @@ def register():
 
     # POSTの場合:(登録処理)
     if request.method == "POST":
-        # フォーム値：元気/普通/悪いのどれかである前提
-        mood = request.form.get("mood", "").strip()
-        # バリデーション
-        if mood not in ALLOWED_MOODS:  # 元気/普通/悪い でない場合:
-            db.disconnect()  # DB接続を閉じる
-            return render_template(
-                "mood/register_mood.html",
-                error="気分の値が不正です(正:元気/普通/悪い)"
-            )
+        mood_value = request.form.get("mood")
+
+        mood_point_dict = {
+            "genki": 3,
+            "futu": 2,
+            "warui": 1
+        }
+        mood_point = mood_point_dict.get(mood_value, 3)
 
         # mood(元気/普通/悪い)から点数(3/2/1)を取得
         mood_point = MOOD_POINT_MAP[mood]
