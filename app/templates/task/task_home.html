@@ -132,7 +132,21 @@
  
 .eval-choice.selected { background-color: #f09540 !important; color: #fff !important; font-weight: bold !important; border-color: #f09540 !important; }
 .eval-choice.disabled { background-color: #ddd !important; color: #888 !important; border-color: #ccc !important; cursor: not-allowed !important; font-weight: normal !important; }
- 
+ /* 締切ラベル（赤系） */
+.overdue-label { 
+    background: #ffebee; 
+    color: #e53935; 
+    padding: 2px 6px; 
+    border-radius: 10px; 
+    font-size: 10px; 
+    margin-left: 6px; 
+    border: 1px solid #ffcdd2;
+}
+
+/* 締切タスクカードの枠線（任意） */
+.overdue-card {
+    border-left: 4px solid #e53935 !important;
+}
 /* 評価ボタンの状態 */
 .eval-submit-btn { background-color: #ddd !important; color: #fff; border: none; width: 140px; padding: 12px; border-radius: 25px; font-weight: bold; cursor: not-allowed; display: block; margin: 0 auto; }
 .eval-submit-btn.enabled { background-color: #f09540 !important; cursor: pointer; }
@@ -204,9 +218,7 @@
     img.src = images[Math.floor(Math.random() * images.length)];
  
     function renderTasksForDate(currentWeek){
-        const dateKey = getLocalDateKey(displayDate)
-        
-        // localStorageからその日の保存データを読み込む
+        const dateKey = getLocalDateKey(displayDate);
         const storageKey = "task_done_" + dateKey;
         const storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
         
@@ -214,72 +226,79 @@
         $list.empty();
 
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const viewingDate = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate()).getTime();
-        const isToday = (today === viewingDate);
+        const todayObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const viewingDateObj = new Date(displayDate.getFullYear(), displayDate.getMonth(), displayDate.getDate());
+        const isToday = (todayObj.getTime() === viewingDateObj.getTime());
 
-        let displayTasks = [];
-        
-        // 1. 表示すべきタスクの抽出
+        let overdueTasks = [];  // 締切（今日より前で未完了）
+        let fixedTasks = [];    // 固定タスク
+        let normalTasks = [];   // 通常の提案タスク（今日の日付）
+
         allTasks.forEach(task => {
             if(task.is_fixed){
-                // 固定タスク：毎日、または該当する曜日の場合に表示
+                // 固定タスク：該当曜日の場合に表示
                 if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
-                    displayTasks.push(task);
+                    fixedTasks.push(task);
                 }
             } else {
-                // 提案タスク：日付が一致する場合に表示
-                // ※重複排除が必要な場合は ID + Date で判定するが、基本は日付一致でOK
+                // 提案タスクの判定
+                const taskDate = new Date(task.suggestion_date);
+                
                 if (task.suggestion_date === dateKey) {
-                    displayTasks.push(task);
+                    // 選択中の日付に一致
+                    normalTasks.push(task);
+                } else if (isToday && taskDate < todayObj && !task.done) {
+                    // 【追加】今日を表示中 かつ 過去の日付 かつ 未完了
+                    overdueTasks.push(task);
                 }
             }
         });
 
-        // 2. HTMLの生成と表示
+        // 3. 表示順に結合 (1.締切 2.固定 3.通常)
+        const displayTasks = [...overdueTasks, ...fixedTasks, ...normalTasks];
+
         displayTasks.forEach(task => {
-            // 固定か提案かを区別するためのユニークなキー（ID重複対策）
             const taskUniqueKey = (task.is_fixed ? "f_" : "s_") + task.id;
-            
-            // デフォルトはDBの値、今日であればlocalStorageの値を優先
             let isChecked = task.done;
             if (isToday && storedData[taskUniqueKey] !== undefined) {
                 isChecked = storedData[taskUniqueKey];
             }
 
+            // 締切タスク（過去の未完了）かどうかの判定
+            const isOverdue = !task.is_fixed && task.suggestion_date !== dateKey;
+
             let checkHtml = "";
             if (isToday) {
-                // 今日の場合は操作可能なチェックボックス
-                // data-storage-key を持たせてJSで判別できるようにする
-                checkHtml = `<input type="checkbox"
-                    class="task-checkbox"
-                    data-task-id="${task.id}"
-                    data-is-fixed="${task.is_fixed}"
-                    data-storage-key="${taskUniqueKey}"
-                    ${isChecked ? "checked" : ""}>`;
+                checkHtml = `<input type="checkbox" class="task-checkbox" 
+                            data-task-id="${task.id}" data-is-fixed="${task.is_fixed}" 
+                            data-storage-key="${taskUniqueKey}" ${isChecked ? "checked" : ""}>`;
             } else {
-                // 過去・未来の場合は表示のみ
-                checkHtml = isChecked ? '<span class="done-icon" style="color:#f19710;">✔</span>' : '';
+                checkHtml = isChecked ? '<span class="done-icon">✔</span>' : '';
             }
             
+            // ラベルの作成
+            let labelHtml = "";
+            if (task.is_fixed) {
+                labelHtml = '<span class="fixed-label">固定</span>';
+            } else if (isOverdue) {
+                labelHtml = '<span class="overdue-label">締切</span>';
+            }
+
             const html = `
-            <div class="task-card">
+            <div class="task-card ${isOverdue ? 'overdue-card' : ''}">
                 <div class="task-check">${checkHtml}</div>
                 <div class="task-body">
-                    <p class="task-title">${task.name} ${task.is_fixed ? '<span class="fixed-label">固定</span>' : ''}</p>
-                    <p class="task-time">${task.time}</p>
+                    <p class="task-title" style="${isOverdue ? 'color: #e53935;' : ''}">
+                        ${task.name} ${labelHtml}
+                    </p>
+                    <p class="task-time">${isOverdue ? task.suggestion_date : task.time}</p>
                 </div>
             </div>`;
             $list.append(html);
         });
 
-        // 3. 進捗バーとメッセージの更新
         updateProgress(isToday);
-        
-        // 4. イベントハンドラの再設定（今日の場合のみ）
-        if (isToday) {
-            attachCheckboxHandler();
-        }
+        if (isToday) attachCheckboxHandler();
     }
     // タイピングとアニメーションを管理するグローバル変数
     let typingTimer = null;
