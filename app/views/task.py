@@ -181,23 +181,46 @@ def task_list():
 @task_bp.route("/delete/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
 
-    user_id = session.get("user_id")  # ← ここを変更
+    user_id = session.get("user_id")
     if not user_id:
-        return redirect(url_for('auth.login'))  # 未ログインならログインページへ
+        return redirect(url_for('auth.login'))
 
     db = DatabaseManager()
     db.connect()
 
-    sql = """
-    DELETE FROM t_tasks
-    WHERE task_id = %s AND user_id = %s
-    """
+    try:
+        # ① 子テーブル：提案詳細を先に削除
+        sql_child1 = """
+        DELETE FROM t_task_suggestion_detail
+        WHERE task_id = %s
+        """
+        db.cursor.execute(sql_child1, (task_id,))
 
-    db.cursor.execute(sql, (task_id, user_id))
-    db.connection.commit()
-    db.disconnect()
+        # ② 子テーブル：作業ログを先に削除
+        sql_child2 = """
+        DELETE FROM t_task_work_logs
+        WHERE task_id = %s
+        """
+        db.cursor.execute(sql_child2, (task_id,))
+
+        # ③ 親テーブル：タスクを削除
+        sql_parent = """
+        DELETE FROM t_tasks
+        WHERE task_id = %s AND user_id = %s
+        """
+        db.cursor.execute(sql_parent, (task_id, user_id))
+
+        db.connection.commit()
+
+    except Exception as e:
+        db.connection.rollback()
+        print("削除エラー:", e)
+
+    finally:
+        db.disconnect()
 
     return redirect(url_for('task.task_list'))
+
 
 # -----------------------------------------------------
 # タスク作成：担当者名 向山

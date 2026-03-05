@@ -517,8 +517,8 @@ content %}
         style="width: 44px; height: 44px; object-fit: contain"
       />
     </div>
-    <div class="tl-mascot-text">
-      今日までのタスクが{{ tasks|length }}つあるよ！<br />一緒に頑張ろう！
+    <div class="tl-mascot-text" id="tlMascotText">
+      合計 {{ tasks|length }} 件タスクあるよ！<br />一緒に頑張ろう！
     </div>
   </div>
 
@@ -674,6 +674,8 @@ content %}
       document.querySelectorAll(".tl-filter-btn").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.filter === filter);
       });
+
+      updateMascotText(filter);
     }
 
     document.querySelectorAll(".tl-filter-btn").forEach((btn) => {
@@ -739,5 +741,42 @@ content %}
     document.addEventListener("DOMContentLoaded", tlInit);
     document.addEventListener("turbo:load", tlInit);
   })();
+
+  function updateMascotText(filter) {
+    const cards = document.querySelectorAll(".tl-task-card");
+
+    let total = 0;
+    let todayCount = 0; // 今日中（期限切れ除外）
+    let otherCount = 0; // 今日中じゃない（期限切れ除外）
+    let expiredCount = 0; // 期限切れ
+
+    cards.forEach((card) => {
+      total++;
+
+      const isToday = card.dataset.today === "true";
+      const isExpired = card.classList.contains("expired-card");
+
+      if (isExpired) {
+        expiredCount++;
+      } else if (isToday) {
+        todayCount++;
+      } else {
+        otherCount++;
+      }
+    });
+
+    const el = document.getElementById("tlMascotText");
+    if (!el) return;
+
+    if (filter === "all") {
+      el.innerHTML = `合計 ${total} 件タスクあるよ！<br />無理せず頑張ろう！`;
+    } else if (filter === "today") {
+      el.innerHTML = `今日までのタスクは ${todayCount} 件あるよ！<br />一緒に頑張ろう！`;
+    } else if (filter === "other") {
+      el.innerHTML = `今後のタスクは ${otherCount} 件あります！<br />コツコツ頑張ろう！`;
+    } else if (filter === "expired") {
+      el.innerHTML = `締め切ったタスクは ${expiredCount} 件あります！<br />まだ間に合うよ！！`;
+    }
+  }
 </script>
 {% endblock %}
