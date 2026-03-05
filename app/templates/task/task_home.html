@@ -143,7 +143,12 @@
     let displayDate = new Date();
     const dayLabels = ["日","月","火","水","木","金","土"];
     const allTasks = {{ rec | default([]) | tojson | safe }};
- 
+    function getLocalDateKey(date){
+        const y = date.getFullYear();
+        const m = String(date.getMonth()+1).padStart(2,'0');
+        const d = String(date.getDate()).padStart(2,'0');
+        return `${y}-${m}-${d}`;
+    }
     function refreshDateDisplay(){
         const m = displayDate.getMonth() + 1;
         const d = displayDate.getDate();
@@ -159,7 +164,7 @@
         const isToday = (today === viewingDate);
 
         const $evalBtn = $('#openEvalModal');
-        const selectedDateStr = displayDate.toISOString().split('T')[0];
+        const selectedDateStr = getLocalDateKey(displayDate)
         const hasProposals = allTasks.some(t => 
             !t.is_fixed && t.suggestion_date === selectedDateStr
         );
@@ -199,7 +204,7 @@
     img.src = images[Math.floor(Math.random() * images.length)];
  
     function renderTasksForDate(currentWeek){
-        const dateKey = displayDate.toISOString().split('T')[0];
+        const dateKey = getLocalDateKey(displayDate)
         
         // localStorageからその日の保存データを読み込む
         const storageKey = "task_done_" + dateKey;
@@ -408,7 +413,7 @@
             const done = $this.is(':checked');
             const isFixed = $this.data('is-fixed'); 
             
-            const dateKey = displayDate.toISOString().split('T')[0];
+            const dateKey = getLocalDateKey(displayDate)
             const storageKey = "task_done_" + dateKey;
             
             let storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
@@ -469,7 +474,7 @@
     // 評価するボタン送信処理
     $(document).on('click', '#submitEval', function(){
         const selectedEval = $('.eval-choice.selected').data('value');
-        const dateKey = displayDate.toISOString().split('T')[0];
+        const dateKey = getLocalDateKey(displayDate)
         
         // 達成済みのタスクIDを集める（checkboxがチェックされているもの）
         let completedIds = [];
