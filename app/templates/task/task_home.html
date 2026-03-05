@@ -157,6 +157,7 @@
     let displayDate = new Date();
     const dayLabels = ["日","月","火","水","木","金","土"];
     const allTasks = {{ rec | default([]) | tojson | safe }};
+    const backTasks = {{ all_rec | default([]) | tojson | safe }};
     function getLocalDateKey(date){
         const y = date.getFullYear();
         const m = String(date.getMonth()+1).padStart(2,'0');
@@ -233,25 +234,50 @@
         let overdueTasks = [];  // 締切（今日より前で未完了）
         let fixedTasks = [];    // 固定タスク
         let normalTasks = [];   // 通常の提案タスク（今日の日付）
+        let overdueIds = new Set();
 
+
+        // ① まず締切タスクを取得
         allTasks.forEach(task => {
-            if(task.is_fixed){
-                // 固定タスク：該当曜日の場合に表示
-                if(task.repeat_type === "毎日" || (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
-                    fixedTasks.push(task);
-                }
-            } else {
-                // 提案タスクの判定
-                const taskDate = new Date(task.suggestion_date);
-                
-                if (task.suggestion_date === dateKey) {
-                    // 選択中の日付に一致
-                    normalTasks.push(task);
-                } else if (isToday && taskDate < todayObj && !task.done) {
-                    // 【追加】今日を表示中 かつ 過去の日付 かつ 未完了
-                    overdueTasks.push(task);
-                }
+
+            if(task.is_fixed) return;
+
+            const taskDate = new Date(task.suggestion_date);
+
+            if (isToday && taskDate < todayObj && !task.done) {
+                overdueTasks.push(task);
+                overdueIds.add(task.id);
             }
+
+        });
+
+        // ② 固定タスク
+        allTasks.forEach(task => {
+
+            if(task.is_fixed){
+
+                if(task.repeat_type === "毎日" ||
+                (task.day_of_week && task.day_of_week.indexOf(currentWeek) !== -1)){
+
+                    fixedTasks.push(task);
+
+                }
+
+            }
+
+        });
+
+        // ③ 今日の提案タスク（締切と被るものは除外）
+        allTasks.forEach(task => {
+
+            if(!task.is_fixed){
+
+                if(task.suggestion_date === dateKey && !overdueIds.has(task.id)){
+                    normalTasks.push(task);
+                }
+
+            }
+
         });
 
         // 3. 表示順に結合 (1.締切 2.固定 3.通常)

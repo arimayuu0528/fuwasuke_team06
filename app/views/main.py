@@ -96,6 +96,31 @@ def home():
             completed_tasks = len([t for t in proposal_tasks_today if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
             remain_count = total_tasks - completed_tasks
+        # --- 過去のログデータを user_id でフィルタリングして全件取得 ---
+        # 今日以前のログをすべて取得
+        # sql_all_logs = """
+        #     SELECT 
+        #         t.task_id, 
+        #         t.task_name, 
+        #         t.duration_min, 
+        #         l.is_completed, 
+        #         l.work_date
+        #     FROM t_task_work_logs l
+        #     JOIN t_tasks t ON l.task_id = t.task_id
+        #     WHERE l.user_id = %s
+        #     ORDER BY l.work_date DESC
+        # """
+        # cursor.execute(sql_all_logs, (current_user_id,))
+        # all_rec=[]
+        # for row in cursor.fetchall():
+        #     all_rec.append({
+        #         "id": row["task_id"],
+        #         "name": row["task_name"],
+        #         "time": f"{row['duration_min']}分",
+        #         "done": bool(row["is_completed"]),
+        #         "is_fixed": False,
+        #         "suggestion_date": str(row["work_date"]) # JSで「どの日か」を判定する鍵
+        #     })
  
     except Exception as e:
         print(f"Error: {e}")
@@ -106,6 +131,7 @@ def home():
         "task/task_home.html",
         rec=rec, 
         percent=percent,
+        # all_rec=all_rec,
         remain_count=remain_count
     )
 @main_bp.route('/update_task_done', methods=['POST'])
