@@ -58,19 +58,20 @@ def home():
                 t.task_id, 
                 t.task_name, 
                 d.plan_min, 
-                t.is_completed  -- actual_work_minではなく、t_tasksのフラグを見る
-            FROM t_task_suggestion_detail d
-            JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
+                t.is_completed
+            FROM t_task_suggestions s
+            -- 提案されたタスクを detail から JOIN するが、
+            -- チェックを外して detail から消えてもタスク自体は出るように LEFT JOIN にする
+            JOIN t_task_suggestion_detail d ON s.task_suggestion_id = d.task_suggestion_id
             JOIN t_tasks t ON d.task_id = t.task_id
             WHERE s.user_id = %s
-            GROUP BY s.suggestion_date, t.task_id  -- 日付とタスクIDでグルーピングして重複排除
+            GROUP BY s.suggestion_date, t.task_id
             ORDER BY s.suggestion_date DESC, d.plan_min ASC
         """
         cursor.execute(sql_all_details, (current_user_id,))
         all_details = cursor.fetchall()
 
         for row in all_details:
-            # done の判定を t_tasks.is_completed (0 or 1) に合わせる
             is_done = bool(row["is_completed"])
             
             rec.append({
@@ -95,6 +96,31 @@ def home():
             completed_tasks = len([t for t in proposal_tasks_today if t["done"]])
             percent = int((completed_tasks / total_tasks) * 100)
             remain_count = total_tasks - completed_tasks
+        # --- 過去のログデータを user_id でフィルタリングして全件取得 ---
+        # 今日以前のログをすべて取得
+        # sql_all_logs = """
+        #     SELECT 
+        #         t.task_id, 
+        #         t.task_name, 
+        #         t.duration_min, 
+        #         l.is_completed, 
+        #         l.work_date
+        #     FROM t_task_work_logs l
+        #     JOIN t_tasks t ON l.task_id = t.task_id
+        #     WHERE l.user_id = %s
+        #     ORDER BY l.work_date DESC
+        # """
+        # cursor.execute(sql_all_logs, (current_user_id,))
+        # all_rec=[]
+        # for row in cursor.fetchall():
+        #     all_rec.append({
+        #         "id": row["task_id"],
+        #         "name": row["task_name"],
+        #         "time": f"{row['duration_min']}分",
+        #         "done": bool(row["is_completed"]),
+        #         "is_fixed": False,
+        #         "suggestion_date": str(row["work_date"]) # JSで「どの日か」を判定する鍵
+        #     })
  
     except Exception as e:
         print(f"Error: {e}")
@@ -105,6 +131,7 @@ def home():
         "task/task_home.html",
         rec=rec, 
         percent=percent,
+        # all_rec=all_rec,
         remain_count=remain_count
     )
 @main_bp.route('/update_task_done', methods=['POST'])
@@ -153,9 +180,10 @@ def update_task_done():
                 cursor.execute(sql_task, (task_id,))
             else:
                 sql = """
-                DELETE d FROM t_task_suggestion_detail d
+                UPDATE t_task_suggestion_detail d
                 JOIN t_task_suggestions s ON d.task_suggestion_id = s.task_suggestion_id
-                WHERE d.task_id=%s AND s.suggestion_date=%s
+                SET d.actual_work_min = 0 
+                WHERE d.task_id = %s AND s.suggestion_date = %s
                 """
                 cursor.execute(sql, (task_id, target_date))
                 sql_task = "UPDATE t_tasks SET is_completed = FALSE WHERE task_id = %s"

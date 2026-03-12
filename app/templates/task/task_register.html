@@ -591,104 +591,138 @@ content %}
 </style>
 
 <script>
-  (function () {
-    /* ── カテゴリー選択 ── */
-    function trSelectCategory(btn) {
-      btn.closest('.tr-category-selector')
-         .querySelectorAll('.tr-category-btn')
-         .forEach(b => b.classList.remove('tr-category-active'));
-      btn.classList.add('tr-category-active');
-      document.getElementById('trCategory').value = btn.textContent.trim();
-      trRipple(btn, event);
-    }
-
-    /* ── モチベーション選択 ── */
-    function trSelectMotivation(btn) {
-      btn.closest('.tr-motivation-selector')
-         .querySelectorAll('.tr-motivation-btn')
-         .forEach(b => b.classList.remove('tr-motivation-active'));
-      btn.classList.add('tr-motivation-active');
-      document.getElementById('trMotivation').value = btn.dataset.value;
-      if (navigator.vibrate) navigator.vibrate(10);
-    }
-
-    /* ── 通知トグル ── */
-    let trNotifOn = {{ task.notification_enabled if task else 1 }};
-
-    function trApplyNotifState() {
-      const box    = document.getElementById('trNotifBox');
-      const toggle = document.getElementById('trToggle');
-      const sub    = document.getElementById('trNotifSub');
-
-      if (trNotifOn) {
-        box.classList.remove('tr-notif-off');
-        toggle.classList.remove('tr-toggle-off');
-        sub.textContent = '5分前に通知します';
-      } else {
-        box.classList.add('tr-notif-off');
-        toggle.classList.add('tr-toggle-off');
-        sub.textContent = '通知オフ';
+    (function () {
+      /* ── カテゴリー選択 ── */
+      function trSelectCategory(btn) {
+        btn.closest('.tr-category-selector')
+           .querySelectorAll('.tr-category-btn')
+           .forEach(b => b.classList.remove('tr-category-active'));
+        btn.classList.add('tr-category-active');
+        document.getElementById('trCategory').value = btn.textContent.trim();
+        trRipple(btn, event);
       }
-      document.getElementById('trNotification').value = trNotifOn;
-    }
 
-    function trToggleNotif() {
-      trNotifOn = trNotifOn ? 0 : 1;
+      /* ── モチベーション選択 ── */
+      function trSelectMotivation(btn) {
+        btn.closest('.tr-motivation-selector')
+           .querySelectorAll('.tr-motivation-btn')
+           .forEach(b => b.classList.remove('tr-motivation-active'));
+        btn.classList.add('tr-motivation-active');
+        document.getElementById('trMotivation').value = btn.dataset.value;
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
+
+      /* ── 通知トグル ── */
+      let trNotifOn = {{ task.notification_enabled if task else 1 }};
+
+      function trApplyNotifState() {
+        const box    = document.getElementById('trNotifBox');
+        const toggle = document.getElementById('trToggle');
+        const sub    = document.getElementById('trNotifSub');
+
+        if (trNotifOn) {
+          box.classList.remove('tr-notif-off');
+          toggle.classList.remove('tr-toggle-off');
+          sub.textContent = '5分前に通知します';
+        } else {
+          box.classList.add('tr-notif-off');
+          toggle.classList.add('tr-toggle-off');
+          sub.textContent = '通知オフ';
+        }
+        document.getElementById('trNotification').value = trNotifOn;
+      }
+
+      function trToggleNotif() {
+        trNotifOn = trNotifOn ? 0 : 1;
+        trApplyNotifState();
+        if (navigator.vibrate) navigator.vibrate(8);
+      }
+
+      /* 初期状態を適用 */
       trApplyNotifState();
-      if (navigator.vibrate) navigator.vibrate(8);
+      trApplyNotifState();
+      trSetupTitleCounterLimit(); // ← これを追加
+
+
+      /* ── タスク名 50文字 カウント&制限（追加） ── */
+  function trSetupTitleCounterLimit() {
+    const title = document.querySelector('#trTaskForm input[name="title"]');
+    if (!title) return;
+
+    // カウンター作成（既にあれば再利用）
+    let counter = title.parentElement.querySelector(".tr-character-counter");
+    if (!counter) {
+      counter = document.createElement("div");
+      counter.className = "tr-character-counter";
+      counter.style.cssText =
+        "text-align:right; font-size:12px; color:#999; margin-top:6px;";
+      title.parentElement.appendChild(counter);
     }
 
-    /* 初期状態を適用 */
-    trApplyNotifState();
+    const max = 50;
 
-    /* ── フォーム送信 ── */
-    document.getElementById('trTaskForm').addEventListener('submit', function (e) {
-      const title = this.querySelector('[name="title"]');
-      if (!title.value.trim()) {
-        e.preventDefault();
-        title.classList.add('tr-error');
-        trShowToast('タスク名を入力してください', 'warning');
-        title.focus();
-        return;
+    const update = () => {
+      if (title.value.length > max) {
+        title.value = title.value.slice(0, max);
+        trShowToast("タスク名は50文字までです", "warning");
       }
-      title.classList.remove('tr-error');
-      const btn = document.querySelector('.tr-submit-btn');
-      btn.classList.add('tr-loading');
-      btn.disabled = true;
-    });
 
-    /* ── タブ：固定タスク登録へ遷移 ── */
-    document.querySelectorAll('.tr-tab')[1].addEventListener('click', function () {
-      window.location.href = "{{ url_for('schedule.schedule_form') }}";
-    });
+      const len = title.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.style.color = len > max * 0.9 ? "#ff6b6b" : "#999";
+    };
 
-    /* ── リップル ── */
-    function trRipple(el, ev) {
-      const r = document.createElement('span');
-      r.className = 'tr-ripple';
-      const rect = el.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      r.style.cssText = `width:${size}px;height:${size}px;left:${(ev.clientX||0) - rect.left - size/2}px;top:${(ev.clientY||0) - rect.top - size/2}px`;
-      el.querySelectorAll('.tr-ripple').forEach(x => x.remove());
-      el.appendChild(r);
-      setTimeout(() => r.remove(), 600);
-    }
+    title.addEventListener("input", update);
+    update();
+  }
+      /* ── フォーム送信 ── */
+      document.getElementById('trTaskForm').addEventListener('submit', function (e) {
+        const title = this.querySelector('[name="title"]');
+        if (!title.value.trim()) {
+          e.preventDefault();
+          title.classList.add('tr-error');
+          trShowToast('タスク名を入力してください', 'warning');
+          title.focus();
+          return;
+        }
+        title.classList.remove('tr-error');
+        const btn = document.querySelector('.tr-submit-btn');
+        btn.classList.add('tr-loading');
+        btn.disabled = true;
+      });
 
-    /* ── トースト ── */
-    function trShowToast(msg, type) {
-      document.querySelectorAll('.tr-toast').forEach(t => t.remove());
-      const t = document.createElement('div');
-      t.className = `tr-toast tr-toast-${type || 'info'}`;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
+      /* ── タブ：固定タスク登録へ遷移 ── */
+      document.querySelectorAll('.tr-tab')[1].addEventListener('click', function () {
+        window.location.href = "{{ url_for('schedule.schedule_form') }}";
+      });
 
-    /* ── グローバル公開（onclick属性用） ── */
-    window.trSelectCategory   = trSelectCategory;
-    window.trSelectMotivation = trSelectMotivation;
-    window.trToggleNotif      = trToggleNotif;
-  })();
+      /* ── リップル ── */
+      function trRipple(el, ev) {
+        const r = document.createElement('span');
+        r.className = 'tr-ripple';
+        const rect = el.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        r.style.cssText = `width:${size}px;height:${size}px;left:${(ev.clientX||0) - rect.left - size/2}px;top:${(ev.clientY||0) - rect.top - size/2}px`;
+        el.querySelectorAll('.tr-ripple').forEach(x => x.remove());
+        el.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      }
+
+      /* ── トースト ── */
+      function trShowToast(msg, type) {
+        document.querySelectorAll('.tr-toast').forEach(t => t.remove());
+        const t = document.createElement('div');
+        t.className = `tr-toast tr-toast-${type || 'info'}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+
+      /* ── グローバル公開（onclick属性用） ── */
+      window.trSelectCategory   = trSelectCategory;
+      window.trSelectMotivation = trSelectMotivation;
+      window.trToggleNotif      = trToggleNotif;
+    })();
 </script>
 
 {% endblock %}
