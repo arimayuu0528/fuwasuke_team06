@@ -174,14 +174,14 @@ def register():
 
     # POSTの場合:(登録処理)
     if request.method == "POST":
-        mood_value = request.form.get("mood")
+        mood = request.form.get("mood")
 
         mood_point_dict = {
             "genki": 3,
             "futu": 2,
             "warui": 1
         }
-        mood_point = mood_point_dict.get(mood_value, 3)
+        mood_point = mood_point_dict.get(mood)
 
         # mood(元気/普通/悪い)から点数(3/2/1)を取得
         mood_point = MOOD_POINT_MAP[mood]
