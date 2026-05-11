@@ -2,8 +2,8 @@
   background-color: #fff;
   box-sizing: border-box;
   width: 100%;
-  min-height: 100vh;     // fallback
-  min-height: 100dvh;    // mobile address bar対策
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
   padding: clamp(12px, 2.5vw, 20px);
@@ -14,7 +14,7 @@
 
   .BOX {
     width: 100%;
-    max-width: 860px;   // PCで広がりすぎない
+    max-width: 860px;
     margin: 0 auto;
   }
 
@@ -70,7 +70,6 @@
       border-radius: clamp(18px, 15vw, 48px);
       overflow: hidden;
 
-      // 高さは「画面に応じて伸縮」
       min-height: 360px;
       max-height: min(65dvh, 620px);
       display: flex;
@@ -82,13 +81,16 @@
       width: 100%;
       height: 100%;
       display: flex;
+      flex-wrap: nowrap;
       transition: transform 0.25s ease;
     }
 
     .item {
-      flex: 0 0 100%;
+      flex: 0 0 100%; 
+      width: 100%;
+      min-width: 100%;
       max-width: 100%;
-      min-width: 0;
+      
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -97,7 +99,7 @@
     }
 
     .sum_time {
-      align-self: flex-end;   // 右寄せ
+      align-self: flex-end;
       margin: 0;
       padding: 8px 14px;
       border-radius: 999px;
@@ -111,7 +113,7 @@
 
     .task_list {
       flex: 1 1 auto;
-      min-height: 0;       // overflow効かせるため必須
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       list-style: none;
@@ -120,44 +122,69 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding-right: 6px;  // スクロールバー分
-    }
+      padding-right: 6px;
 
-    .task {
-      width: 100%;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      // タスクカード本体
+      .task, .task_selectable {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        align-items: center; 
+        justify-content: space-between; // 左右に振り分け
+        gap: 12px;
+        background-color: #fff;
+        border: 2px solid #E9C59A;
+        border-radius: 16px;
+        padding: 12px 14px;
+        min-height: clamp(56px, 9vh, 84px);
+        cursor: pointer;
+        transition: all 0.2s ease;
 
-      background-color: #fff;
-      border: 2px solid #E9C59A;
-      border-radius: 16px;
-      padding: 12px 14px;
+        // --- 選択中のスタイル ---
+        &.is-selected {
+          background-color: #FFF4E6; // 薄いオレンジ
+          border: 3px solid #F7BD58;   // 枠線を太く・濃く
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(233, 197, 154, 0.3);
 
-      // 小さすぎ/大きすぎ防止
-      min-height: clamp(56px, 9vh, 84px);
+          .plan_min {
+            color: #E67E22;
+            font-weight: 700;
+          }
+        }
+
+        &:hover:not(.is-selected) {
+          border-color: #F7BD58;
+          background-color: #FFFCF9;
+        }
+      }
     }
 
     .task_name {
-      font-weight: 600;
+      flex: 1; // 可能な限り幅を広げる
       display: flex;
-      flex-direction: column;   // 縦並び
-      align-items: flex-start;  // 左揃え
+      flex-direction: column;
+      align-items: flex-start;
       text-align: left;
-      gap: 6px;
-      min-width: 0;             // 折り返し崩れ防止
-      font-size: 1.1rem;
+      gap: 4px;
+      min-width: 0;
+      
+      span {
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.3;
+        word-break: break-all;
+      }
+
       .deadline_tag {
-        margin-top: 0;
+        margin-top: 2px;
         width: fit-content;
         max-width: 100%;
-        padding: 4px 10px;
+        padding: 2px 10px;
         border-radius: 999px;
         background-color: #F7DEC7;
         color: #F3822B;
-        font-size: clamp(0.85rem, 2.6vw, 1rem);
+        font-size: 0.85rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -165,14 +192,13 @@
     }
 
     .plan_min {
-      flex: 0 0 auto;
+      flex: 0 0 auto; // 右側に固定
       white-space: nowrap;
       color: #F09942;
-      font-size: clamp(0.95rem, 3vw, 1.05rem);
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
-
-    // スライダーボタン（container内に入れた前提）
     .slider_btn {
       position: absolute;
       bottom:0;
@@ -182,24 +208,14 @@
       border-radius: 50%;
       font-size: 24px;
       cursor: pointer;
-
       display: grid;
       place-items: center;
       z-index: 100;
-      &:active {
-        opacity: 0.6;
-      }
+      &:active { opacity: 0.6; }
     }
 
-    .back_btn {
-      left: 10px;
-      color: lightgray;
-    }
-
-    .next_btn {
-      right: 10px;
-      color: #F7BD58;
-    }
+    .back_btn { left: 10px; color: lightgray; }
+    .next_btn { right: 10px; color: #F7BD58; }
 
     .indicator_container {
       display: flex;
@@ -208,17 +224,13 @@
       position: relative;
       bottom: 70px;
 
-
       .indicator {
         width: 10px;
         height: 10px;
         border-radius: 50%;
         background-color: lightgray;
       }
-
-      .indicator1 {
-        background-color: #EFAB6F;
-      }
+      .indicator1 { background-color: #EFAB6F; }
     }
 
     .start {
@@ -227,13 +239,11 @@
       margin: 10px auto 0;
       height: clamp(48px, 7vh, 60px);
       border-radius: 999px;
-
       border: none;
       background-color: #FFAF5A;
       color: #fff;
       font-weight: 600;
       font-size: clamp(1.05rem, 3.5vw, 1.25rem);
-
       display: flex;
       align-items: center;
       justify-content: center;
@@ -243,65 +253,8 @@
     }
   }
 
-  // タブレット以上
   @media (min-width: 768px) {
     padding: 24px;
-
-    .section {
-      gap: 14px;
-
-      .container {
-        max-height: min(62dvh, 720px);
-      }
-
-      .slider_btn {
-        width: 44px;
-        height: 44px;
-        font-size: 28px;
-      }
-    }
+    .section .container { max-height: min(62dvh, 720px); }
   }
-
-  // PC大きめ
-  @media (min-width: 1024px) {
-    .section .container {
-      border-radius: 52px;
-    }
-  }
-}
-
-// 窓：高さを固定（画面に応じて伸縮）
-.task_suggestion .section .container{
-  height: clamp(420px, 65dvh, 680px);
-  overflow: hidden; 
-}
-
-// track / item を窓いっぱいにする（中身がはみ出しても外に広がらない）
-.task_suggestion .section .track{
-  height: 100%;
-}
-
-.task_suggestion .section .item{
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; // これが無いとスクロールが効かないことが多い 
-}
-
-// タスクが多い時は task_list だけスクロール 
-.task_suggestion .section .task_list{
-  flex: 1 1 auto;
-  min-height: 0;                 
-  overflow-y: auto;              // 縦スクロールON 
-  -webkit-overflow-scrolling: touch; 
-  padding-right: 6px;            
-}
-
-.no_suggestion_msg{
-  text-align: center;
-  margin: 24px 0;
-  padding: 16px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.05);
-  font-weight: 600;
 }

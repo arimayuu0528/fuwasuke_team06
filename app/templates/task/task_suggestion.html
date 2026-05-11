@@ -43,7 +43,22 @@
                             <div class="item {%if loop.first %} is-active {% endif %}">
                                 <!-- 合計時間 -->
                                 <p class="sum_time">合計：{{ bundle.total_plan_text }}</p>
-
+                                {% if bundle.is_custom %}
+                                    <ul class="task_list custom_selection">
+                                        {% for row in bundle.suggestion_list %}
+                                            <li class="task_selectable" onclick="toggleTask(this)">
+                                                <input type="checkbox" name="task_name" value="{{ row.task_name }}" style="display:none;">
+                                                <div class="task_name">
+                                                    <span class="task_title">{{ row.task_name }}</span>
+                                                    {% if row.deadline_tag %}
+                                                        <div class="deadline_tag">{{ row.deadline_tag }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="plan_min">{{ row.plan_min }}分</div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
                                 <!-- 提案タスク一覧 -->
                                 <ul class="task_list">
                                 {% for row in bundle.suggestion_list %}
@@ -57,6 +72,7 @@
                                         <div class="plan_min">{{ row.plan_min }}分</div>
                                     </li>
                                 {% endfor %}
+                                {% endif %}
                                 </ul>
 
                                 <!-- 決定ボタン押下：この案のタスク提案ID + タスク名 送信 -->
@@ -81,9 +97,9 @@
 
                 <!-- ドットインジケータ -->
                 <div class="indicator_container">
-                    <div class="indicator indicator1"></div>
-                    <div class="indicator"></div>
-                    <div class="indicator"></div>
+                {% for bundle in suggestion_bundles %}
+                    <div class="indicator {% if loop.first %}indicator1{% endif %}"></div>
+                {% endfor %}
                 </div>
 
                 {# ===== 変更：提案がある時だけJS読み込み（JSエラー防止） ===== #}

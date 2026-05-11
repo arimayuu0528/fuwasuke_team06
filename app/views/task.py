@@ -1253,7 +1253,26 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
                     "total_plan_text": total_plan_text,  # 合計時間の表示用文字列
                 }
             )
+        # --- task_suggestion 関数内の末尾（GET処理中）に追加 ---
 
+        # 4つ目のメニュー：全ての提案タスクを重複なくまとめる
+        all_task_ids = set()
+        all_details = []
+
+        for b in suggestion_bundles:
+            for task in b["suggestion_list"]:
+                if task["task_id"] not in all_task_ids: # 重複排除
+                    all_task_ids.add(task["task_id"])
+                    all_details.append(task)
+
+        # 4つ目の「カスタム案」として追加
+        suggestion_bundles.append({
+            "label": "カスタム案",
+            "suggestion": {"task_suggestion_id": 999}, # 仮のID
+            "suggestion_list": all_details,
+            "total_plan_text": " 0分", # 初期値
+            "is_custom": True # テンプレ側での判定用フラグ
+        })
         # 後方互換：テンプレが「1案前提」でも動くように、先頭案を単体変数でも渡す
         # 先頭案のヘッダ（無ければ None）
         single_suggestion = suggestion_bundles[0]["suggestion"] if suggestion_bundles else None
@@ -1261,7 +1280,7 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
         single_list = suggestion_bundles[0]["suggestion_list"] if suggestion_bundles else []
         # 先頭案の合計時間（無ければ 0分表記）
         single_total = suggestion_bundles[0]["total_plan_text"] if suggestion_bundles else minutes_to_hm(0)
-
+        print(suggestion_bundles[0]["suggestion_list"])
         return render_template(
             "task/task_suggestion.html",
             # 3案提案用（テンプレ側でループ表示）
