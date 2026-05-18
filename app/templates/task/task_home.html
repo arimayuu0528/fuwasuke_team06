@@ -14,7 +14,7 @@
  
 <div class="container">
     <div class="header-msg-row">
-        <img src="../../static/image/bouhuwasuke.png" width="50" class="chara-img">
+        <img src="../../static/image/meme.png" width="50" class="chara-img">
         <div class="message-bubble">
             <p id="dailyMessage">今日はたくさんの予定があります。<br>しっかりとがんばりましょう。</p>
         </div>
@@ -356,20 +356,38 @@
         
         $el.html(""); // 表示エリアをクリア
         isTyping = true;
+        let mouthCloseCount = 0;
 
-        // 3. パクパクアニメーション（200ms間隔で画像を交互に切り替え）
-        mouthTimer = setInterval(function() {
-            // ヘッダー内のキャラクター画像（chara-imgクラス）を取得
+        mouthTimer = setInterval(function () {
             const $img = $('.header-msg-row .chara-img');
-            
+
             if (mouthOpen) {
-                // 口を閉じる
-                $img.attr('src', '../../static/image/bouhuwasuke.png');
+                // 閉じるタイミング
+
+                mouthCloseCount++;
+
+                // 3回目の閉じるタイミングで meme.png
+                if (mouthCloseCount >= 5) {
+                    $img.attr('src', '../../static/image/bouhuwasuke.png');
+
+                    // カウントリセット
+                    mouthCloseCount = 0;
+                } else {
+                    $img.attr('src', '../../static/image/meme.png');
+                }
+
             } else {
-                // 口を開ける
-                $img.attr('src', '../../static/image/kutipaku.png');
+                // 開けるタイミング
+                if (mouthCloseCount >= 3) {
+                    $img.attr('src', '../../static/image/kutipaku.png');
+
+                } else {
+                    $img.attr('src', '../../static/image/pakupaku.png');
+                }
             }
+
             mouthOpen = !mouthOpen;
+
         }, 200);
 
         // 4. タイピング実行
