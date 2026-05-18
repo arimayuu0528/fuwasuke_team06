@@ -45,7 +45,7 @@
                                 {% if bundle.is_custom %}
                                     <ul class="task_list custom_selection">
                                         {% for row in bundle.suggestion_list %}
-                                            <li class="task_selectable" onclick="toggleTask(this)">
+                                            <li class="task_selectable" onclick="toggleTask(this)" data-task-id="{{ row.task_id }}" data-plan-min="{{ row.plan_min }}">
                                                 <input type="checkbox" name="task_checkbox" style="display:none;">
                                                 <div class="task_name">
                                                     <span class="task_title">{{ row.task_name }}</span>
@@ -58,9 +58,9 @@
                                         {% endfor %}
                                     </ul>
 
-                                    <form method="post" action="{{ url_for('task.task_suggestion') }}" class="start_form custom_form">
-                                        <input type="hidden" name="selected_suggestion_id" value="{{ bundle.suggestion.task_suggestion_id }}">
-                                        </form>
+                                    <form method="post" action="{{ url_for('task.task_suggestion') }}" class="start_form" onsubmit="prepareSubmit(this)">
+                                        <input type="hidden" name="selected_suggestion_id" value="custom">
+                                    </form>
 
                                 {% else %}
                                     <ul class="task_list">

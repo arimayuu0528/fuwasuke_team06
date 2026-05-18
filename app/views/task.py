@@ -1063,7 +1063,17 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
 
             # 作り直したので、改めて今日の提案一覧を取得
             suggestions_today = fetch_today_suggestions_all()
+        all_task_ids = set()
+        all_details = []
 
+        # DBから取得した今日の提案（suggestions_today）をループして、全マスタ詳細を1つのリストに集約
+        for s in suggestions_today:
+            sid = int(s["task_suggestion_id"])
+            details = fetch_suggestion_details(db, sid) or []
+            for task in details:
+                if task["task_id"] not in all_task_ids:  # 重複排除のガード
+                    all_task_ids.add(task["task_id"])
+                    all_details.append(task)
         # --------------------------------------------------------------------------------------------------------------------------------
         # POST：3案の「選択」 or 「評価更新」 or 「開始」
         # --------------------------------------------------------------------------------------------------------------------------------
@@ -1071,26 +1081,75 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
             # -- 今日の提案ID一覧（検証に使用）
             today_ids = [row["task_suggestion_id"] for row in suggestions_today]
 
-            # タスク提案 3案のうち「どれを採用するか」選択
-            # formから｢ユーザーが選択した提案ID｣をintで受け取る(無ければNone)
-            picked_id = (request.form.get("selected_suggestion_id", type=int)
-                         or request.form.get("task_suggestion_id",type=int))
-            # 値があり、｢今日のタスク提案IDのどれか｣に含まれている場合:
+            # 【修正】最初は type=int を外して「文字列（str）」として安全に受け取る
+            picked_id_str = (request.form.get("selected_suggestion_id", type=str)
+                             or request.form.get("task_suggestion_id", type=str))
+
+            # 最初は None 判定用に変数を用意しておく
+            picked_id = None
+
+            # ============================================================================================================================
+            # ★ 4枚目のカスタム案（文字列 "custom"）が選ばれたときの新規作成処理
+            # ============================================================================================================================
+            if picked_id_str == "custom":
+                # 1. 新しい「4枚目のための親データ（ヘッダ）」をDBに1件作成
+                base_s = suggestions_today[0] if suggestions_today else {}
+                db.cursor.execute(
+                    """
+                    INSERT INTO t_task_suggestions
+                    (user_id, suggestion_date, mood, mood_point, coef_value, evaluation, evaluation_multiplier, target_task_level)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+                    """,
+                    (
+                        user_id, today, 
+                        base_s.get("mood"), base_s.get("mood_point"), base_s.get("coef_value"), 
+                        None, 1.0, base_s.get("target_task_level")
+                    ),
+                )
+                picked_id = db.cursor.lastrowid
+
+                
+                # 3. 選択されたタスク名に一致する詳細データをDBに登録する
+                selected_task_ids = request.form.getlist("selected_task_ids")
+                selected_plan_mins = request.form.getlist("selected_plan_mins")
+
+                # ペアでループを回してインサート
+                for t_id, p_min in zip(selected_task_ids, selected_plan_mins):
+                    db.cursor.execute(
+                        """
+                        INSERT INTO t_task_suggestion_detail 
+                        (task_suggestion_id, task_id, plan_min)
+                        VALUES (%s, %s, %s);
+                        """,
+                        (picked_id, t_id, p_min)
+                    )
+                
+                # 今作った本物の数値を「今日の一覧」に合流させる
+                today_ids.append(picked_id)
+
+            # ============================================================================================================================
+            # 通常の1〜3枚目（本物の数値ID）が送られてきた場合
+            # ============================================================================================================================
+            else:
+                # 送られてきた文字列を安全に数値（int）に変換する
+                if picked_id_str and picked_id_str.isdigit():
+                    picked_id = int(picked_id_str)
+
+            # ----------------------------------------------------------------------------------------------------------------------------
+            # 最終的な判定（1〜3枚目も、4枚目で新IDが作られた後も、全員ここを通る）
+            # ----------------------------------------------------------------------------------------------------------------------------
             if picked_id is not None and picked_id in today_ids: 
-                # 選ばれたIDをセッションに保存
+                # セッションに選ばれた本物のIDを保存
                 session["selected_task_suggestion_id"] = picked_id
 
-                # 選ばれなかった2案を削除
-                for sid in today_ids:           # 今日のタスク提案IDを1つずつループ
-                    if sid != picked_id:        # 採用したタスク提案ID以外の場合
-                        delete_suggestion(sid)  # 不採用のタスク提案をDBから削除
+                # 選ばれなかった他の案をDBから削除
+                for sid in today_ids:
+                    if sid != picked_id:
+                        delete_suggestion(sid)
 
-                # 削除を確定
+                # 変更をDBにコミットして次画面へ
                 db.connection.commit()
-
-                # ★追加：開始中IDが残っているとそっちが優先されるのでクリア
                 session.pop("current_task_suggestion_id", None)
-                # 選んだ1案だけ表示する画面へ戻す
                 return redirect(url_for("task.task_form"))
 
             # -- 評価更新
@@ -1256,14 +1315,14 @@ def task_suggestion():  # 「今日のタスク提案」を表示 / 3案作成 /
         # --- task_suggestion 関数内の末尾（GET処理中）に追加 ---
 
         # 4つ目のメニュー：全ての提案タスクを重複なくまとめる
-        all_task_ids = set()
-        all_details = []
+        # all_task_ids = set()
+        # all_details = []
 
-        for b in suggestion_bundles:
-            for task in b["suggestion_list"]:
-                if task["task_id"] not in all_task_ids: # 重複排除
-                    all_task_ids.add(task["task_id"])
-                    all_details.append(task)
+        # for b in suggestion_bundles:
+        #     for task in b["suggestion_list"]:
+        #         if task["task_id"] not in all_task_ids: # 重複排除
+        #             all_task_ids.add(task["task_id"])
+        #             all_details.append(task)
 
         # 4つ目の「カスタム案」として追加
         suggestion_bundles.append({

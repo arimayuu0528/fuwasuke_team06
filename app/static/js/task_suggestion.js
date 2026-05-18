@@ -97,45 +97,57 @@ document.querySelectorAll('.task_selectable').forEach(el => {
 // --- 【最重要】決定ボタンを押したときの処理（123枚目・4枚目すべての送信をここで一括制御） ---
 if (DecideBtn) {
   DecideBtn.addEventListener("click", () => { 
-    // 現在画面に見えているスライド（item）を取得
     const activeItem = document.querySelector(".item.is-active");
     if (!activeItem) return;
 
-    // 今の画面が「4枚目のカスタム選択画面」かどうかを判定
-    const isCustomPage = activeItem.querySelector(".custom_selection") !== null;
-    
-    // そのスライド内にあるフォームを取得
     const form = activeItem.querySelector("form.start_form");
     if (!form) return;
 
-    if (isCustomPage) {
-      // --- 4枚目の場合：送信直前のパッキング処理 ---
-      // フォーム内に最初から埋め込んであるすべてのタスク用inputを取得
-      const hiddenInputs = form.querySelectorAll("input[name='task_name']");
-      const selectables = activeItem.querySelectorAll(".task_selectable");
+    // 「4枚目のカスタム画面を開いているか」の判定
+    const isCustomPage = activeItem.querySelector(".custom_selection") !== null;
 
-      // HTML側のループ順（インデックス）を合わせてチェック
-      selectables.forEach((el, idx) => {
-        if (hiddenInputs[idx]) {
-          // 選ばれていない（'is-selected' が付いていない）タスクのinputをdisabledにする
-          // これにより、選んだタスクだけが1〜3枚目と【完全に同じ形式】で送信されます
-          hiddenInputs[idx].disabled = !el.classList.contains("is-selected");
+    if (isCustomPage) {
+      // 既存の古い hidden input（HTMLに最初からある全タスク分のinputなど）があれば一度クリアする
+      // ※これをしないと、選んでいないタスクまで一緒に送られてしまうのを防ぐため
+      form.querySelectorAll("input[name='selected_task_ids'], input[name='selected_plan_mins'], input[name='task_name']").forEach(el => el.remove());
+
+      // 画面上で「実際に選択されている（is-selectedがついている）」行だけを全て取得
+      const selectedItems = activeItem.querySelectorAll(".task_selectable.is-selected");
+
+      // 1つも選ばれていない場合は送信をブロック（必要に応じてコメントアウトを解除してください）
+      // if (selectedItems.length === 0) {
+      //   alert("タスクを1つ以上選択してください。");
+      //   return;
+      // }
+      
+      // 選択された行のデータをループして、フォームの中に動的にhidden要素を作る
+      selectedItems.forEach(el => {
+        // HTMLの li要素に仕込んだ data-task-id と data-plan-min を取得
+        const taskId = el.getAttribute('data-task-id');
+        const planMin = el.getAttribute('data-plan-min');
+        
+        if (taskId) {
+          // 送信用に task_id の隠しインプットを生成してフォームに追加
+          const idInput = document.createElement('input');
+          idInput.type = 'hidden';
+          idInput.name = 'selected_task_ids'; // Python側で受け取る名前
+          idInput.value = taskId;
+          form.appendChild(idInput);
+        }
+
+        if (planMin) {
+          // 同一IDで分数が違う場合の対策として plan_min もペアで追加
+          const minInput = document.createElement('input');
+          minInput.type = 'hidden';
+          minInput.name = 'selected_plan_mins';
+          minInput.value = planMin;
+          form.appendChild(minInput);
         }
       });
-
-      // カスタム画面で1つも選んでいない場合は、誤送信（空リロード）を防ぐためにブロック
-      const selectedCount = activeItem.querySelectorAll(".task_selectable.is-selected").length;
-      if (selectedCount === 0) {
-        alert("タスクを1つ以上選択してください。");
-        return; 
-      }
     }
 
-    // --- 1〜3枚目の通常提案、および4枚目のカスタム処理通過後、安全に送信を実行 ---
-    if (form.requestSubmit) {
-      form.requestSubmit();
-    } else {
-      form.submit();
-    }
+    // 通常の1〜3枚目も、4枚目のカスタムも、最終的にここで安全に送信！
+    if (form.requestSubmit) form.requestSubmit();
+    else form.submit();
   });
 }
