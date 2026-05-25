@@ -267,3 +267,20 @@
     .section .container { height: min(65dvh, 720px); } 
   }
 }
+.customp {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333333;
+    margin: 0 0 4px 0;
+    padding: 0;
+    text-align: center;
+}
+
+/* 「選択した予定を選択できます」の補足テキスト */
+.custom_p {
+    font-size: 11px;
+    color: #666666;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}

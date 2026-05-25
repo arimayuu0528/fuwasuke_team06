@@ -44,6 +44,8 @@
                                 
                                 {% if bundle.is_custom %}
                                     <ul class="task_list custom_selection">
+                                        <p class="customp">予定カスタムページ</p>
+                                        <p class="custom_p">選択した予定を選択できます</p>
                                         {% for row in bundle.suggestion_list %}
                                             <li class="task_selectable" onclick="toggleTask(this)" data-task-id="{{ row.task_id }}" data-plan-min="{{ row.plan_min }}">
                                                 <input type="checkbox" name="task_checkbox" style="display:none;">
