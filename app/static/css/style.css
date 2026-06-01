@@ -2393,10 +2393,11 @@ input[type=radio]:checked + .mood-card {
 }
 .mypage-content .profile-header .username {
   font-size: 32px;
-  font-weight: lighter;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 .mypage-content .profile-header .username span {
-  font-weight: bolder;
+  font-weight: bold;
 }
 .mypage-content .profile-header .today_mood {
   font-size: 14px;
@@ -2543,6 +2544,36 @@ input[type=radio]:checked + .mood-card {
   cursor: not-allowed;
   box-shadow: none;
   transform: none !important;
+}
+.mypage-content .setting_life_rhythm {
+  margin-top: 2rem;
+  text-align: center;
+}
+.mypage-content .setting_life_rhythm h3 {
+  margin: 0 auto 20px;
+  padding-left: 0;
+  border-left: none;
+  font-weight: bold;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.mypage-content .setting_life_rhythm .setting_items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+}
+.mypage-content .setting_life_rhythm .setting_time {
+  width: 260px;
+  display: flex;
+  justify-content: space-between;
+}
+.mypage-content .setting_life_rhythm .item_label p {
+  white-space: nowrap;
+}
+.mypage-content .setting_life_rhythm h3 {
+  width: 260px;
+  text-align: left;
 }
 .mypage-content .logout_area {
   display: flex;
