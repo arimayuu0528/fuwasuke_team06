@@ -16,9 +16,10 @@
         margin-bottom: 5%;
         .username{
             font-size: 32px;
-            font-weight: lighter;
+            font-weight: bold;
+            margin-bottom: 20px;
             span{
-                font-weight: bolder;
+                font-weight: bold;
             }
         }
         .today_mood{
@@ -26,6 +27,8 @@
             color: #999;
         }
     }
+
+
 
     .today_task{
         display: flex;
@@ -187,6 +190,41 @@
             }
         }
     }
+
+.setting_life_rhythm {
+    margin-top: 2rem;
+    text-align: center;
+
+    h3 {
+        margin: 0 auto 20px;
+        padding-left: 0;
+        border-left: none;
+        font-weight: bold;
+        width: fit-content;
+    }
+
+    .setting_items {
+        display: flex;
+        flex-direction: column;
+        align-items: center; // ← これが重要（中央揃え）
+        min-width: 160px;
+    }
+
+    .setting_time {
+        width: 260px; // ← 起床/就寝ボックスの幅に合わせる（必要に応じて調整）
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .item_label p {
+        white-space: nowrap;   // ← 折り返し禁止
+    }
+
+    h3 {
+        width: 260px; // ← 見出しも同じ幅にする
+        text-align: left; // ← ボックスと同じ左揃えにする
+    }
+}
 
     .logout_area{
         display: flex;

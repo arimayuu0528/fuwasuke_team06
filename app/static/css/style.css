@@ -1,10 +1,12 @@
 @charset "UTF-8";
 body {
   font-family: "Roboto", sans-serif;
-  min-height: 100dvh;
-  min-width: 100dvw;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  padding-bottom: 75px;
+  box-sizing: border-box;
 }
 
 .fuwasuke_log2 p {
@@ -31,8 +33,10 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 65px; /* メニューの高さを固定すると安定します */
+  height: 80px; /* メニューの高さを固定すると安定します */
   z-index: 999;
+  background-color: #fff;
+  border-top: 1px solid #eee;
 }
 .menu .icon {
   display: flex;
@@ -2419,10 +2423,11 @@ input[type=radio]:checked + .mood-card {
 }
 .mypage-content .profile-header .username {
   font-size: 32px;
-  font-weight: lighter;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 .mypage-content .profile-header .username span {
-  font-weight: bolder;
+  font-weight: bold;
 }
 .mypage-content .profile-header .today_mood {
   font-size: 14px;
@@ -2570,6 +2575,36 @@ input[type=radio]:checked + .mood-card {
   box-shadow: none;
   transform: none !important;
 }
+.mypage-content .setting_life_rhythm {
+  margin-top: 2rem;
+  text-align: center;
+}
+.mypage-content .setting_life_rhythm h3 {
+  margin: 0 auto 20px;
+  padding-left: 0;
+  border-left: none;
+  font-weight: bold;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.mypage-content .setting_life_rhythm .setting_items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+}
+.mypage-content .setting_life_rhythm .setting_time {
+  width: 260px;
+  display: flex;
+  justify-content: space-between;
+}
+.mypage-content .setting_life_rhythm .item_label p {
+  white-space: nowrap;
+}
+.mypage-content .setting_life_rhythm h3 {
+  width: 260px;
+  text-align: left;
+}
 .mypage-content .logout_area {
   display: flex;
   justify-content: center;
@@ -2655,7 +2690,6 @@ input[type=radio]:checked + .mood-card {
   --footer-h: 90px;
   overflow-x: hidden;
   position: relative;
-  left: -3vw;
   /* 左右に余白 + 下にフッター分の余白 + iPhoneの安全領域 */
   padding: 0 16px calc(var(--footer-h) + env(safe-area-inset-bottom) + 12px);
 }
@@ -2738,7 +2772,7 @@ input[type=radio]:checked + .mood-card {
   align-items: center;
   gap: 12px;
   position: relative;
-  left: 11vw;
+  left: 8vw;
   margin-bottom: 3vh;
   margin-top: 6px;
 }
@@ -2790,7 +2824,7 @@ input[type=radio]:checked + .mood-card {
     カード（グラフ本体）
 ----------------------------- */
 .mood-chart-card {
-  width: 92vw;
+  width: 100%;
   position: relative;
   top: -1vh;
   left: 1vw;
@@ -2835,25 +2869,27 @@ input[type=radio]:checked + .mood-card {
   margin-bottom: 0.5rem;
   position: relative;
   left: 2rem;
+  text-align: left;
 }
 .week-review .week-review-card {
-  width: 92vw;
+  width: 107%;
   border-radius: 16px;
   border: 1px solid #ffe9c9;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: #FFF5E6;
   position: relative;
   left: 2vw;
 }
 .week-review .week-review-card .week-review-title {
   display: flex;
+  align-items: center;
 }
 .week-review .week-review-card .week-review-title .week-review-character {
   width: 50px;
   height: 50px;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   margin-right: 10px;
 }
 .week-review .week-review-card .week-review-title .week-review-left-title span {
