@@ -1,11 +1,11 @@
 DROP DATABASE IF EXISTS huwasuke_db;
 CREATE DATABASE huwasuke_db DEFAULT CHARACTER SET utf8mb4;
 USE huwasuke_db;
-
+ 
 -- ==========================================
 -- 1. CREATE TABLE 文（一括）
 -- ==========================================
-
+ 
 -- ユーザー
 CREATE TABLE t_users (
     user_id INT NOT NULL AUTO_INCREMENT,
@@ -16,15 +16,15 @@ CREATE TABLE t_users (
     user_name VARCHAR(8) NOT NULL,
     PRIMARY KEY (user_id)
 );
-
-
+ 
+ 
 -- モチベーション
 CREATE TABLE t_motivations (
     motivation_id INT NOT NULL AUTO_INCREMENT,
     motivation_name VARCHAR(4) NOT NULL,
     PRIMARY KEY (motivation_id)
 );
-
+ 
 -- タスク
 -- 変更点：
 --  - remaining_min を追加（分数入力で減らす残り時間）
@@ -45,7 +45,7 @@ CREATE TABLE t_tasks (
     FOREIGN KEY (user_id) REFERENCES t_users(user_id),
     FOREIGN KEY (motivation_id) REFERENCES t_motivations(motivation_id)
 );
-
+ 
 -- 固定予定マスタ
 CREATE TABLE t_fixed_schedule_masters (
     master_id INT NOT NULL AUTO_INCREMENT,
@@ -64,7 +64,7 @@ CREATE TABLE t_fixed_schedule_masters (
     PRIMARY KEY (master_id),
     FOREIGN KEY (user_id) REFERENCES t_users(user_id)
 );
-
+ 
 -- 固定予定インスタンス
 CREATE TABLE t_fixed_schedule_instances (
     instance_id INT NOT NULL AUTO_INCREMENT,
@@ -76,7 +76,7 @@ CREATE TABLE t_fixed_schedule_instances (
     PRIMARY KEY (instance_id),
     FOREIGN KEY (master_id) REFERENCES t_fixed_schedule_masters(master_id)
 );
-
+ 
 -- 今日の気分
 -- 変更点：
 --  - mood_point(1〜3) を追加（ロジック用）
@@ -89,7 +89,7 @@ CREATE TABLE t_today_moods (
     PRIMARY KEY (today_moods_id),
     FOREIGN KEY (user_id) REFERENCES t_users(user_id)
 );
-
+ 
 -- タスク作業ログ（分数入力）
 -- 変更点：
 --  - created_at に統一（元は create_at）
@@ -106,7 +106,7 @@ CREATE TABLE t_task_work_logs (
     FOREIGN KEY (user_id) REFERENCES t_users(user_id),
     FOREIGN KEY (task_id) REFERENCES t_tasks(task_id)
 );
-
+ 
 -- タスク提案（ヘッダ）
 -- 変更点：
 --  - 係数、評価、評価倍率、目標などを保存できるように追加
@@ -115,19 +115,19 @@ CREATE TABLE t_task_suggestions (
     user_id INT NOT NULL,
     suggestion_date DATE NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
+ 
     mood VARCHAR(4) NOT NULL,
     mood_point INT NOT NULL,
-
+ 
     coef_value FLOAT NOT NULL,                           -- 係数（直近7日など）
     evaluation INT NULL,                                 -- 評価（1〜5）※未評価 NULL可
     evaluation_multiplier FLOAT NOT NULL DEFAULT 1.0,    -- 評価補正倍率（例：0.8/1.0/1.2）
     target_task_level INT NOT NULL,                      -- 今日の目標タスクレベル
-
+ 
     PRIMARY KEY (task_suggestion_id),
     FOREIGN KEY (user_id) REFERENCES t_users(user_id)
 );
-
+ 
 -- タスク提案詳細（明細）
 -- 変更点：
 --  - 分割提案や計算結果を保存できる列を追加
@@ -135,17 +135,17 @@ CREATE TABLE t_task_suggestion_detail (
     task_suggestion_detail_id INT NOT NULL AUTO_INCREMENT,
     task_suggestion_id INT NOT NULL,
     task_id INT NOT NULL,
-
+ 
     plan_min INT NOT NULL,                         -- 提案した分数（例：20/25など）
     remaining_min_at_suggest INT NULL,             -- 提案時点の残り分（分母として使った値）
     days_left INT NULL,                            -- 提案時点の残り日数
     deadline_multiplier FLOAT NULL,                -- 締め切り補正倍率
-
+ 
     exec_task_level FLOAT NULL,                    -- 実施タスクレベル
     priority_score FLOAT NULL,                     -- 優先点
-
+ 
     actual_work_min INT NULL,                      -- 実際にやった分数（その日の入力をここに持つ）
-
+ 
     PRIMARY KEY (task_suggestion_detail_id),
     FOREIGN KEY (task_suggestion_id) REFERENCES t_task_suggestions(task_suggestion_id),
     FOREIGN KEY (task_id) REFERENCES t_tasks(task_id)
@@ -180,7 +180,7 @@ CREATE TABLE t_task_evaluation_logs (
 -- - ※ task.py の INSERT/UPDATEは今のままでOK（DB側で自動反映）
 -- ================================================================================================
 DELIMITER // -- 命令の区切り文字を ; から // に変更 ※途中の ; でSQL文完了だと認識させないため
-
+ 
 CREATE TRIGGER trg_eval_logs_to_suggestions_ai -- トリガ名 trg_eval_logs_to_suggestions_ai
 AFTER INSERT ON t_task_evaluation_logs -- t_task_evaluation_logs に INSERT された後に、このトリガを実行する
 FOR EACH ROW -- 行ごとに1回ずつトリガを実行する
@@ -201,7 +201,7 @@ BEGIN -- UPDATEをまとめるブロック
     WHERE user_id = NEW.user_id -- t_task_suggestionsの中から 同じユーザー(user_id)同じ日付(suggestion_date)の行を探す
         AND suggestion_date = NEW.target_date;
 END//
-
+ 
 CREATE TRIGGER trg_eval_logs_to_suggestions_au-- トリガ名 trg_eval_logs_to_suggestions_au
 AFTER UPDATE ON t_task_evaluation_logs -- t_task_evaluation_logs に UPDATE された後に、このトリガを実行する
 FOR EACH ROW -- 行ごとに1回ずつトリガを実行する
@@ -222,28 +222,28 @@ BEGIN-- UPDATEをまとめるブロック
     WHERE user_id = NEW.user_id -- t_task_suggestionsの中から 同じユーザー(user_id)同じ日付(suggestion_date)の行を探す
         AND suggestion_date = NEW.target_date;
 END//
-
+ 
 DELIMITER ; -- 命令の区切り文字を // から ; に戻す
-
+ 
 -- 元SQLの「タスク提案評価」は内容が詳細と同じで重複していたため削除
 -- CREATE TABLE t_task_suggestion_reviews ... (削除)
-
+ 
 -- ==========================================
 -- 2. INSERT 文（一括）
 -- ==========================================
-
+ 
 -- モチベーション
-INSERT INTO t_motivations (motivation_id,motivation_name) VALUES 
+INSERT INTO t_motivations (motivation_id,motivation_name) VALUES
 (1,'かんたん'),
 (2,'ふつう'),
 (3,'がんばる');
-
+ 
 -- ユーザー
 INSERT INTO t_users (email, user_name, password, wakeup_time, sleep_time) VALUES
 ('user1@example.com','ふわじぃ','pass000001','07:00:00','23:30:00'),
 ('user2@example.com','ふわちゃん','pass000002','06:30:00','23:00:00'),
 ('user3@example.com','ふわばぁ','pass000003','08:00:00','22:30:00');
-
+ 
 -- タスク
 -- motivation_id ： 1(かんたん) 2(ふつう) 3(がんばる)
 INSERT INTO t_tasks (user_id, task_name, motivation_id, deadline, duration_min, remaining_min, created_date, category_name, is_completed) VALUES
@@ -321,7 +321,7 @@ INSERT INTO t_tasks (user_id, task_name, motivation_id, deadline, duration_min, 
 (1,'UIモック更新',2,'2026-04-09',45,45,'2026-02-04','studyLog', FALSE),
 (1,'アクセシビリティ確認',2,'2026-04-26',60,60,'2026-02-04','studyLog', FALSE),
 (1,'日次振り返り',3,'2026-03-10',90,0,'2026-02-20','生活', TRUE),
-
+ 
 -- user_id = 2 (既存5個 + 追加10個)
 (2, '仕様書レビュー', 1, '2026-04-01', 80, 0, '2026-01-26', '仕事', TRUE),
 (2, '夕食の買い出し', 3, '2026-04-29', 30, 0, '2026-01-26', '生活', TRUE),
@@ -339,7 +339,7 @@ INSERT INTO t_tasks (user_id, task_name, motivation_id, deadline, duration_min, 
 (2, 'ポートフォリオ構成案', 1, '2026-03-20', 45, 45, '2026-03-02', '学習', FALSE),
 (2, '不要なメールの整理', 3, '2026-03-05', 30, 0, '2026-03-04', '生活', TRUE),
 (2, '読書タイム', 3, '2026-03-15', 270, 0, '2026-02-20', '学習', TRUE),
-
+ 
 -- user_id = 3 (既存5個 + 追加10個)
 (3, '資料整理', 1, '2026-04-03', 60, 0, '2026-01-27', '仕事', TRUE),
 (3, '掃除', 3, '2026-04-01', 30, 0, '2026-01-26', '生活', TRUE),
@@ -358,7 +358,7 @@ INSERT INTO t_tasks (user_id, task_name, motivation_id, deadline, duration_min, 
 (3, '友人への誕生日LINE', 3, '2026-03-05', 5, 0, '2026-03-05', 'プライベート', TRUE),
 (3, 'ストレッチ(日課)', 3, '2026-03-10', 135, 0, '2026-02-20', '健康', TRUE);
 -- 固定予定マスター
-INSERT INTO t_fixed_schedule_masters 
+INSERT INTO t_fixed_schedule_masters
 (user_id, title, duration_min, start_time, end_time, repeat_type, day_of_week, location, tag, memo) VALUES
 -- user_id = 1
 (1,'資料確認',20,'08:30:00','08:50:00','毎日','月火水木金','デスク','仕事','朝の軽いチェック'),
@@ -366,21 +366,21 @@ INSERT INTO t_fixed_schedule_masters
 (1,'メール整理',15,'09:30:00','09:45:00','毎日','月火水木金','デスク','仕事','受信メールの整理'),
 (1,'プロジェクトMTG',45,'10:00:00','10:45:00','毎週','火','会議室C','仕事','定例ミーティング'),
 (1,'週報作成',60,'16:00:00','17:00:00','毎週','金','デスク','仕事','週次報告書作成'),
-
+ 
 -- user_id = 2
 (2,'午後休憩',15,'15:00:00','15:15:00','毎日','月火水木金','休憩スペース','休憩','軽い休憩'),
 (2,'読書',30,'13:30:00','14:00:00','毎日','月火水木金','ロビー','趣味','リラックスタイム'),
 (2,'散歩',20,'12:40:00','13:00:00','毎日','月火水木金','屋外','健康','昼食後の散歩'),
 (2,'買い出し',30,'17:00:00','17:30:00','毎週','水','スーパー','生活','日用品補充'),
 (2,'カフェ休憩',45,'16:00:00','16:45:00','毎週','金','カフェ','休憩','週末前の息抜き'),
-
+ 
 -- user_id = 3
 (3,'ストレッチ',20,'07:30:00','07:50:00','毎日','月火水木金','自宅','健康','朝のストレッチ'),
 (3,'ランニング',30,'19:00:00','19:30:00','毎週','月水金','公園','健康','有酸素運動'),
 (3,'ヨガ',40,'20:00:00','20:40:00','毎週','土','スタジオ','健康','リラックスヨガ'),
 (3,'サウナ',60,'21:00:00','22:00:00','毎週','金','スパ','健康','疲労回復'),
 (3,'買い物',30,'17:30:00','18:00:00','毎週','日','ショッピングモール','生活','週末の買い出し');
-
+ 
 -- 固定予定インスタンス
 INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, end_time, is_cancelled) VALUES
 (1,'2026-01-27','09:00:00','09:30:00',0),
@@ -396,7 +396,7 @@ INSERT INTO t_fixed_schedule_instances (master_id, schedule_date, start_time, en
 (3,'2026-01-28','18:00:00','18:45:00',0),
 (3,'2026-01-30','18:00:00','18:45:00',0),
 (3,'2026-02-04','18:00:00','18:45:00',0);
-
+ 
 -- 今日の気分
 -- mood 元気(3) 普通(2) 悪い(1)
 INSERT INTO t_today_moods (user_id, mood_date, mood, mood_point) VALUES
@@ -455,56 +455,56 @@ INSERT INTO t_today_moods (user_id, mood_date, mood, mood_point) VALUES
 (1,'2026-03-04 08:00:00','悪い',1),
 (2,'2026-03-04 08:00:00','普通',2),
 (3,'2026-03-04 08:00:00','元気',3);
-
-
+ 
+ 
 -- タスク作業ログ
 INSERT INTO t_task_work_logs (user_id,task_id, work_date, work_min, start_time, end_time) VALUES
 -- 2/25 (水)
 (1,3,  '2026-02-25', 50, '18:00:00', '18:50:00'), -- User1: ランニング完了
 (2,73, '2026-02-25', 80, '10:00:00', '11:20:00'), -- User2: 仕様書レビュー完了
 (3,79, '2026-02-25', 30, '09:00:00', '09:30:00'), -- User3: 掃除完了
-
+ 
 -- 2/26 (木)
 (1,11, '2026-02-26', 10, '09:00:00', '09:10:00'), -- User1: DB設計完了
 (2,74, '2026-02-26', 30, '17:00:00', '17:30:00'), -- User2: 買い出し完了
 (3,78, '2026-02-26', 30, '14:00:00', '14:30:00'), -- User3: 資料整理(1回目)
-
+ 
 -- 2/27 (金)
 (1,15, '2026-02-27', 60, '20:00:00', '21:00:00'), -- User1: Unity調整完了
 (2,76, '2026-02-27', 30, '08:00:00', '08:30:00'), -- User2: 英語(継続)
 (3,78, '2026-02-27', 30, '10:00:00', '10:30:00'), -- User3: 資料整理完了
-
+ 
 -- 2/28 (土)
 (1,4,  '2026-02-28', 60, '14:00:00', '15:00:00'), -- User1: 資格勉強(1回目)
 (2,76, '2026-02-28', 15, '09:00:00', '09:15:00'), -- User2: 英語(合計45分だがFALSEのまま設定)
 (3,81, '2026-02-28', 30, '21:00:00', '21:30:00'), -- User3: オンライン講座(1回目)
-
+ 
 -- 3/1 (日)
 (1,56, '2026-03-01', 20, '08:00:00', '08:20:00'), -- User1: 英単語完了
 (2,73, '2026-03-01', 30, '20:00:00', '20:30:00'), -- User2: (予備ログ: 追加作業)
 (3,81, '2026-03-01', 30, '10:00:00', '10:30:00'), -- User3: オンライン講座(2回目)
-
+ 
 -- 3/2 (月)
 (1,29, '2026-03-02', 15, '11:00:00', '11:15:00'), -- User1: バグ修正完了
 (2,74, '2026-03-02', 15, '18:00:00', '18:15:00'), -- User2: 買い出し(追加分)
 (3,78, '2026-03-02', 20, '13:00:00', '13:20:00'), -- User3: 資料整理(追加分)
-
+ 
 -- 3/3 (火)
 (1,19, '2026-03-03', 30, '20:00:00', '20:30:00'), -- User1: SPI対策(継続)
 (2,76, '2026-03-03', 20, '08:00:00', '08:20:00'), -- User2: 英語
 (3,81, '2026-03-03', 30, '21:00:00', '21:30:00'), -- User3: オンライン講座(3回目)
-
+ 
 -- 3/4 (水)
 (1,23, '2026-03-04', 45, '13:00:00', '13:45:00'), -- User1: ガクチカ整理完了
 (2,73, '2026-03-04', 40, '10:00:00', '10:40:00'), -- User2: 仕様書(追加)
 (3,79, '2026-03-04', 30, '09:00:00', '09:30:00'), -- User3: 掃除(定期)
-
+ 
 -- 3/5 (木)
 (1,4,  '2026-02-24', 60, '22:00:00', '23:00:00'), -- User1: 資格勉強完了(計120分)
 (1,1,  '2026-02-24', 25, '09:00:00', '09:25:00'), -- User1: メール返信完了
 (2,76, '2026-02-24', 30, '08:00:00', '08:30:00'), -- User2: 英語
 (3,81, '2026-02-24', 60, '20:00:00', '21:00:00'); -- User3: オンライン講座
-
+ 
 -- タスク提案（ヘッダ）
 INSERT INTO t_task_suggestions
 (user_id, suggestion_date, mood, mood_point, coef_value, evaluation, evaluation_multiplier, target_task_level)
@@ -512,15 +512,15 @@ VALUES
 (1,'2026-01-27','普通',2,1.10,3,1.2,3),
 (1,'2026-01-28','普通',2,0.95,2,1.0,2),
 (1,'2026-01-29','悪い',1,0.80,NULL,1.0,1),
-
+ 
 (2,'2026-01-27','元気',3,1.05,3,1.2,3),
 (2,'2026-01-28','元気',3,1.20,3,1.2,4),
 (2,'2026-01-29','悪い',1,0.85,1,0.80,1),
-
+ 
 (3,'2026-01-27','元気',3,1.15,3,1.2,3),
 (3,'2026-01-28','普通',2,1.00,1,0.8,2),
 (3,'2026-01-29','悪い',1,0.75,NULL,1.0,1),
-
+ 
 (1,'2026-01-30','悪い',1,1.10,3,1.2,3),
 (2,'2026-01-30','普通',2,1.00,2,1.0,2),
 (3,'2026-01-30','元気',3,1.20,3,1.2,4);
@@ -530,18 +530,18 @@ INSERT INTO t_task_suggestion_detail
 VALUES
 (4, 1, 30, 25, 5, 1.2, 2.5, 60.0, NULL),
 (4, 2, 20, 40, 6, 1.2, 2.0, 48.0, NULL),
-
+ 
 (5, 3, 25, 50, 8, 1.1, 2.2, 55.0, NULL),
 (5, 4, 40, 120, 2, 1.3, 1.8, 45.0, NULL),
-
+ 
 (6, 5, 15, 30, 7, 1.2, 1.5, 35.0, NULL),
-
+ 
 (7, 6, 40, 80, 3, 1.2, 3.0, 70.0, NULL),
 (7, 7, 15, 30, 1, 1.3, 2.8, 65.0, NULL),
-
+ 
 (8, 8, 20, 20, 2, 1.3, 2.0, 50.0, NULL),
-
+ 
 (9, 9, 30, 45, 1, 1.3, 1.6, 40.0, NULL),
-
+ 
 (10, 10, 25, 60, 4, 1.2, 2.7, 68.0, NULL),
 (11, 11, 20, 30, 6, 1.2, 2.1, 52.0, NULL);
