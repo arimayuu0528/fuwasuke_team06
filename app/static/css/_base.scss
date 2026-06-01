@@ -4,6 +4,9 @@ body{
     width: 100%;
     display: flex;
     flex-direction: column;
+
+    padding-bottom: 75px;
+    box-sizing: border-box;
 }
 
 .fuwasuke_log2{
@@ -38,8 +41,10 @@ body{
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 65px; /* メニューの高さを固定すると安定します */
+    height: 80px; /* メニューの高さを固定すると安定します */
     z-index: 999;
+    background-color: #fff;
+    border-top: 1px solid #eee;
     .icon{
         display: flex;
         flex-direction: column; /* 縦に並べる */
