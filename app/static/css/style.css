@@ -2741,7 +2741,7 @@ input[type=radio]:checked + .mood-card {
   align-items: center;
   gap: 12px;
   position: relative;
-  left: 11vw;
+  left: 8vw;
   margin-bottom: 3vh;
   margin-top: 6px;
 }
@@ -2838,6 +2838,7 @@ input[type=radio]:checked + .mood-card {
   margin-bottom: 0.5rem;
   position: relative;
   left: 2rem;
+  text-align: left;
 }
 .week-review .week-review-card {
   width: 107%;

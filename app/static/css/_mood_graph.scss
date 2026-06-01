@@ -90,7 +90,7 @@
     gap: 12px;
 
     position: relative;
-    left: 11vw;
+    left: 8vw;
 
     margin-bottom: 3vh;
     margin-top: 6px;
@@ -181,13 +181,13 @@
 .week-review{
     position: relative;
     top: 1rem;
-    
     h2{
         font-size: 18px;
         font-weight: 500;
         margin-bottom: 0.5rem;
         position: relative;
         left: 2rem;
+        text-align: left;
     }
     .week-review-card{
         width:107%;
