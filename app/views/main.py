@@ -60,8 +60,6 @@ def home():
                 d.plan_min, 
                 t.is_completed
             FROM t_task_suggestions s
-            -- 提案されたタスクを detail から JOIN するが、
-            -- チェックを外して detail から消えてもタスク自体は出るように LEFT JOIN にする
             JOIN t_task_suggestion_detail d ON s.task_suggestion_id = d.task_suggestion_id
             JOIN t_tasks t ON d.task_id = t.task_id
             WHERE s.user_id = %s
@@ -132,7 +130,8 @@ def home():
         rec=rec, 
         percent=percent,
         # all_rec=all_rec,
-        remain_count=remain_count
+        remain_count=remain_count,
+        current_user_id=current_user_id
     )
 @main_bp.route('/update_task_done', methods=['POST'])
 def update_task_done():
