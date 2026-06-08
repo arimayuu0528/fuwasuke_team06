@@ -112,9 +112,10 @@ function safeJsonParse(text, fallback) {
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        aspectRatio:2,
 
         // 左にキャラを描くので余白を確保（好みで調整OK）
-        layout: { padding: { left: 50, right: 24, top: 24, bottom: 8 } },
+        layout: { padding: { left: 50, right: 24, top: 24, bottom: 20 } },
 
         interaction: { mode: "index", intersect: false },
         plugins: {
@@ -249,3 +250,19 @@ if (window.Turbo) {
     document.addEventListener("DOMContentLoaded", initMoodChart);
 }
 })();
+
+document.addEventListener("turbo:before-cache", () => {
+        alive = false;
+        destroyChart(canvas);
+    }, { once: true });
+
+    // 画像ロード後に再描画 ※サイズを崩さずにアップデートする
+    function safeUpdate() {
+        if (!alive || !canvas.isConnected || !canvas._moodChart) return;
+        try { 
+            // resize()を一度挟んで、現在の正しい親要素のサイズ（320px）を強制検知させる
+            canvas._moodChart.resize();
+            canvas._moodChart.update(); 
+        } catch (_) {}
+    }
+    [imgGenki, imgFutu, imgWarui].forEach(img => img.onload = safeUpdate);
