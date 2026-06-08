@@ -2220,12 +2220,15 @@ input[type=radio]:checked + .mood-card {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 24px 16px 16px;
+  /* 【微調整】要素間の隙間を 12px から 8px に少し詰める */
+  gap: 8px;
+  /* 【微調整】上部のパディングを 24px から 16px に減らし、全体の初期位置を上げる */
+  padding: 16px 16px 16px;
   overflow: hidden;
 }
 .task_suggestion .section .sum_time {
   align-self: flex-end;
+  /* 【重要】マイナスマージン等は一切使わず 0 に戻します */
   margin: 0;
   padding: 8px 14px;
   border-radius: 999px;
@@ -2239,17 +2242,18 @@ input[type=radio]:checked + .mood-card {
   flex-shrink: 0;
 }
 .task_suggestion .section .task_list {
-  flex: 1 1 0%;
-  min-height: 0;
+  flex: 1 1 auto;
+  max-height: 335px;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 0;
   list-style: none;
-  padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-right: 6px;
+  /* 【変更】右の余白(6px)に加え、下に40pxの進入禁止エリアを作ります */
+  padding: 0 6px 40px 0;
   -webkit-overflow-scrolling: touch;
 }
 .task_suggestion .section .task_list .task, .task_suggestion .section .task_list .task_selectable {
@@ -2390,20 +2394,20 @@ input[type=radio]:checked + .mood-card {
   }
 }
 
+/* 最下部にある2つのクラスもマージンを通常の値にリセットします */
 .customp {
   font-size: 14px;
   font-weight: bold;
   color: #333333;
-  margin: 0 0 4px 0;
+  margin: 4px 0 0 0; /* 上に少しだけ隙間を開ける */
   padding: 0;
   text-align: center;
 }
 
-/* 「選択した予定を選択できます」の補足テキスト */
 .custom_p {
   font-size: 11px;
   color: #666666;
-  margin: 0;
+  margin: 0 0 4px 0; /* 下のタスクリストとの隙間を少し開ける */
   padding: 0;
   text-align: center;
 }

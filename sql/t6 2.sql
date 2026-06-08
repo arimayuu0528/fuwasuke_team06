@@ -240,8 +240,8 @@ INSERT INTO t_motivations (motivation_id,motivation_name) VALUES
  
 -- ユーザー
 INSERT INTO t_users (email, user_name, password, wakeup_time, sleep_time) VALUES
-('user1@example.com','ふわじぃ','pass000001','07:00:00','23:30:00'),
-('user2@example.com','ふわちゃん','pass000002','06:30:00','23:00:00'),
+('nagamine','ふわじぃ','php','07:00:00','23:30:00'),
+('2','ふわちゃん','2','06:30:00','23:00:00'),
 ('ohs','ふわばぁ','hal','08:00:00','22:30:00');
  
 -- タスク

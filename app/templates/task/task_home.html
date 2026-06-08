@@ -244,7 +244,9 @@
 
             const taskDate = new Date(task.suggestion_date);
 
-            if (isToday && taskDate < todayObj && !task.done) {
+            // ★ String() で文字列に変換してから比較することで、参照比較のバグを回避します
+            // ※ Jinja2のテンプレート変数は {{ current_user_id | tojson }} と書くと安全にJavaScriptに渡せます
+            if (isToday && taskDate < todayObj && !task.done && String(task.user_id) === String({{ current_user_id | tojson }})) {
                 overdueTasks.push(task);
                 overdueIds.add(task.id);
             }
