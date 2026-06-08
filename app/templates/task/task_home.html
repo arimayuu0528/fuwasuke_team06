@@ -51,7 +51,7 @@
             <span id="toggleTasks" class="toggle-link">すべて見る ＞</span>
         </div>
  
-        <div id="task-list" class="task-container" style="display: none;">
+        <div id="task-list" class="task-container">
             </div>
     </div>
 </div>
@@ -592,7 +592,7 @@
     $(document).ready(function(){
         refreshDateDisplay();
         // ★追加：最初からタスクを表示
-        $('#task-list').hide();
+        //$('#task-list').hide();
         $('#toggleTasks').text('すべて見る ＞');
         $('#prevDate').on('click', function(){ displayDate.setDate(displayDate.getDate() - 1); refreshDateDisplay(); });
         $('#nextDate').on('click', function(){ displayDate.setDate(displayDate.getDate() + 1); refreshDateDisplay(); });
